@@ -1,0 +1,31 @@
+{
+  "name": "discord-bot-framework",
+  "version": "1.0.0",
+  "description": "Framework using Discord.js.",
+  "main": "src/index.js",
+  "dependencies": {
+    "discord.js": "^8.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.9.0"
+  },
+  "scripts": {
+    "build": "babel src -d lib",
+    "watch": "babel -w src -d lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkwu/discord-bot-framework.git"
+  },
+  "author": {
+    "name": "Kelvin Wu",
+    "email": "kelvinwu1996@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hkwu/discord-bot-framework/issues"
+  },
+  "homepage": "https://github.com/hkwu/discord-bot-framework#readme"
+}
