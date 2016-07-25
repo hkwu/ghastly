@@ -16,8 +16,8 @@ class Client extends Discord.Client {
     }
 
     _registerEvent(event) {
-        const eventInstance = new event();
-        eventInstance.registerClient(this);
+        let eventInstance = new event();
+        eventInstance.client = this;
         this.on(eventInstance.type, eventInstance.actionWrapper.bind(eventInstance));
     }
 }

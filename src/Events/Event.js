@@ -11,7 +11,7 @@ class Event {
         return this._client;
     }
 
-    registerClient(client) {
+    set client(client) {
         this._client = client;
     }
 
