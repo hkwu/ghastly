@@ -2,12 +2,8 @@ import Event from "./Event.js";
 
 class VoiceStateUpdateEvent extends Event {
     constructor() {
-        super(this.constructor.type);
-    }
-
-    static get type() {
-        return "voiceStateUpdate";
-    }
+        super("voiceStateUpdate");
+	}
 }
 
 export default VoiceStateUpdateEvent;

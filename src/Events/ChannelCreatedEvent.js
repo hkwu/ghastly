@@ -2,12 +2,8 @@ import Event from "./Event.js";
 
 class ChannelCreatedEvent extends Event {
     constructor() {
-        super(this.constructor.type);
-    }
-
-    static get type() {
-        return "channelCreated";
-    }
+        super("channelCreated");
+	}
 }
 
 export default ChannelCreatedEvent;

@@ -2,12 +2,8 @@ import Event from "./Event.js";
 
 class ServerMemberUpdatedEvent extends Event {
     constructor() {
-        super(this.constructor.type);
-    }
-
-    static get type() {
-        return "serverMemberUpdated";
-    }
+        super("serverMemberUpdated");
+	}
 }
 
 export default ServerMemberUpdatedEvent;

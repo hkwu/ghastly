@@ -2,12 +2,8 @@ import Event from "./Event.js";
 
 class VoiceJoinEvent extends Event {
     constructor() {
-        super(this.constructor.type);
-    }
-
-    static get type() {
-        return "voiceJoin";
-    }
+        super("voiceJoin");
+	}
 }
 
 export default VoiceJoinEvent;
