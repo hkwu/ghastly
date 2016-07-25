@@ -7,9 +7,7 @@ class Client extends Discord.Client {
 
   registerEvents(events) {
     if (events.constructor === Array) {
-      for (const event of events) {
-        this._registerEvent(event);
-      }
+      events.forEach(element => this._registerEvent(element));
     } else {
       this._registerEvent(events);
     }
