@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class ChannelDeletedEvent extends Event {
-    constructor() {
-        super("channelDeleted");
-	}
+  constructor() {
+    super('channelDeleted');
+  }
 }
 
 export default ChannelDeletedEvent;

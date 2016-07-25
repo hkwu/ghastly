@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class ReadyEvent extends Event {
-    constructor() {
-        super("ready");
-	}
+  constructor() {
+    super('ready');
+  }
 }
 
 export default ReadyEvent;

@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class MessageUpdatedEvent extends Event {
-    constructor() {
-        super("messageUpdated");
-	}
+  constructor() {
+    super('messageUpdated');
+  }
 }
 
 export default MessageUpdatedEvent;

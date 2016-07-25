@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class ServerCreatedEvent extends Event {
-    constructor() {
-        super("serverCreated");
-	}
+  constructor() {
+    super('serverCreated');
+  }
 }
 
 export default ServerCreatedEvent;

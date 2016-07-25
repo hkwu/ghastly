@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class WarnEvent extends Event {
-    constructor() {
-        super("warn");
-	}
+  constructor() {
+    super('warn');
+  }
 }
 
 export default WarnEvent;

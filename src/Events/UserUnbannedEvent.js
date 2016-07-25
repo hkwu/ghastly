@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class UserUnbannedEvent extends Event {
-    constructor() {
-        super("userUnbanned");
-	}
+  constructor() {
+    super('userUnbanned');
+  }
 }
 
 export default UserUnbannedEvent;

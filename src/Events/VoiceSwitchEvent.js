@@ -1,9 +1,9 @@
-import Event from "./Event.js";
+import Event from './Event.js';
 
 class VoiceSwitchEvent extends Event {
-    constructor() {
-        super("voiceSwitch");
-	}
+  constructor() {
+    super('voiceSwitch');
+  }
 }
 
 export default VoiceSwitchEvent;
