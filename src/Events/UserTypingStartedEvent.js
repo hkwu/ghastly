@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class UserTypingStartedEvent extends Event {
-  constructor() {
-    super('userTypingStarted');
+  static get type() {
+    return 'userTypingStarted';
   }
 }
 

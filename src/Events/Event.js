@@ -1,10 +1,10 @@
 class Event {
-  constructor(type) {
-    this._type = type;
+  constructor(options = {}) {
+    this._options = options;
   }
 
-  get type() {
-    return this._type;
+  get options() {
+    return this._options;
   }
 
   get client() {

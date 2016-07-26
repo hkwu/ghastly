@@ -18,6 +18,8 @@
   "scripts": {
     "build": "babel src -d lib",
     "watch": "babel -w src -d lib",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

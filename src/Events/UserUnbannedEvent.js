@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class UserUnbannedEvent extends Event {
-  constructor() {
-    super('userUnbanned');
+  static get type() {
+    return 'userUnbanned';
   }
 }
 

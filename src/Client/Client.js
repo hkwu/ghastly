@@ -1,22 +1,18 @@
 import Discord from 'discord.js';
 
 class Client extends Discord.Client {
-  constructor(options = {}) {
-    super(options);
-  }
-
-  registerEvents(events) {
+  registerEvent(events) {
     if (events.constructor === Array) {
-      events.forEach(element => this._registerEvent(element));
+      events.forEach(element => this.registerEventInstance(element));
     } else {
-      this._registerEvent(events);
+      this.registerEventInstance(events);
     }
   }
 
-  _registerEvent(event) {
+  registerEventInstance(event) {
     const eventInstance = new event();
     eventInstance.client = this;
-    this.on(eventInstance.type, eventInstance.actionWrapper.bind(eventInstance));
+    this.on(event.type, eventInstance.actionWrapper.bind(eventInstance));
   }
 }
 

@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class DisconnectedEvent extends Event {
-  constructor() {
-    super('disconnected');
+  static get type() {
+    return 'disconnected';
   }
 }
 

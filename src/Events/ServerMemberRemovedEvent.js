@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class ServerMemberRemovedEvent extends Event {
-  constructor() {
-    super('serverMemberRemoved');
+  static get type() {
+    return 'serverMemberRemoved';
   }
 }
 

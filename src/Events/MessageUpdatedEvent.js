@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class MessageUpdatedEvent extends Event {
-  constructor() {
-    super('messageUpdated');
+  static get type() {
+    return 'messageUpdated';
   }
 }
 

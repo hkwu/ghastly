@@ -1,8 +1,8 @@
-import Event from './Event.js';
+import Event from './Event';
 
 class RawEvent extends Event {
-  constructor() {
-    super('raw');
+  static get type() {
+    return 'raw';
   }
 }
 
