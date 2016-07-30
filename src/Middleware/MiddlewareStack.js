@@ -24,11 +24,13 @@ export default class MiddlewareStack {
   _generateMiddlewareProcess(action) {
     return this._stack.reduceRight(
       (previous, current) => (...data) => current.handle(previous, ...data),
-      ...data => action(...data)
+      (...data) => action(...data)
     );
   }
 
   _regenerateMiddlewareProcess() {
-    this._middlewareProcess = this._generateMiddlewareProcess(this._handler.action);
+    this._middlewareProcess = this._generateMiddlewareProcess(
+      this._handler.action.bind(this._handler)
+    );
   }
 }
