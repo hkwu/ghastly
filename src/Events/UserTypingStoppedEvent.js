@@ -1,9 +1,7 @@
 import Event from './Event';
 
-class UserTypingStoppedEvent extends Event {
+export default class UserTypingStoppedEvent extends Event {
   static get type() {
     return 'userTypingStopped';
   }
 }
-
-export default UserTypingStoppedEvent;
