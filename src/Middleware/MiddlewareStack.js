@@ -11,7 +11,10 @@ export default class MiddlewareStack {
   }
 
   pop() {
-    return this._stack.pop();
+    const popped = this._stack.pop();
+    this._regenerateMiddlewareProcess();
+
+    return popped;
   }
 
   process(...data) {
