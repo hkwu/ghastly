@@ -1,12 +1,12 @@
 export default class MiddlewareStack {
   constructor(handler, stack = []) {
     this._handler = handler;
-    this._stack = stack.map(element => (typeof element === 'function' ? new element() : element));
+    this._stack = stack.map(element => new element());
     this._regenerateMiddlewareProcess();
   }
 
   push(middleware) {
-    this._stack.push(middleware);
+    this._stack.push(new middleware());
     this._regenerateMiddlewareProcess();
   }
 
