@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 
 /**
  * Interface class for Discord.js client.
+ * @extends Discord.Client
  */
 export default class Client extends Discord.Client {
   /**
