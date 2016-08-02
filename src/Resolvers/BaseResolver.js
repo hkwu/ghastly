@@ -10,10 +10,14 @@ export default class BaseResolver {
 
   /**
    * Validates the given options object and returns a promise.
-   * @param {Object} [options] - Options object to resolve.
+   * @param {Object} [options={}] - Options object to resolve.
    * @returns {Promise}
    */
   resolve(options = {}) {
-    return this._resolver.resolve(options);
+    return this._resolver.resolve(options).catch(e => {
+      process.nextTick(() => {
+        throw e;
+      });
+    });
   }
 }

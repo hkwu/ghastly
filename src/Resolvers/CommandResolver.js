@@ -1,4 +1,5 @@
 import BaseResolver from './BaseResolver';
+import createResolver from 'options-resolver';
 
 /**
  * Options resolver for command classes.
@@ -37,5 +38,40 @@ export default class CommandResolver extends BaseResolver {
 
         resolver.resolve(value);
       });
+  }
+
+  /**
+   * Resolves an object containing options for a command.
+   * @param {Object} [options={}] - Options to resolve.
+   * @returns {Promise}
+   */
+  resolve(options = {}) {
+    return super.resolve(options).then(resolved => {
+      // resolve the restrictions object, if necessary
+      if (resolved.hasOwnProperty('restrictions')) {
+        const restrictionsResolver = createResolver();
+        restrictionsResolver.setDefined([
+          'permissions',
+          'roleIds',
+          'roleNames',
+          'userIds',
+        ]).setAllowedTypes('permissions', ['string', 'array'])
+          .setAllowedTypes('roleIds', 'array')
+          .setAllowedTypes('roleNames', 'array')
+          .setAllowedTypes('userIds', 'array');
+
+        return restrictionsResolver.resolve(resolved).then(restrictions => {
+          resolved.restrictions = restrictions;
+
+          return resolved;
+        }).catch(e => {
+          process.nextTick(() => {
+            throw e;
+          });
+        });
+      }
+
+      return resolved;
+    });
   }
 }
