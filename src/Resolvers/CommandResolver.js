@@ -1,5 +1,5 @@
-import BaseResolver from './BaseResolver';
 import createResolver from 'options-resolver';
+import BaseResolver from './BaseResolver';
 
 /**
  * Options resolver for command classes.
@@ -23,32 +23,20 @@ export default class CommandResolver extends BaseResolver {
       .setAllowedTypes('aliases', 'array')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('restrictions', 'plainObject')
-      .setAllowedTypes('usage', 'string')
-      .setAllowedValues('restrictions', value => {
-        const resolver = createResolver();
-        resolver.setDefined([
-          'permissions',
-          'roleIds',
-          'roleNames',
-          'userIds',
-        ]).setAllowedTypes('permissions', ['string', 'array'])
-          .setAllowedTypes('roleIds', 'array')
-          .setAllowedTypes('roleNames', 'array')
-          .setAllowedTypes('userIds', 'array');
-
-        resolver.resolve(value);
-      });
+      .setAllowedTypes('usage', 'string');
   }
 
   /**
    * Resolves an object containing options for a command.
    * @param {Object} [options={}] - Options to resolve.
-   * @returns {Promise}
+   * @returns {Promise<Object>}
    */
-  resolve(options = {}) {
-    return super.resolve(options).then(resolved => {
+  async resolve(options = {}) {
+    try {
+      const resolvedOptions = await super.resolve(options);
+
       // resolve the restrictions object, if necessary
-      if (resolved.hasOwnProperty('restrictions')) {
+      if ('restrictions' in resolvedOptions) {
         const restrictionsResolver = createResolver();
         restrictionsResolver.setDefined([
           'permissions',
@@ -60,18 +48,14 @@ export default class CommandResolver extends BaseResolver {
           .setAllowedTypes('roleNames', 'array')
           .setAllowedTypes('userIds', 'array');
 
-        return restrictionsResolver.resolve(resolved).then(restrictions => {
-          resolved.restrictions = restrictions;
-
-          return resolved;
-        }).catch(e => {
-          process.nextTick(() => {
-            throw e;
-          });
-        });
+        resolvedOptions.restrictions = await restrictionsResolver.resolve(resolvedOptions);
       }
 
-      return resolved;
-    });
+      return resolvedOptions;
+    } catch (e) {
+      process.nextTick(() => {
+        throw e;
+      });
+    }
   }
 }

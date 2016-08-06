@@ -11,13 +11,15 @@ export default class BaseResolver {
   /**
    * Validates the given options object and returns a promise.
    * @param {Object} [options={}] - Options object to resolve.
-   * @returns {Promise}
+   * @returns {Promise<Object>}
    */
-  resolve(options = {}) {
-    return this._resolver.resolve(options).catch(e => {
+  async resolve(options = {}) {
+    try {
+      return this._resolver.resolve(options);
+    } catch (e) {
       process.nextTick(() => {
         throw e;
       });
-    });
+    }
   }
 }
