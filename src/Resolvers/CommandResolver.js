@@ -27,9 +27,7 @@ export default class CommandResolver extends BaseResolver {
   }
 
   /**
-   * Resolves an object containing options for a command.
-   * @param {Object} [options={}] - Options to resolve.
-   * @returns {Promise<Object>}
+   * @inheritDoc
    */
   async resolve(options = {}) {
     try {

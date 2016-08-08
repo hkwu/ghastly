@@ -1,4 +1,5 @@
 import MiddlewareStack from '../Middleware/MiddlewareStack';
+import EventResolver from '../Resolvers/EventResolver';
 
 /**
  * Handles actions for events emitted by the client.
@@ -10,8 +11,12 @@ export default class Event {
    */
   constructor(client, options = {}) {
     this._client = client;
-    this._options = options;
     this._middlewareStack = new MiddlewareStack(this);
+
+    const resolver = new EventResolver();
+    resolver.resolve(options).then(resolved => {
+      this._options = resolved;
+    });
   }
 
   /**
@@ -49,6 +54,10 @@ export default class Event {
    * @param {*} args - Arguments passed to the event handler by the Discord client.
    */
   actionWrapper(...args) {
-    this._middlewareStack.process(...args);
+    if (this._options.injectClient) {
+      this._middlewareStack.process(...args);
+    } else {
+      this._middlewareStack.process(this._client, ...args);
+    }
   }
 }

@@ -15,7 +15,7 @@ export default class BaseResolver {
    */
   async resolve(options = {}) {
     try {
-      return this._resolver.resolve(options);
+      return await this._resolver.resolve(options);
     } catch (e) {
       process.nextTick(() => {
         throw e;
