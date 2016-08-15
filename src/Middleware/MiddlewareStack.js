@@ -4,7 +4,7 @@
 export default class MiddlewareStack {
   /**
    * @param {Event} handler - The event handler this middleware is attached to.
-   * @param {Array<Middleware>} [stack] - Array of middleware constructors.
+   * @param {Array<Middleware>} [stack=[]] - Array of middleware constructors.
    */
   constructor(handler, stack = []) {
     this._handler = handler;
@@ -34,11 +34,12 @@ export default class MiddlewareStack {
 
   /**
    * Passes values through the middleware stack for processing.
+   * @param {Client} client - The Discord client.
    * @param {*} data - Data to be processed.
    * @returns {*}
    */
-  process(...data) {
-    return this._middlewareProcess(...data);
+  process(client, ...data) {
+    return this._middlewareProcess(client, ...data);
   }
 
   /**
@@ -49,8 +50,8 @@ export default class MiddlewareStack {
    */
   _generateMiddlewareProcess(action) {
     return this._stack.reduceRight(
-      (previous, current) => (...data) => current.handle(previous, ...data),
-      (...data) => action(...data)
+      (previous, current) => (client, ...data) => current.handle(previous, client, ...data),
+      (client, ...data) => action(client, ...data)
     );
   }
 
