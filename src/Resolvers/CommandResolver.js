@@ -1,4 +1,4 @@
-import createResolver from '../Utils/createResolver';
+import createResolver from './createResolver';
 import BaseResolver from './BaseResolver';
 
 /**
