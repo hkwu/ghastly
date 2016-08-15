@@ -1,4 +1,4 @@
-import createResolver from 'options-resolver';
+import createResolver from '../Utils/createResolver';
 import BaseResolver from './BaseResolver';
 
 /**
@@ -8,52 +8,47 @@ import BaseResolver from './BaseResolver';
 export default class CommandResolver extends BaseResolver {
   constructor() {
     super();
+
     this._resolver.setRequired([
-      'action',
       'name',
-      'prefix',
-    ]).setDefined([
-      'aliases',
-      'description',
-      'restrictions',
-      'usage',
-    ]).setAllowedTypes('action', 'function')
+      'action',
+    ]).setDefaults({
+      prefix: '',
+      aliases: [],
+      description: 'No description set for this command.',
+      usage: 'No usage information for this command.',
+    }).setDefined('filters')
       .setAllowedTypes('name', 'string')
+      .setAllowedTypes('action', 'function')
       .setAllowedTypes('prefix', 'string')
       .setAllowedTypes('aliases', 'array')
       .setAllowedTypes('description', 'string')
-      .setAllowedTypes('restrictions', 'plainObject')
-      .setAllowedTypes('usage', 'string');
+      .setAllowedTypes('filters', 'plainObject')
+      .setAllowedTypes('usage', 'string')
+      .setAllowedValues('name', value => value && !/\s/.test(value))
+      .setAllowedValues('prefix', value => !/\s/.test(value));
   }
 
   /**
    * @inheritDoc
    */
-  async resolve(options = {}) {
-    try {
-      const resolvedOptions = await super.resolve(options);
+  resolve(options = {}) {
+    const resolvedOptions = super.resolve(options);
 
-      // resolve the restrictions object, if necessary
-      if ('restrictions' in resolvedOptions) {
-        const restrictionsResolver = createResolver();
-        restrictionsResolver.setDefined([
-          'permissions',
-          'roleIds',
-          'roleNames',
-          'userIds',
-        ]).setAllowedTypes('permissions', ['string', 'array'])
-          .setAllowedTypes('roleIds', 'array')
-          .setAllowedTypes('roleNames', 'array')
-          .setAllowedTypes('userIds', 'array');
+    // resolve the restrictions object
+    const filterResolver = createResolver();
+    filterResolver.setDefaults({
+      permissions: {},
+      roleNames: [],
+      roleIds: [],
+      userIds: [],
+    }).setAllowedTypes('permissions', ['string', 'plainObject'])
+      .setAllowedTypes('roleNames', 'array')
+      .setAllowedTypes('roleIds', 'array')
+      .setAllowedTypes('userIds', 'array');
 
-        resolvedOptions.restrictions = await restrictionsResolver.resolve(resolvedOptions);
-      }
+    resolvedOptions.filters = filterResolver.resolve(resolvedOptions.filters, false);
 
-      return resolvedOptions;
-    } catch (e) {
-      process.nextTick(() => {
-        throw e;
-      });
-    }
+    return resolvedOptions;
   }
 }

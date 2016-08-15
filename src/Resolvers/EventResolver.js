@@ -7,21 +7,9 @@ import BaseResolver from './BaseResolver';
 export default class EventResolver extends BaseResolver {
   constructor() {
     super();
-    this._resolver.setDefined([
-      'injectClient',
-    ]).setAllowedTypes('injectClient', 'boolean');
-  }
 
-  /**
-   * @inheritDoc
-   */
-  async resolve(options = {}) {
-    try {
-      return await this._resolver.resolve(options);
-    } catch (e) {
-      process.nextTick(() => {
-        throw e;
-      });
-    }
+    this._resolver.setDefined([
+      'middleware',
+    ]).setAllowedTypes('middleware', 'array');
   }
 }

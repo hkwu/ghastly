@@ -14,9 +14,7 @@ export default class Event {
     this._middlewareStack = new MiddlewareStack(this);
 
     const resolver = new EventResolver();
-    resolver.resolve(options).then(resolved => {
-      this._options = resolved;
-    });
+    this._options = resolver.resolve(options);
   }
 
   /**
@@ -54,10 +52,6 @@ export default class Event {
    * @param {*} args - Arguments passed to the event handler by the Discord client.
    */
   actionWrapper(...args) {
-    if (this._options.injectClient) {
-      this._middlewareStack.process(...args);
-    } else {
-      this._middlewareStack.process(this._client, ...args);
-    }
+    this._middlewareStack.process(this._client, ...args);
   }
 }

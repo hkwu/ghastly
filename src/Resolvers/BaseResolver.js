@@ -1,4 +1,4 @@
-import createResolver from 'options-resolver';
+import createResolver from '../Utils/createResolver';
 
 /**
  * Base class for creating options resolvers.
@@ -11,15 +11,9 @@ export default class BaseResolver {
   /**
    * Validates the given options object and returns a promise.
    * @param {Object} [options={}] - Options object to resolve.
-   * @returns {Promise<Object>}
+   * @returns {Object}
    */
-  async resolve(options = {}) {
-    try {
-      return await this._resolver.resolve(options);
-    } catch (e) {
-      process.nextTick(() => {
-        throw e;
-      });
-    }
+  resolve(options = {}) {
+    return this._resolver.resolve(options, false);
   }
 }
