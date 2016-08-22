@@ -1,4 +1,6 @@
-import { forOwn, has } from 'lodash/object';
+import { keyBy } from 'lodash/collection';
+import { isEmpty } from 'lodash/lang';
+import { forOwn } from 'lodash/object';
 import CommandResolver from '../Resolvers/CommandResolver';
 
 /**
@@ -39,45 +41,56 @@ export default class Command {
    * @private
    */
   _isFilterable(message) {
-    if (has(this._resolvedStructure, 'filters')) {
+    if (this._resolvedStructure.filters) {
       const filters = this._resolvedStructure.filters;
 
       // filter by permissions
-      const userRoles = message.server.rolesOfUser(message.author);
+      const channelPermissions = message.channel.isPrivate
+        ? null
+        : message.channel.permissionsOf(message.author).serialize();
 
-      for (const role of userRoles) {
-        let roleMatchesPermissions = true;
+      if (channelPermissions) {
+        let permissionsMatchFilters = true;
 
         forOwn(filters.permissions, (value, key) => {
-          if ((value && !role.hasPermission(key)) || (!value && role.hasPermission(key))) {
-            roleMatchesPermissions = false;
+          // the values of the permissions in the filter object and the channel permissions object must match
+          if ((value && !channelPermissions[key]) || (!value && channelPermissions[key])) {
+            permissionsMatchFilters = false;
 
             return false;
           }
         });
 
-        if (!roleMatchesPermissions) {
+        if (!permissionsMatchFilters) {
           return false;
         }
       }
 
       // generate maps for efficiency
-      const userRoleNameMap = {};
-      const userRoleIdMap = {};
+      const userRoleNameIndex = keyBy(filters.roleNames);
+      const userRoleIdIndex = keyBy(filters.roleIds);
+      const userIdIndex = keyBy(filters.userIds);
 
-      userRoles.forEach((element) => {
-        userRoleNameMap[element.name] = true;
-        userRoleIdMap[element.id] = true;
-      });
+      // filter by user ID
+      if (!isEmpty(userIdIndex) && !userIdIndex[message.author.id]) {
+        return false;
+      }
 
-      // we can filter by role names, role IDs, and user IDs in one pass
-      const validCredentials = [
-        ...filters.roleNames,
-        ...filters.roleIds,
-        ...filters.userIds,
-      ].filter(element => userRoleNameMap[element] || userRoleIdMap[element] || message.author.id === element);
+      const userRoles = message.server ? message.server.rolesOfUser(message.author) : [];
+      let rolesMatchFilters = false;
 
-      return validCredentials.length > 0;
+      // filter by role name and ID
+      for (const role of userRoles) {
+        if (userRoleNameIndex[role.name] || userRoleIdIndex[role.id]) {
+          rolesMatchFilters = true;
+
+          break;
+        }
+      }
+
+      if (message.server && !rolesMatchFilters) {
+        return false;
+      }
     }
 
     return true;
