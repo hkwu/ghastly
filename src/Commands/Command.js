@@ -50,19 +50,19 @@ export default class Command {
         : message.channel.permissionsOf(message.author).serialize();
 
       if (channelPermissions) {
-        let permissionsMatchFilters = true;
+        let permissionsMatchRequirements = true;
 
         forOwn(filters.permissions, (value, key) => {
           // the values of the permissions in the filter object and the channel permissions object must match
           if ((value && !channelPermissions[key]) || (!value && channelPermissions[key])) {
-            permissionsMatchFilters = false;
+            permissionsMatchRequirements = false;
 
             return false;
           }
         });
 
-        if (!permissionsMatchFilters) {
-          return false;
+        if (!permissionsMatchRequirements) {
+          return true;
         }
       }
 
@@ -73,26 +73,26 @@ export default class Command {
 
       // filter by user ID
       if (!isEmpty(userIdIndex) && !userIdIndex[message.author.id]) {
-        return false;
+        return true;
       }
 
       const userRoles = message.server ? message.server.rolesOfUser(message.author) : [];
-      let rolesMatchFilters = false;
+      let rolesMatchRequirements = false;
 
       // filter by role name and ID
       for (const role of userRoles) {
         if (userRoleNameIndex[role.name] || userRoleIdIndex[role.id]) {
-          rolesMatchFilters = true;
+          rolesMatchRequirements = true;
 
           break;
         }
       }
 
-      if (message.server && !rolesMatchFilters) {
-        return false;
+      if (message.server && !rolesMatchRequirements) {
+        return true;
       }
     }
 
-    return true;
+    return false;
   }
 }
