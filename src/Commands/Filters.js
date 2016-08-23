@@ -97,6 +97,7 @@ export default (filters, message) => {
     permissions,
     roleNames,
     roleIds,
+    userIds,
   };
 
   let messageMatchesRequirements = true;
