@@ -1,3 +1,4 @@
+import stringArgv from 'string-argv';
 import { endsWith, trimEnd } from 'lodash/string';
 import CommandParserError from '../Errors/CommandParserError';
 
@@ -78,7 +79,7 @@ export default class Parser {
     let signature;
 
     if (parameter.indexOf(':') !== -1) {
-      [signature, token.description] = parameter.split(':', 2).map(element => element.trim());
+      [signature, token.description] = parameter.split(':', 2).map(x => x.trim());
     } else {
       signature = parameter;
     }
@@ -86,7 +87,8 @@ export default class Parser {
     const matches = signature.match(/(.+)=(.+)/);
 
     if (matches) {
-      [signature, token.defaultValue] = matches;
+      signature = matches[1].trim();
+      token.defaultValue = matches[2].trim();
       token.optional = true;
     }
 
@@ -97,7 +99,7 @@ export default class Parser {
 
     if (endsWith(signature, '*')) {
       token.type = Parser.TOKEN_TYPES.ARRAY;
-      token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
+      token.defaultValue = token.defaultValue && stringArgv(token.defaultValue).map(x => x.trim());
       signature = trimEnd(signature, '*');
     }
 
