@@ -94,13 +94,13 @@ export default class Parser {
 
     if (endsWith(signature, '?')) {
       token.optional = true;
-      signature = trimEnd(signature, '?');
+      signature = trimEnd(signature, ' ?');
     }
 
     if (endsWith(signature, '*')) {
       token.type = Parser.TOKEN_TYPES.ARRAY;
       token.defaultValue = token.defaultValue && stringArgv(token.defaultValue).map(x => x.trim());
-      signature = trimEnd(signature, '*');
+      signature = trimEnd(signature, ' *');
     }
 
     token.name = signature;
