@@ -1,8 +1,13 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
 import Parser from '../../src/Commands/Parser';
 
 describe('Parser', function() {
   describe('#parseParameter()', function() {
+    before(function() {
+      chai.use(chaiSubset);
+    });
+
     it('parses basic arguments', function() {
       expect(Parser.parseParameter('basic')).to.deep.equal({
         name: 'basic',
@@ -14,97 +19,148 @@ describe('Parser', function() {
     });
 
     it('parses descriptions', function() {
-      const single = Parser.parseParameter('name:description');
-      expect(single.name).to.equal('name');
-      expect(single.description).to.equal('description');
+      expect(Parser.parseParameter('name:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
 
-      const array = Parser.parseParameter('name*:description');
-      expect(array.name).to.equal('name');
-      expect(array.description).to.equal('description');
+      expect(Parser.parseParameter('name*:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
 
-      const singleOptional = Parser.parseParameter('name?:description');
-      expect(singleOptional.name).to.equal('name');
-      expect(singleOptional.description).to.equal('description');
+      expect(Parser.parseParameter('name?:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
 
-      const arrayOptional = Parser.parseParameter('name*?:description');
-      expect(arrayOptional.name).to.equal('name');
-      expect(arrayOptional.description).to.equal('description');
+      expect(Parser.parseParameter('name*?:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
 
-      const singleDefault = Parser.parseParameter('name=default:description');
-      expect(singleDefault.name).to.equal('name');
-      expect(singleDefault.description).to.equal('description');
+      expect(Parser.parseParameter('name=default:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
 
-      const arrayDefault = Parser.parseParameter('name*=default1 default2:description');
-      expect(arrayDefault.name).to.equal('name');
-      expect(arrayDefault.description).to.equal('description');
+      expect(Parser.parseParameter('name*=default1 default2:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
     });
 
     it('parses array types', function() {
-      const parsed = Parser.parseParameter('array*');
-      expect(parsed.name).to.equal('array');
-      expect(parsed.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
+      expect(Parser.parseParameter('array*')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: false,
+      });
     });
 
     it('parses optional arguments', function() {
-      const parsed = Parser.parseParameter('optional?');
-      expect(parsed.name).to.equal('optional');
-      expect(parsed.optional).to.be.true;
+      expect(Parser.parseParameter('optional?')).to.containSubset({
+        name: 'optional',
+        type: Parser.TOKEN_TYPES.SINGLE,
+        optional: true,
+        defaultValue: null,
+      });
     });
 
     it('parses optional array arguments', function() {
-      const parsed = Parser.parseParameter('array*?');
-      expect(parsed.name).to.equal('array');
-      expect(parsed.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
-      expect(parsed.optional).to.be.true;
+      expect(Parser.parseParameter('array*?')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: true,
+        defaultValue: null,
+      });
     });
 
     it('parses default single arguments', function() {
-      const noWhitespace = Parser.parseParameter('single=true');
-      expect(noWhitespace.name).to.equal('single');
-      expect(noWhitespace.defaultValue).to.equal('true');
-
-      const withWhitespace = Parser.parseParameter('single    =    true');
-      expect(withWhitespace.name).to.equal('single');
-      expect(withWhitespace.defaultValue).to.equal('true');
+      expect(Parser.parseParameter('single=true')).to.containSubset({
+        name: 'single',
+        defaultValue: 'true',
+      });
     });
 
     it('parses default array arguments', function() {
-      const parsed = Parser.parseParameter('array*=one two three four');
-      expect(parsed.name).to.equal('array');
-      expect(parsed.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
-      expect(parsed.optional).to.be.true;
-      expect(parsed.defaultValue).to.deep.equal(['one', 'two', 'three', 'four']);
+      expect(Parser.parseParameter('array*=one two three four')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: true,
+        defaultValue: ['one', 'two', 'three', 'four'],
+      });
+    });
+
+    it('parses argument names with spaces', function() {
+      expect(Parser.parseParameter('name with spaces=some value')).to.containSubset({
+        name: 'name with spaces',
+        defaultValue: 'some value',
+      });
+
+      expect(Parser.parseParameter('array with spaces*=some value')).to.containSubset({
+        name: 'array with spaces',
+        defaultValue: ['some', 'value'],
+      });
+    });
+
+    it('parses default array values with spaces', function() {
+      const testString = 'array*=\'single quotes\' "double quotes" \'nested "quotes"\'';
+      expect(Parser.parseParameter(testString)).to.containSubset({
+        name: 'array',
+        defaultValue: ['single quotes', 'double quotes', 'nested "quotes"'],
+      });
     });
 
     it('strips redundant question marks', function() {
-      const singleOptional = Parser.parseParameter('single?=true');
-      expect(singleOptional.name).to.equal('single');
-      expect(singleOptional.type).to.equal(Parser.TOKEN_TYPES.SINGLE);
-      expect(singleOptional.optional).to.be.true;
-      expect(singleOptional.defaultValue).to.equal('true');
+      expect(Parser.parseParameter('single?=true')).to.containSubset({
+        name: 'single',
+        type: Parser.TOKEN_TYPES.SINGLE,
+        optional: true,
+        defaultValue: 'true',
+      });
 
-      const arrayOptional = Parser.parseParameter('array*???????=one two');
-      expect(arrayOptional.name).to.equal('array');
-      expect(arrayOptional.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
-      expect(arrayOptional.optional).to.be.true;
-      expect(arrayOptional.defaultValue).to.deep.equal(['one', 'two']);
+      expect(Parser.parseParameter('array*???????=one two')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: true,
+        defaultValue: ['one', 'two'],
+      });
     });
 
     it('strips redundant asterisks', function() {
-      const requiredArray = Parser.parseParameter('array********');
-      expect(requiredArray.name).to.equal('array');
-      expect(requiredArray.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
+      expect(Parser.parseParameter('array********')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+      });
 
-      const optionalArray = Parser.parseParameter('array****?');
-      expect(optionalArray.name).to.equal('array');
-      expect(optionalArray.type).to.equal(Parser.TOKEN_TYPES.ARRAY);
-      expect(optionalArray.optional).to.be.true;
+      expect(Parser.parseParameter('array****?')).to.containSubset({
+        name: 'array',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: true,
+      });
     });
 
     it('strips whitespaces', function() {
-      const descriptionWhitespace = Parser.parseParameter('name     :     desc');
-      expect(descriptionWhitespace.name).to.equal('name');
-      expect(descriptionWhitespace.description).to.equal('desc');
+      expect(Parser.parseParameter('name     :     desc')).to.containSubset({
+        name: 'name',
+        description: 'desc',
+      });
+
+      expect(Parser.parseParameter('name   =   someVal    :    desc')).to.containSubset({
+        name: 'name',
+        description: 'desc',
+        optional: true,
+        defaultValue: 'someVal',
+      });
+
+      expect(Parser.parseParameter('array   *  ? = someVal : desc')).to.containSubset({
+        name: 'array',
+        description: 'desc',
+        type: Parser.TOKEN_TYPES.ARRAY,
+        optional: true,
+        defaultValue: ['someVal'],
+      });
     });
   });
 });
