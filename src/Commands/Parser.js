@@ -1,9 +1,19 @@
+import { endsWith, trimEnd } from 'lodash/string';
 import CommandParserError from '../Errors/CommandParserError';
 
 /**
  * Parses the signature of a command.
  */
 export default class Parser {
+  /**
+   * Some constants for command argument types.
+   * @type {Object}
+   */
+  static TOKEN_TYPES = {
+    SINGLE: 'SINGLE',
+    ARRAY: 'ARRAY',
+  };
+
   /**
    * Parses a given command signature.
    * @param {String} signature - The command signature.
@@ -38,27 +48,61 @@ export default class Parser {
    * @returns {Array<Object>} Array containing data on the parsed parameters.
    */
   static parseParameters(parameters) {
-    return parameters.map(param => Parser.parseArgument(param));
+    return parameters.reduce((previous, current) => {
+      const parameter = Parser.parseParameter(current);
+
+      if (previous[parameter.name]) {
+        throw new CommandParserError(`Encountered duplicate parameter names: ${parameter.name}.`);
+      }
+
+      previous[parameter.name] = parameter;
+
+      return previous;
+    }, {});
   }
 
   /**
-   * Parses a single command argument.
-   * @param {String} argument - The argument.
-   * @returns {Object} Object containing data on the parsed argument.
+   * Parses a single command parameter.
+   * @param {String} parameter - The parameter.
+   * @returns {Object} Object containing data on the parsed parameter.
    */
-  static parseArgument(argument) {
-    let name = null;
-    let description = null;
+  static parseParameter(parameter) {
+    const token = {
+      name: null,
+      description: null,
+      type: Parser.TOKEN_TYPES.SINGLE,
+      optional: false,
+      defaultValue: null,
+    };
 
-    if (argument.indexOf(':') !== -1) {
-      [name, description] = argument.split(':', 2).map(element => element.trim());
+    let signature;
+
+    if (parameter.indexOf(':') !== -1) {
+      [signature, token.description] = parameter.split(':', 2).map(element => element.trim());
     } else {
-      name = argument;
+      signature = parameter;
     }
 
-    return {
-      name,
-      description,
-    };
+    const matches = signature.match(/(.+)=(.+)/);
+
+    if (matches) {
+      [signature, token.defaultValue] = matches;
+      token.optional = true;
+    }
+
+    if (endsWith(signature, '?')) {
+      token.optional = true;
+      signature = trimEnd(signature, '?');
+    }
+
+    if (endsWith(signature, '*')) {
+      token.type = Parser.TOKEN_TYPES.ARRAY;
+      token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
+      signature = trimEnd(signature, '*');
+    }
+
+    token.name = signature;
+
+    return token;
   }
 }
