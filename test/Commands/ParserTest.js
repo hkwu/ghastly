@@ -105,8 +105,7 @@ describe('Parser', function() {
     });
 
     it('parses default array values with spaces', function() {
-      const testString = 'array*=\'single quotes\' "double quotes" \'nested "quotes"\'';
-      expect(Parser.parseParameter(testString)).to.containSubset({
+      expect(Parser.parseParameter('array*=\'single quotes\' "double quotes" \'nested "quotes"\'')).to.containSubset({
         name: 'array',
         defaultValue: ['single quotes', 'double quotes', 'nested "quotes"'],
       });
