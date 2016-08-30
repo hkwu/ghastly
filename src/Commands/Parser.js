@@ -110,12 +110,20 @@ export default class Parser {
       defaultValue: null,
     };
 
+    const nameAndDescription = parameter.split(':', 2);
     let signature;
 
-    if (parameter.indexOf(':') !== -1) {
-      [signature, token.description] = parameter.split(':', 2).map(x => x.trim());
+    if (nameAndDescription.length > 1) {
+      [signature, token.description] = nameAndDescription.map(x => x.trim());
     } else {
       signature = parameter;
+    }
+
+    const typeAndSignature = signature.split('>>', 2);
+
+    if (typeAndSignature.length > 1) {
+      let type;
+      [type, signature] = typeAndSignature[0];
     }
 
     const matches = signature.match(/(.+)=(.+)/);
