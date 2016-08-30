@@ -49,17 +49,41 @@ export default class Parser {
    * @returns {Array<Object>} Array containing data on the parsed parameters.
    */
   static parseParameters(parameters) {
-    return parameters.reduce((previous, current) => {
-      const parameter = Parser.parseParameter(current);
+    const parsed = parameters.reduce(
+      (previous, current) => {
+        const token = Parser.parseParameter(current);
 
-      if (previous[parameter.name]) {
-        throw new CommandParserError(`Encountered duplicate parameter names: ${parameter.name}.`);
-      }
+        if (previous.seen.parameterNames[token.name]) {
+          throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
+        } else if (previous.seen.array) {
+          throw new CommandParserError(`Argument of type array can only appear at the end of the command signature. Given parameters: <${parameters.join(' ')}>.`);
+        } else if (!token.optional && previous.seen.optional) {
+          throw new CommandParserError(`Encountered required argument after optional argument: ${token.name}.`);
+        }
 
-      previous[parameter.name] = parameter;
+        return {
+          seen: {
+            array: previous.seen.array || token.type === Parser.TOKEN_TYPES.ARRAY,
+            optional: previous.seen.optional || token.optional,
+            parameterNames: {
+              ...previous.seen.parameterNames,
+              [token.name]: true,
+            },
+          },
+          parameters: [...previous.parameters, token],
+        };
+      },
+      {
+        seen: {
+          array: false,
+          optional: false,
+          parameterNames: {},
+        },
+        parameters: [],
+      },
+    );
 
-      return previous;
-    }, {});
+    return parsed.parameters;
   }
 
   /**

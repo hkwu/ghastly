@@ -3,11 +3,43 @@ import chaiSubset from 'chai-subset';
 import Parser from '../../src/Commands/Parser';
 
 describe('Parser', function() {
-  describe('#parseParameter()', function() {
-    before(function() {
-      chai.use(chaiSubset);
-    });
+  before(function() {
+    chai.use(chaiSubset);
+  });
 
+  describe('#parseParameters()', function() {
+    it('parses basic parameters', function() {
+      expect(Parser.parseParameters([
+        'name:description',
+        'argument?:optional',
+        'array*?:description',
+      ])).to.deep.equal([
+        {
+          name: 'name',
+          description: 'description',
+          type: Parser.TOKEN_TYPES.SINGLE,
+          optional: false,
+          defaultValue: null,
+        },
+        {
+          name: 'argument',
+          description: 'optional',
+          type: Parser.TOKEN_TYPES.SINGLE,
+          optional: true,
+          defaultValue: null,
+        },
+        {
+          name: 'array',
+          description: 'description',
+          type: Parser.TOKEN_TYPES.ARRAY,
+          optional: true,
+          defaultValue: null,
+        },
+      ]);
+    });
+  });
+
+  describe('#parseParameter()', function() {
     it('parses basic arguments', function() {
       expect(Parser.parseParameter('basic')).to.deep.equal({
         name: 'basic',
