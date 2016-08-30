@@ -49,7 +49,7 @@ export default class Parser {
    * @returns {Array<Object>} Array containing data on the parsed parameters.
    */
   static parseParameters(parameters) {
-    const parsed = parameters.reduce(
+    return parameters.reduce(
       (previous, current) => {
         const token = Parser.parseParameter(current);
 
@@ -70,7 +70,7 @@ export default class Parser {
               [token.name]: true,
             },
           },
-          parameters: [...previous.parameters, token],
+          parsedParameters: [...previous.parsedParameters, token],
         };
       },
       {
@@ -79,11 +79,9 @@ export default class Parser {
           optional: false,
           parameterNames: {},
         },
-        parameters: [],
+        parsedParameters: [],
       },
-    );
-
-    return parsed.parameters;
+    ).parsedParameters;
   }
 
   /**
