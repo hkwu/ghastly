@@ -10,31 +10,44 @@ export default class Parser {
    * Some constants for command argument types.
    * @type {Object}
    */
-  static TOKEN_TYPES = {
-    SINGLE: 'SINGLE',
-    ARRAY: 'ARRAY',
+  static TOKEN_ARITIES = {
+    UNARY: 'UNARY',
+    VARIADIC: 'VARIADIC',
   };
 
   /**
    * Parses a given command signature.
    * @param {String} signature - The command signature.
    * @returns {Object} Object containing data on the command signature.
+   * @throws {CommandParserError}
    */
   static parse(signature) {
-    if (!signature.trim()) {
-      throw new CommandParserError('Signature cannot not be empty.');
+    const trimmed = signature.trim();
+
+    if (!trimmed) {
+      throw new CommandParserError('Signature cannot be empty.');
     }
 
-    const partition = signature.split(' ');
+    const partition = trimmed.split(' ');
     const identifier = partition[0].trim();
 
     if (partition.length > 1) {
-      const matches = partition.slice(1).join(' ').match(/\{\s*(.*?)\s*\}/g);
-      const parameters = Parser.parseParameters(matches);
+      const parameterString = partition.slice(1).join(' ').trim();
+      const parameterRegex = /\{\s*(.*?)\s*\}/g;
+      const matches = [];
+      let match;
+
+      while (match = parameterRegex.exec(parameterString)) {
+        matches.push(match[1]);
+      }
+
+      if (parameterString && !matches.length) {
+        throw new CommandParserError(`Expected parameter definitions after command name but found none. Given signature: <${signature}>.`);
+      }
 
       return {
         identifier,
-        parameters,
+        parameters: Parser.parseParameters(matches),
       };
     }
 
@@ -47,23 +60,23 @@ export default class Parser {
    * Parses the parameters in a command signature.
    * @param {Array<String>} parameters - Array of parameters parsed from the signature.
    * @returns {Array<Object>} Array containing data on the parsed parameters.
+   * @throws {CommandParserError}
    */
   static parseParameters(parameters) {
     return parameters.reduce(
-      (previous, current) => {
+      (previous, current, index) => {
         const token = Parser.parseParameter(current);
 
         if (previous.seen.parameterNames[token.name]) {
           throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
-        } else if (previous.seen.array) {
-          throw new CommandParserError(`Argument of type array can only appear at the end of the command signature. Given parameters: <{${parameters.join('} {')}}>.`);
+        } else if (token.arity === Parser.TOKEN_ARITIES.VARIADIC && index < parameters.length - 1) {
+          throw new CommandParserError(`Parameter of type array can only appear at the end of the command signature. Given parameters: <{${parameters.join('} {')}}>.`);
         } else if (!token.optional && previous.seen.optional) {
-          throw new CommandParserError(`Encountered required argument after optional argument: ${token.name}.`);
+          throw new CommandParserError(`Encountered required parameter after optional parameter: ${token.name}.`);
         }
 
         return {
           seen: {
-            array: previous.seen.array || token.type === Parser.TOKEN_TYPES.ARRAY,
             optional: previous.seen.optional || token.optional,
             parameterNames: {
               ...previous.seen.parameterNames,
@@ -75,7 +88,6 @@ export default class Parser {
       },
       {
         seen: {
-          array: false,
           optional: false,
           parameterNames: {},
         },
@@ -93,7 +105,7 @@ export default class Parser {
     const token = {
       name: null,
       description: null,
-      type: Parser.TOKEN_TYPES.SINGLE,
+      arity: Parser.TOKEN_ARITIES.UNARY,
       optional: false,
       defaultValue: null,
     };
@@ -120,7 +132,7 @@ export default class Parser {
     }
 
     if (endsWith(signature, '*')) {
-      token.type = Parser.TOKEN_TYPES.ARRAY;
+      token.arity = Parser.TOKEN_ARITIES.VARIADIC;
       token.defaultValue = token.defaultValue && stringArgv(token.defaultValue).map(x => x.trim());
       signature = trimEnd(signature, ' *');
     }

@@ -1,10 +1,86 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 import Parser from '../../src/Commands/Parser';
+import CommandParserError from '../../src/Errors/CommandParserError';
 
 describe('Parser', function() {
   before(function() {
     chai.use(chaiSubset);
+  });
+
+  describe('#parse()', function() {
+    it('parses basic signatures', function() {
+      expect(Parser.parse('sample {command} {other} {foo}')).to.deep.equal({
+        identifier: 'sample',
+        parameters: [
+          {
+            name: 'command',
+            description: null,
+            arity: Parser.TOKEN_ARITIES.UNARY,
+            optional: false,
+            defaultValue: null,
+          },
+          {
+            name: 'other',
+            description: null,
+            arity: Parser.TOKEN_ARITIES.UNARY,
+            optional: false,
+            defaultValue: null,
+          },
+          {
+            name: 'foo',
+            description: null,
+            arity: Parser.TOKEN_ARITIES.UNARY,
+            optional: false,
+            defaultValue: null,
+          },
+        ],
+      });
+    });
+
+    it('parses signatures without parameters', function() {
+      expect(Parser.parse('noParams')).to.deep.equal({
+        identifier: 'noParams',
+      });
+    });
+
+    it('strips whitespace from command name and parameters', function() {
+      expect(Parser.parse('   white      {space}   {two}    ')).to.deep.equal({
+        identifier: 'white',
+        parameters: [
+          {
+            name: 'space',
+            description: null,
+            arity: Parser.TOKEN_ARITIES.UNARY,
+            optional: false,
+            defaultValue: null,
+          },
+          {
+            name: 'two',
+            description: null,
+            arity: Parser.TOKEN_ARITIES.UNARY,
+            optional: false,
+            defaultValue: null,
+          },
+        ],
+      });
+    });
+
+    it('requires parameter values if text follows the command name', function() {
+      expect(() => Parser.parse('name and some values that shouldn\'t be here')).to.throw(
+        CommandParserError,
+        'Expected parameter definitions after command name',
+      );
+
+      expect(() => Parser.parse('name and some values {with} {params}')).to.not.throw(
+        CommandParserError,
+        'Expected parameter definitions after command name',
+      );
+    });
+
+    it('disallows empty signatures', function() {
+      expect(() => Parser.parse('')).to.throw(CommandParserError, 'Signature cannot be empty');
+    });
   });
 
   describe('#parseParameters()', function() {
@@ -17,25 +93,59 @@ describe('Parser', function() {
         {
           name: 'name',
           description: 'description',
-          type: Parser.TOKEN_TYPES.SINGLE,
+          arity: Parser.TOKEN_ARITIES.UNARY,
           optional: false,
           defaultValue: null,
         },
         {
           name: 'argument',
           description: 'optional',
-          type: Parser.TOKEN_TYPES.SINGLE,
+          arity: Parser.TOKEN_ARITIES.UNARY,
           optional: true,
           defaultValue: null,
         },
         {
           name: 'array',
           description: 'description',
-          type: Parser.TOKEN_TYPES.ARRAY,
+          arity: Parser.TOKEN_ARITIES.VARIADIC,
           optional: true,
           defaultValue: null,
         },
       ]);
+    });
+
+    it('disallows duplicate parameter names', function() {
+      expect(() => Parser.parseParameters([
+        'duplicate',
+        'duplicate*?',
+        'duplicate?',
+      ])).to.throw(CommandParserError, 'duplicate parameter names');
+
+      expect(() => Parser.parseParameters([
+        'origin:terrace',
+        'duplicate',
+        'origin:super',
+        'duplicate*:some',
+      ])).to.throw(CommandParserError, 'duplicate parameter names');
+    });
+
+    it('disallows variadic parameters except as the last parameter', function() {
+      expect(() => Parser.parseParameters([
+        'single:description',
+        'array*:should not be here',
+        'singleTwo:description',
+      ])).to.throw(CommandParserError, 'array can only appear at the end');
+
+      expect(() => Parser.parseParameters([
+        'array*:should not be here',
+      ])).to.not.throw(CommandParserError);
+    });
+
+    it('disallows required parameters after optional parameters', function() {
+      expect(() => Parser.parseParameters([
+        'optional?',
+        'required',
+      ])).to.throw(CommandParserError, 'required parameter after optional');
     });
   });
 
@@ -44,7 +154,7 @@ describe('Parser', function() {
       expect(Parser.parseParameter('basic')).to.deep.equal({
         name: 'basic',
         description: null,
-        type: Parser.TOKEN_TYPES.SINGLE,
+        arity: Parser.TOKEN_ARITIES.UNARY,
         optional: false,
         defaultValue: null,
       });
@@ -82,10 +192,10 @@ describe('Parser', function() {
       });
     });
 
-    it('parses array types', function() {
+    it('parses variadic arguments', function() {
       expect(Parser.parseParameter('array*')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: false,
       });
     });
@@ -93,16 +203,16 @@ describe('Parser', function() {
     it('parses optional arguments', function() {
       expect(Parser.parseParameter('optional?')).to.containSubset({
         name: 'optional',
-        type: Parser.TOKEN_TYPES.SINGLE,
+        arity: Parser.TOKEN_ARITIES.UNARY,
         optional: true,
         defaultValue: null,
       });
     });
 
-    it('parses optional array arguments', function() {
+    it('parses optional variadic arguments', function() {
       expect(Parser.parseParameter('array*?')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: true,
         defaultValue: null,
       });
@@ -115,10 +225,10 @@ describe('Parser', function() {
       });
     });
 
-    it('parses default array arguments', function() {
+    it('parses default variadic arguments', function() {
       expect(Parser.parseParameter('array*=one two three four')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: true,
         defaultValue: ['one', 'two', 'three', 'four'],
       });
@@ -136,7 +246,7 @@ describe('Parser', function() {
       });
     });
 
-    it('parses default array values with spaces', function() {
+    it('parses default variadic values with spaces', function() {
       expect(Parser.parseParameter('array*=\'single quotes\' "double quotes" \'nested "quotes"\'')).to.containSubset({
         name: 'array',
         defaultValue: ['single quotes', 'double quotes', 'nested "quotes"'],
@@ -146,14 +256,14 @@ describe('Parser', function() {
     it('strips redundant question marks', function() {
       expect(Parser.parseParameter('single?=true')).to.containSubset({
         name: 'single',
-        type: Parser.TOKEN_TYPES.SINGLE,
+        arity: Parser.TOKEN_ARITIES.UNARY,
         optional: true,
         defaultValue: 'true',
       });
 
       expect(Parser.parseParameter('array*???????=one two')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: true,
         defaultValue: ['one', 'two'],
       });
@@ -162,12 +272,12 @@ describe('Parser', function() {
     it('strips redundant asterisks', function() {
       expect(Parser.parseParameter('array********')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
       });
 
       expect(Parser.parseParameter('array****?')).to.containSubset({
         name: 'array',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: true,
       });
     });
@@ -188,7 +298,7 @@ describe('Parser', function() {
       expect(Parser.parseParameter('array   *  ? = someVal : desc')).to.containSubset({
         name: 'array',
         description: 'desc',
-        type: Parser.TOKEN_TYPES.ARRAY,
+        arity: Parser.TOKEN_ARITIES.VARIADIC,
         optional: true,
         defaultValue: ['someVal'],
       });
