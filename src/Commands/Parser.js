@@ -56,7 +56,7 @@ export default class Parser {
         if (previous.seen.parameterNames[token.name]) {
           throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
         } else if (previous.seen.array) {
-          throw new CommandParserError(`Argument of type array can only appear at the end of the command signature. Given parameters: <${parameters.join(' ')}>.`);
+          throw new CommandParserError(`Argument of type array can only appear at the end of the command signature. Given parameters: <{${parameters.join('} {')}}>.`);
         } else if (!token.optional && previous.seen.optional) {
           throw new CommandParserError(`Encountered required argument after optional argument: ${token.name}.`);
         }
