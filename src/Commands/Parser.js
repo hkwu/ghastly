@@ -1,5 +1,5 @@
 import stringArgv from 'string-argv';
-import { isInteger, isNumber, toInteger, toNumber } from 'lodash/lang';
+import { isNumber, toInteger, toNumber } from 'lodash/lang';
 import { endsWith, trimEnd } from 'lodash/string';
 import CommandParserError from '../Errors/CommandParserError';
 
