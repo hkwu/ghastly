@@ -34,7 +34,7 @@ export const permissions = (filterValues, message) => {
 
 /**
  * Filters out commands based on user role names.
- * @param {Array<String>} filterValues - The value of the 'roleNames' property as defined on the command's filters.
+ * @param {Array.<String>} filterValues - The value of the 'roleNames' property as defined on the command's filters.
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
@@ -57,7 +57,7 @@ export const roleNames = (filterValues, message) => {
 
 /**
  * Filters out commands based on user role IDs.
- * @param {Array<String>} filterValues - The value of the 'roleIds' property as defined on the command's filters.
+ * @param {Array.<String>} filterValues - The value of the 'roleIds' property as defined on the command's filters.
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
@@ -80,7 +80,7 @@ export const roleIds = (filterValues, message) => {
 
 /**
  * Filters out commands based on user IDs.
- * @param {Array<String>} filterValues - The value of the 'userIds' property as defined on the command's filters.
+ * @param {Array.<String>} filterValues - The value of the 'userIds' property as defined on the command's filters.
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
