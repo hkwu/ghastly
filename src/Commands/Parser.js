@@ -205,7 +205,7 @@ export default class Parser {
     if (token.defaultValue && token.type !== Parser.TOKEN.TYPE.STRING) {
       const typeValidator = (value) => {
         if (!Parser.TYPE_CHECKERS[token.type](value)) {
-          throw new CommandParserError(`Expected default value of type <${token.type}>, got <${typeof value}>. Given parameter: <[${parameter}]>.`);
+          throw new CommandParserError(`Expected default value of type <${token.type}>. Given parameter: <[${parameter}]>.`);
         }
 
         return value;
