@@ -268,105 +268,105 @@ describe('Parser', function() {
     });
 
     it('parses parameter types', function() {
-      expect(Parser.parseParameter('bool>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<bool>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.BOOLEAN,
       });
 
-      expect(Parser.parseParameter('boolean>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<boolean>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.BOOLEAN,
       });
 
-      expect(Parser.parseParameter('integer>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<integer>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.INTEGER,
       });
 
-      expect(Parser.parseParameter('int>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<int>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.INTEGER,
       });
 
-      expect(Parser.parseParameter('number>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<number>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.NUMBER,
       });
 
-      expect(Parser.parseParameter('num>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<num>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.NUMBER,
       });
 
-      expect(Parser.parseParameter('string>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<string>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.STRING,
       });
 
-      expect(Parser.parseParameter('str>>variable')).to.containSubset({
+      expect(Parser.parseParameter('variable<str>')).to.containSubset({
         name: 'variable',
         type: Parser.TOKEN.TYPE.STRING,
       });
 
-      expect(Parser.parseParameter('num>>variable*:description')).to.containSubset({
+      expect(Parser.parseParameter('variable<num>*:description')).to.containSubset({
         name: 'variable',
         description: 'description',
         arity: Parser.TOKEN.ARITY.VARIADIC,
         type: Parser.TOKEN.TYPE.NUMBER,
       });
 
-      expect(Parser.parseParameter('num>>variable with >> *:description with >>')).to.containSubset({
-        name: 'variable with >>',
-        description: 'description with >>',
+      expect(Parser.parseParameter('variable with <> <num> *:description with <>')).to.containSubset({
+        name: 'variable with <>',
+        description: 'description with <>',
         arity: Parser.TOKEN.ARITY.VARIADIC,
         type: Parser.TOKEN.TYPE.NUMBER,
       });
     });
 
     it('parses typed default values', function() {
-      expect(Parser.parseParameter('bool>>name=true')).to.containSubset({
+      expect(Parser.parseParameter('name<bool>=true')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.BOOLEAN,
         defaultValue: true,
       });
 
-      expect(Parser.parseParameter('bool>>name=false')).to.containSubset({
+      expect(Parser.parseParameter('name<bool>=false')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.BOOLEAN,
         defaultValue: false,
       });
 
-      expect(Parser.parseParameter('int>>name=123')).to.containSubset({
+      expect(Parser.parseParameter('name<int>=123')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.INTEGER,
         defaultValue: 123,
       });
 
-      expect(Parser.parseParameter('int>>name=123.555')).to.containSubset({
+      expect(Parser.parseParameter('name<int>=123.555')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.INTEGER,
         defaultValue: 123,
       });
 
-      expect(Parser.parseParameter('num>>name=123.555')).to.containSubset({
+      expect(Parser.parseParameter('name<num>=123.555')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.NUMBER,
         defaultValue: 123.555,
       });
 
-      expect(Parser.parseParameter('str>>name=false')).to.containSubset({
+      expect(Parser.parseParameter('name<str>=false')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.STRING,
         defaultValue: 'false',
       });
 
-      expect(Parser.parseParameter('bool>>name*=true false "true" false')).to.containSubset({
+      expect(Parser.parseParameter('name<bool>*=true false "true" false')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.BOOLEAN,
         defaultValue: [true, false, true, false],
       });
 
-      expect(Parser.parseParameter('number>>name*=123 -233 -100.5 0 23.4')).to.containSubset({
+      expect(Parser.parseParameter('name<number>*=123 -233 -100.5 0 23.4')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.NUMBER,
         defaultValue: [123, -233, -100.5, 0, 23.4],
@@ -426,26 +426,26 @@ describe('Parser', function() {
 
     it('disallows invalid parameter types', function() {
       expect(() => (
-        Parser.parseParameter('func>>name')
+        Parser.parseParameter('name<func>')
       )).to.throw(CommandParserError, 'not a valid parameter type');
 
       expect(() => (
-        Parser.parseParameter('NUMB  >>  name ?: yeah it\'s me')
+        Parser.parseParameter('name <NUMB> ?: yeah it\'s me')
       )).to.throw(CommandParserError, 'not a valid parameter type');
     });
 
     it('disallows invalid default value types', function() {
       expect(() => (
-        Parser.parseParameter('int>>array* = hey not an integer 123 !'
-      ))).to.throw(CommandParserError, 'Expected default value of type <INTEGER>');
+        Parser.parseParameter('array<int>* = hey not an integer 123 !'
+      ))).to.throw(CommandParserError, 'Expected default value <hey> to be of type <INTEGER>');
 
       expect(() => (
-        Parser.parseParameter('bool>>single=default:description')
-      )).to.throw(CommandParserError, 'Expected default value of type <BOOLEAN>');
+        Parser.parseParameter('single<bool>=default:description')
+      )).to.throw(CommandParserError, 'Expected default value <default> to be of type <BOOLEAN>');
 
       expect(() => (
-        Parser.parseParameter('bool>>single=true:description')
-      )).to.not.throw(CommandParserError, 'Expected default value of type <BOOLEAN>');
+        Parser.parseParameter('single<bool>=true:description')
+      )).to.not.throw(CommandParserError, 'Expected default value <true> to be of type <BOOLEAN>');
     });
   });
 });

@@ -160,52 +160,71 @@ export default class Parser {
       defaultValue: null,
     };
 
-    const signatureAndDescription = parameter.split(Parser.DELIMITERS.DESCRIPTION);
     let signature;
+    const signatureAndDescription = parameter.match(`(.+?)${Parser.DELIMITERS.DESCRIPTION}(.+)`);
 
-    if (signatureAndDescription.length > 1) {
-      signature = signatureAndDescription[0].trim();
-      token.description = signatureAndDescription.slice(1).join(Parser.DELIMITERS.DESCRIPTION).trim();
+    if (signatureAndDescription) {
+      signature = signatureAndDescription[1].trim();
+      token.description = signatureAndDescription[2].trim();
     } else {
       signature = parameter;
     }
 
-    const typeAndSignature = signature.split(Parser.DELIMITERS.PARAMETER_TYPE);
+    const signatureAndDefaults = signature.match(/(.+)=(.+)/);
 
-    if (typeAndSignature.length > 1) {
-      const type = typeAndSignature[0].toUpperCase().trim();
+    if (signatureAndDefaults) {
+      signature = signatureAndDefaults[1].trim();
+      token.defaultValue = signatureAndDefaults[2].trim();
+      token.optional = true;
+    }
+
+    // if (endsWith(signature, '?')) {
+    //   token.optional = true;
+    //   signature = trimEnd(signature, ' ?');
+    // }
+    //
+    // if (endsWith(signature, '*')) {
+    //   token.arity = Parser.TOKEN.ARITY.VARIADIC;
+    //   token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
+    //   signature = trimEnd(signature, ' *');
+    // }
+
+    const signatureAndType = signature.match(/(.+)<(.+)>/);
+
+    if (signatureAndType) {
+      let type = signatureAndType[2].toUpperCase().trim();
+      token.optional = Parser.parseTokenIsOptional(type);
+
+      type = token.optional ? trimEnd(type, '?') : type;
+      token.arity = Parser.parseTokenArity(type);
+
+      if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
+        token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
+        type = trimEnd(type, ' *');
+      }
 
       if (!Parser.TOKEN.TYPE[type]) {
         throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <[${parameter}]>.`);
       }
 
       token.type = Parser.TOKEN.TYPE[type];
-      signature = typeAndSignature.slice(1).join(Parser.DELIMITERS.PARAMETER_TYPE).trim();
-    }
+      signature = signatureAndType[1].trim();
+    } else {
+      token.optional = Parser.parseTokenIsOptional(signature);
 
-    const matches = signature.match(/(.+)=(.+)/);
+      signature = token.optional ? trimEnd(signature, '?') : signature;
+      token.arity = Parser.parseTokenArity(signature);
 
-    if (matches) {
-      signature = matches[1].trim();
-      token.defaultValue = matches[2].trim();
-      token.optional = true;
-    }
-
-    if (endsWith(signature, '?')) {
-      token.optional = true;
-      signature = trimEnd(signature, ' ?');
-    }
-
-    if (endsWith(signature, '*')) {
-      token.arity = Parser.TOKEN.ARITY.VARIADIC;
-      token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
-      signature = trimEnd(signature, ' *');
+      if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
+        token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
+        signature = trimEnd(signature, ' *');
+      }
     }
 
     if (token.defaultValue && token.type !== Parser.TOKEN.TYPE.STRING) {
       const typeValidator = (value) => {
         if (!Parser.TYPE_CHECKERS[token.type](value)) {
-          throw new CommandParserError(`Expected default value of type <${token.type}>. Given value <${value}> in parameter: <[${parameter}]>.`);
+          throw new CommandParserError(`Expected default value <${value}> to be of type <${token.type}>. Given parameter: <[${parameter}]>.`);
         }
 
         return value;
@@ -223,5 +242,13 @@ export default class Parser {
     token.name = signature;
 
     return token;
+  }
+
+  static parseTokenArity(token) {
+    return endsWith(token, '*') ? Parser.TOKEN.ARITY.VARIADIC : Parser.TOKEN.ARITY.UNARY;
+  }
+
+  static parseTokenIsOptional(token) {
+    return endsWith(token, '?');
   }
 }
