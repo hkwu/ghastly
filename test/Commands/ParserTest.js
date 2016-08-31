@@ -10,7 +10,7 @@ describe('Parser', function() {
 
   describe('#parse()', function() {
     it('parses basic signatures', function() {
-      expect(Parser.parse('sample {command} {other} {foo}')).to.deep.equal({
+      expect(Parser.parse('sample [command] [other] [foo]')).to.deep.equal({
         identifier: 'sample',
         parameters: [
           {
@@ -48,7 +48,7 @@ describe('Parser', function() {
     });
 
     it('strips whitespace from command name and parameters', function() {
-      expect(Parser.parse('   white      {space}   {two}    ')).to.deep.equal({
+      expect(Parser.parse('   white      [space]   [two]    ')).to.deep.equal({
         identifier: 'white',
         parameters: [
           {
@@ -77,7 +77,7 @@ describe('Parser', function() {
         'Expected parameter definitions after command name',
       );
 
-      expect(() => Parser.parse('name and some values {with} {params}')).to.not.throw(
+      expect(() => Parser.parse('name and some values [with] [params]')).to.not.throw(
         CommandParserError,
         'Expected parameter definitions after command name',
       );
@@ -199,6 +199,11 @@ describe('Parser', function() {
         name: 'name',
         description: 'description',
       });
+
+      expect(Parser.parseParameter('name*=default1 default2:description with a : colon')).to.containSubset({
+        name: 'name',
+        description: 'description with a : colon',
+      });
     });
 
     it('parses variadic arguments', function() {
@@ -306,6 +311,13 @@ describe('Parser', function() {
       expect(Parser.parseParameter('num>>variable*:description')).to.containSubset({
         name: 'variable',
         description: 'description',
+        arity: Parser.TOKEN.ARITY.VARIADIC,
+        type: Parser.TOKEN.TYPE.NUMBER,
+      });
+
+      expect(Parser.parseParameter('num>>variable with >> *:description with >>')).to.containSubset({
+        name: 'variable with >>',
+        description: 'description with >>',
         arity: Parser.TOKEN.ARITY.VARIADIC,
         type: Parser.TOKEN.TYPE.NUMBER,
       });

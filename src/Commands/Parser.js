@@ -81,7 +81,7 @@ export default class Parser {
 
     if (partition.length > 1) {
       const parameterString = partition.slice(1).join(' ').trim();
-      const parameterRegex = /\{\s*(.*?)\s*\}/g;
+      const parameterRegex = /\[\s*(.*?)\s*\]/g;
       const matches = [];
       let match;
 
@@ -118,7 +118,7 @@ export default class Parser {
         if (previous.seen.parameterNames[token.name]) {
           throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
         } else if (token.arity === Parser.TOKEN.ARITY.VARIADIC && index < parameters.length - 1) {
-          throw new CommandParserError(`Parameter of type array can only appear at the end of the command signature. Given parameters: <{${parameters.join('} {')}}>.`);
+          throw new CommandParserError(`Parameter of type array can only appear at the end of the command signature. Given parameters: <[${parameters.join('] [')}]>.`);
         } else if (!token.optional && previous.seen.optional) {
           throw new CommandParserError(`Encountered required parameter after optional parameter: ${token.name}.`);
         }
@@ -176,7 +176,7 @@ export default class Parser {
       const type = typeAndSignature[0].toUpperCase().trim();
 
       if (!Parser.TOKEN.TYPE[type]) {
-        throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <{${parameter}}>.`);
+        throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <[${parameter}]>.`);
       }
 
       token.type = Parser.TOKEN.TYPE[type];
@@ -205,7 +205,7 @@ export default class Parser {
     if (token.defaultValue && token.type !== Parser.TOKEN.TYPE.STRING) {
       const typeValidator = (value) => {
         if (!Parser.TYPE_CHECKERS[token.type](value)) {
-          throw new CommandParserError(`Expected default value of type <${token.type}>, got <${typeof value}>. Given parameter: <{${parameter}}>.`);
+          throw new CommandParserError(`Expected default value of type <${token.type}>, got <${typeof value}>. Given parameter: <[${parameter}]>.`);
         }
 
         return value;
