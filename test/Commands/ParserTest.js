@@ -16,21 +16,24 @@ describe('Parser', function() {
           {
             name: 'command',
             description: null,
-            arity: Parser.TOKEN_ARITIES.UNARY,
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.STRING,
             optional: false,
             defaultValue: null,
           },
           {
             name: 'other',
             description: null,
-            arity: Parser.TOKEN_ARITIES.UNARY,
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.STRING,
             optional: false,
             defaultValue: null,
           },
           {
             name: 'foo',
             description: null,
-            arity: Parser.TOKEN_ARITIES.UNARY,
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.STRING,
             optional: false,
             defaultValue: null,
           },
@@ -51,14 +54,16 @@ describe('Parser', function() {
           {
             name: 'space',
             description: null,
-            arity: Parser.TOKEN_ARITIES.UNARY,
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.STRING,
             optional: false,
             defaultValue: null,
           },
           {
             name: 'two',
             description: null,
-            arity: Parser.TOKEN_ARITIES.UNARY,
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.STRING,
             optional: false,
             defaultValue: null,
           },
@@ -93,21 +98,24 @@ describe('Parser', function() {
         {
           name: 'name',
           description: 'description',
-          arity: Parser.TOKEN_ARITIES.UNARY,
+          arity: Parser.TOKEN.ARITY.UNARY,
+          type: Parser.TOKEN.TYPE.STRING,
           optional: false,
           defaultValue: null,
         },
         {
           name: 'argument',
           description: 'optional',
-          arity: Parser.TOKEN_ARITIES.UNARY,
+          arity: Parser.TOKEN.ARITY.UNARY,
+          type: Parser.TOKEN.TYPE.STRING,
           optional: true,
           defaultValue: null,
         },
         {
           name: 'array',
           description: 'description',
-          arity: Parser.TOKEN_ARITIES.VARIADIC,
+          arity: Parser.TOKEN.ARITY.VARIADIC,
+          type: Parser.TOKEN.TYPE.STRING,
           optional: true,
           defaultValue: null,
         },
@@ -154,7 +162,8 @@ describe('Parser', function() {
       expect(Parser.parseParameter('basic')).to.deep.equal({
         name: 'basic',
         description: null,
-        arity: Parser.TOKEN_ARITIES.UNARY,
+        arity: Parser.TOKEN.ARITY.UNARY,
+        type: Parser.TOKEN.TYPE.STRING,
         optional: false,
         defaultValue: null,
       });
@@ -195,7 +204,7 @@ describe('Parser', function() {
     it('parses variadic arguments', function() {
       expect(Parser.parseParameter('array*')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: false,
       });
     });
@@ -203,7 +212,7 @@ describe('Parser', function() {
     it('parses optional arguments', function() {
       expect(Parser.parseParameter('optional?')).to.containSubset({
         name: 'optional',
-        arity: Parser.TOKEN_ARITIES.UNARY,
+        arity: Parser.TOKEN.ARITY.UNARY,
         optional: true,
         defaultValue: null,
       });
@@ -212,7 +221,7 @@ describe('Parser', function() {
     it('parses optional variadic arguments', function() {
       expect(Parser.parseParameter('array*?')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: true,
         defaultValue: null,
       });
@@ -228,7 +237,7 @@ describe('Parser', function() {
     it('parses default variadic arguments', function() {
       expect(Parser.parseParameter('array*=one two three four')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: true,
         defaultValue: ['one', 'two', 'three', 'four'],
       });
@@ -253,17 +262,116 @@ describe('Parser', function() {
       });
     });
 
+    it('parses parameter types', function() {
+      expect(Parser.parseParameter('bool>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.BOOLEAN,
+      });
+
+      expect(Parser.parseParameter('boolean>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.BOOLEAN,
+      });
+
+      expect(Parser.parseParameter('integer>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.INTEGER,
+      });
+
+      expect(Parser.parseParameter('int>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.INTEGER,
+      });
+
+      expect(Parser.parseParameter('number>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.NUMBER,
+      });
+
+      expect(Parser.parseParameter('num>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.NUMBER,
+      });
+
+      expect(Parser.parseParameter('string>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.STRING,
+      });
+
+      expect(Parser.parseParameter('str>>variable')).to.containSubset({
+        name: 'variable',
+        type: Parser.TOKEN.TYPE.STRING,
+      });
+
+      expect(Parser.parseParameter('num>>variable*:description')).to.containSubset({
+        name: 'variable',
+        description: 'description',
+        arity: Parser.TOKEN.ARITY.VARIADIC,
+        type: Parser.TOKEN.TYPE.NUMBER,
+      });
+    });
+
+    it('parses typed default values', function() {
+      expect(Parser.parseParameter('bool>>name=true')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.BOOLEAN,
+        defaultValue: true,
+      });
+
+      expect(Parser.parseParameter('bool>>name=false')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.BOOLEAN,
+        defaultValue: false,
+      });
+
+      expect(Parser.parseParameter('int>>name=123')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.INTEGER,
+        defaultValue: 123,
+      });
+
+      expect(Parser.parseParameter('int>>name=123.555')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.INTEGER,
+        defaultValue: 123,
+      });
+
+      expect(Parser.parseParameter('num>>name=123.555')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.NUMBER,
+        defaultValue: 123.555,
+      });
+
+      expect(Parser.parseParameter('str>>name=false')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.STRING,
+        defaultValue: 'false',
+      });
+
+      expect(Parser.parseParameter('bool>>name*=true false "true" false')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.BOOLEAN,
+        defaultValue: [true, false, true, false],
+      });
+
+      expect(Parser.parseParameter('number>>name*=123 -233 -100.5 0 23.4')).to.containSubset({
+        name: 'name',
+        type: Parser.TOKEN.TYPE.NUMBER,
+        defaultValue: [123, -233, -100.5, 0, 23.4],
+      });
+    });
+
     it('strips redundant question marks', function() {
       expect(Parser.parseParameter('single?=true')).to.containSubset({
         name: 'single',
-        arity: Parser.TOKEN_ARITIES.UNARY,
+        arity: Parser.TOKEN.ARITY.UNARY,
         optional: true,
         defaultValue: 'true',
       });
 
       expect(Parser.parseParameter('array*???????=one two')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: true,
         defaultValue: ['one', 'two'],
       });
@@ -272,12 +380,12 @@ describe('Parser', function() {
     it('strips redundant asterisks', function() {
       expect(Parser.parseParameter('array********')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
       });
 
       expect(Parser.parseParameter('array****?')).to.containSubset({
         name: 'array',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: true,
       });
     });
@@ -298,10 +406,34 @@ describe('Parser', function() {
       expect(Parser.parseParameter('array   *  ? = someVal : desc')).to.containSubset({
         name: 'array',
         description: 'desc',
-        arity: Parser.TOKEN_ARITIES.VARIADIC,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
         optional: true,
         defaultValue: ['someVal'],
       });
+    });
+
+    it('disallows invalid parameter types', function() {
+      expect(() => (
+        Parser.parseParameter('func>>name')
+      )).to.throw(CommandParserError, 'not a valid parameter type');
+
+      expect(() => (
+        Parser.parseParameter('NUMB  >>  name ?: yeah it\'s me')
+      )).to.throw(CommandParserError, 'not a valid parameter type');
+    });
+
+    it('disallows invalid default value types', function() {
+      expect(() => (
+        Parser.parseParameter('int>>array* = hey not an integer 123 !'
+      ))).to.throw(CommandParserError, 'Expected default value of type <INTEGER>');
+
+      expect(() => (
+        Parser.parseParameter('bool>>single=default:description')
+      )).to.throw(CommandParserError, 'Expected default value of type <BOOLEAN>');
+
+      expect(() => (
+        Parser.parseParameter('bool>>single=true:description')
+      )).to.not.throw(CommandParserError, 'Expected default value of type <BOOLEAN>');
     });
   });
 });
