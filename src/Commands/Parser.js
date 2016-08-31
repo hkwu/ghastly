@@ -215,8 +215,8 @@ export default class Parser {
         token.defaultValue = Parser.TYPE_CONVERTERS[token.type](typeValidator(token.defaultValue));
       } else {
         token.defaultValue = token.defaultValue.map(value => (
-          Parser.TYPE_CONVERTERS[token.type](typeValidator(value)
-        )));
+          Parser.TYPE_CONVERTERS[token.type](typeValidator(value))
+        ));
       }
     }
 
