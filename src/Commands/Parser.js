@@ -145,13 +145,38 @@ export default class Parser {
   }
 
   /**
+   * Parses a token for optional and variadic flags.
+   * @param {String} token - The token to parse.
+   * @returns {Object} Object containing information on the parsed token.
+   */
+  static parseTokenModifiers(token) {
+    const properties = {};
+    let value = token.trim();
+
+    if (endsWith(token, '?')) {
+      properties.optional = true;
+      value = trimEnd(token, ' ?');
+    }
+
+    if (endsWith(value, '*')) {
+      properties.arity = Parser.TOKEN.ARITY.VARIADIC;
+      value = trimEnd(value, ' *');
+    }
+
+    return {
+      ...properties,
+      value,
+    };
+  }
+
+  /**
    * Parses a single command parameter.
    * @param {String} parameter - The parameter.
    * @returns {Object} Object containing data on the parsed parameter.
    * @throws {CommandParserError}
    */
   static parseParameter(parameter) {
-    const token = {
+    let token = {
       name: null,
       description: null,
       arity: Parser.TOKEN.ARITY.UNARY,
@@ -178,47 +203,26 @@ export default class Parser {
       token.optional = true;
     }
 
-    // if (endsWith(signature, '?')) {
-    //   token.optional = true;
-    //   signature = trimEnd(signature, ' ?');
-    // }
-    //
-    // if (endsWith(signature, '*')) {
-    //   token.arity = Parser.TOKEN.ARITY.VARIADIC;
-    //   token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
-    //   signature = trimEnd(signature, ' *');
-    // }
-
     const signatureAndType = signature.match(/(.+)<(.+)>/);
 
     if (signatureAndType) {
-      let type = signatureAndType[2].toUpperCase().trim();
-      token.optional = Parser.parseTokenIsOptional(type);
-
-      type = token.optional ? trimEnd(type, '?') : type;
-      token.arity = Parser.parseTokenArity(type);
-
-      if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
-        token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
-        type = trimEnd(type, ' *');
-      }
+      const modifiers = signatureAndType[2].toUpperCase().trim();
+      const { value: type, ...rest } = Parser.parseTokenModifiers(modifiers);
 
       if (!Parser.TOKEN.TYPE[type]) {
         throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <[${parameter}]>.`);
       }
 
-      token.type = Parser.TOKEN.TYPE[type];
+      token = { ...token, ...rest, type: Parser.TOKEN.TYPE[type] };
       signature = signatureAndType[1].trim();
     } else {
-      token.optional = Parser.parseTokenIsOptional(signature);
+      const { value, ...rest } = Parser.parseTokenModifiers(signature);
+      token = { ...token, ...rest };
+      signature = value;
+    }
 
-      signature = token.optional ? trimEnd(signature, '?') : signature;
-      token.arity = Parser.parseTokenArity(signature);
-
-      if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
-        token.defaultValue = token.defaultValue && stringArgv(token.defaultValue);
-        signature = trimEnd(signature, ' *');
-      }
+    if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
+      token.defaultValue = token.defaultValue ? stringArgv(token.defaultValue) : null;
     }
 
     if (token.defaultValue && token.type !== Parser.TOKEN.TYPE.STRING) {
@@ -242,13 +246,5 @@ export default class Parser {
     token.name = signature;
 
     return token;
-  }
-
-  static parseTokenArity(token) {
-    return endsWith(token, '*') ? Parser.TOKEN.ARITY.VARIADIC : Parser.TOKEN.ARITY.UNARY;
-  }
-
-  static parseTokenIsOptional(token) {
-    return endsWith(token, '?');
   }
 }

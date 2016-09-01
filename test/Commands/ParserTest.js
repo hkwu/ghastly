@@ -39,6 +39,20 @@ describe('Parser', function() {
           },
         ],
       });
+
+      expect(Parser.parse('!sample [param<num?>=123.5 : some description]')).to.deep.equal({
+        identifier: '!sample',
+        parameters: [
+          {
+            name: 'param',
+            description: 'some description',
+            arity: Parser.TOKEN.ARITY.UNARY,
+            type: Parser.TOKEN.TYPE.NUMBER,
+            optional: true,
+            defaultValue: 123.5,
+          },
+        ],
+      });
     });
 
     it('parses signatures without parameters', function() {
@@ -154,6 +168,43 @@ describe('Parser', function() {
         'optional?',
         'required',
       ])).to.throw(CommandParserError, 'required parameter after optional');
+    });
+  });
+
+  describe('#parseTokenModifiers()', function() {
+    it('parses basic tokens', function() {
+      expect(Parser.parseTokenModifiers('hello *?')).to.deep.equal({
+        optional: true,
+        arity: Parser.TOKEN.ARITY.VARIADIC,
+        value: 'hello',
+      });
+
+      expect(Parser.parseTokenModifiers('hello ?*')).to.deep.equal({
+        arity: Parser.TOKEN.ARITY.VARIADIC,
+        value: 'hello ?',
+      });
+    });
+
+    it('parses optional modifiers', function() {
+      expect(Parser.parseTokenModifiers('hello ??')).to.deep.equal({
+        optional: true,
+        value: 'hello',
+      });
+
+      expect(Parser.parseTokenModifiers('hello ?? momo')).to.deep.equal({
+        value: 'hello ?? momo',
+      });
+    });
+
+    it('parses variadic modifiers', function() {
+      expect(Parser.parseTokenModifiers('hello **')).to.deep.equal({
+        arity: Parser.TOKEN.ARITY.VARIADIC,
+        value: 'hello',
+      });
+
+      expect(Parser.parseTokenModifiers('hello ** momo')).to.deep.equal({
+        value: 'hello ** momo',
+      });
     });
   });
 
@@ -308,14 +359,14 @@ describe('Parser', function() {
         type: Parser.TOKEN.TYPE.STRING,
       });
 
-      expect(Parser.parseParameter('variable<num>*:description')).to.containSubset({
+      expect(Parser.parseParameter('variable<num*>:description')).to.containSubset({
         name: 'variable',
         description: 'description',
         arity: Parser.TOKEN.ARITY.VARIADIC,
         type: Parser.TOKEN.TYPE.NUMBER,
       });
 
-      expect(Parser.parseParameter('variable with <> <num> *:description with <>')).to.containSubset({
+      expect(Parser.parseParameter('variable with <> <num *>:description with <>')).to.containSubset({
         name: 'variable with <>',
         description: 'description with <>',
         arity: Parser.TOKEN.ARITY.VARIADIC,
@@ -360,13 +411,13 @@ describe('Parser', function() {
         defaultValue: 'false',
       });
 
-      expect(Parser.parseParameter('name<bool>*=true false "true" false')).to.containSubset({
+      expect(Parser.parseParameter('name<bool*>=true false "true" false')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.BOOLEAN,
         defaultValue: [true, false, true, false],
       });
 
-      expect(Parser.parseParameter('name<number>*=123 -233 -100.5 0 23.4')).to.containSubset({
+      expect(Parser.parseParameter('name<number*>=123 -233 -100.5 0 23.4')).to.containSubset({
         name: 'name',
         type: Parser.TOKEN.TYPE.NUMBER,
         defaultValue: [123, -233, -100.5, 0, 23.4],
@@ -430,13 +481,13 @@ describe('Parser', function() {
       )).to.throw(CommandParserError, 'not a valid parameter type');
 
       expect(() => (
-        Parser.parseParameter('name <NUMB> ?: yeah it\'s me')
+        Parser.parseParameter('name <NUMB ?>: yeah it\'s me')
       )).to.throw(CommandParserError, 'not a valid parameter type');
     });
 
     it('disallows invalid default value types', function() {
       expect(() => (
-        Parser.parseParameter('array<int>* = hey not an integer 123 !'
+        Parser.parseParameter('array<int* >= hey not an integer 123 !'
       ))).to.throw(CommandParserError, 'Expected default value <hey> to be of type <INTEGER>');
 
       expect(() => (
