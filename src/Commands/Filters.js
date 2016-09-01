@@ -85,30 +85,3 @@ export const roleIds = (filterValues, message) => {
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const userIds = (filterValues, message) => filterValues.length && !includes(filterValues, message.author.id);
-
-/**
- * Filters out commands based on the filters defined in a command.
- * @param {Object} filters - The object containing all of the filters for a command.
- * @param {Message} message - The message being tested.
- * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
- */
-export default (filters, message) => {
-  const mapFiltersToHandlers = {
-    permissions,
-    roleNames,
-    roleIds,
-    userIds,
-  };
-
-  let messageMatchesRequirements = true;
-
-  forOwn(mapFiltersToHandlers, (value, key) => {
-    if (value(filters[key], message)) {
-      messageMatchesRequirements = false;
-
-      return false;
-    }
-  });
-
-  return !messageMatchesRequirements;
-};
