@@ -8,16 +8,6 @@ import CommandParserError from '../Errors/CommandParserError';
  */
 export default class Parser {
   /**
-   * Constants for special tokens in command signatures.
-   * @type {Object}
-   * @const
-   */
-  static DELIMITERS = {
-    DESCRIPTION: ':',
-    PARAMETER_TYPE: '>>',
-  };
-
-  /**
    * Some constants for command arguments.
    * @type {Object}
    * @const
@@ -42,6 +32,7 @@ export default class Parser {
   /**
    * Maps parameter types to type checking functions.
    * @type {Object}
+   * @const
    */
   static TYPE_CHECKERS = {
     [Parser.TOKEN.TYPE.BOOLEAN]: (value) => {
@@ -56,6 +47,7 @@ export default class Parser {
   /**
    * Maps parameter types to type conversion functions.
    * @type {Object}
+   * @const
    */
   static TYPE_CONVERTERS = {
     [Parser.TOKEN.TYPE.BOOLEAN]: value => value === 'true',
@@ -186,7 +178,7 @@ export default class Parser {
     };
 
     let signature;
-    const signatureAndDescription = parameter.match(`(.+?)${Parser.DELIMITERS.DESCRIPTION}(.+)`);
+    const signatureAndDescription = parameter.match(`(.+?):(.+)`);
 
     if (signatureAndDescription) {
       signature = signatureAndDescription[1].trim();
