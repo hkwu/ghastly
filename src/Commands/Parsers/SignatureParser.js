@@ -1,60 +1,12 @@
 import stringArgv from 'string-argv';
-import { isNumber, toInteger, toNumber } from 'lodash/lang';
 import { endsWith, trimEnd } from 'lodash/string';
-import CommandParserError from '../Errors/CommandParserError';
+import CommandParserError from '../../Errors/CommandParserError';
+import * as Constants from './Constants';
 
 /**
  * Parses the signature of a command.
  */
-export default class Parser {
-  /**
-   * Some constants for command arguments.
-   * @type {Object}
-   * @const
-   */
-  static TOKEN = {
-    ARITY: {
-      UNARY: 'UNARY',
-      VARIADIC: 'VARIADIC',
-    },
-    TYPE: {
-      BOOLEAN: 'BOOLEAN',
-      BOOL: 'BOOLEAN',
-      INTEGER: 'INTEGER',
-      INT: 'INTEGER',
-      NUMBER: 'NUMBER',
-      NUM: 'NUMBER',
-      STRING: 'STRING',
-      STR: 'STRING',
-    },
-  };
-
-  /**
-   * Maps parameter types to type checking functions.
-   * @type {Object}
-   * @const
-   */
-  static TYPE_CHECKERS = {
-    [Parser.TOKEN.TYPE.BOOLEAN]: (value) => {
-      const lower = value.toLowerCase();
-
-      return lower === 'true' || lower === 'false';
-    },
-    [Parser.TOKEN.TYPE.INTEGER]: (value) => !isNaN(value) && isNumber(+value),
-    [Parser.TOKEN.TYPE.NUMBER]: (value) => !isNaN(value) && isNumber(+value),
-  };
-
-  /**
-   * Maps parameter types to type conversion functions.
-   * @type {Object}
-   * @const
-   */
-  static TYPE_CONVERTERS = {
-    [Parser.TOKEN.TYPE.BOOLEAN]: value => value === 'true',
-    [Parser.TOKEN.TYPE.INTEGER]: toInteger,
-    [Parser.TOKEN.TYPE.NUMBER]: toNumber,
-  };
-
+export default class SignatureParser {
   /**
    * Parses a given command signature.
    * @param {String} signature - The command signature.
@@ -87,7 +39,7 @@ export default class Parser {
 
       return {
         identifier,
-        parameters: Parser.parseParameters(matches),
+        parameters: SignatureParser.parseParameters(matches),
       };
     }
 
@@ -105,11 +57,11 @@ export default class Parser {
   static parseParameters(parameters) {
     return parameters.reduce(
       (previous, current, index) => {
-        const token = Parser.parseParameter(current);
+        const token = SignatureParser.parseParameter(current);
 
         if (previous.seen.parameterNames[token.name]) {
           throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
-        } else if (token.arity === Parser.TOKEN.ARITY.VARIADIC && index < parameters.length - 1) {
+        } else if (token.arity === Constants.TOKEN.ARITY.VARIADIC && index < parameters.length - 1) {
           throw new CommandParserError(`Parameter of type array can only appear at the end of the command signature. Given parameters: <[${parameters.join('] [')}]>.`);
         } else if (!token.optional && previous.seen.optional) {
           throw new CommandParserError(`Encountered required parameter after optional parameter: ${token.name}.`);
@@ -151,7 +103,7 @@ export default class Parser {
     }
 
     if (endsWith(value, '*')) {
-      properties.arity = Parser.TOKEN.ARITY.VARIADIC;
+      properties.arity = Constants.TOKEN.ARITY.VARIADIC;
       value = trimEnd(value, ' *');
     }
 
@@ -171,8 +123,8 @@ export default class Parser {
     let token = {
       name: null,
       description: null,
-      arity: Parser.TOKEN.ARITY.UNARY,
-      type: Parser.TOKEN.TYPE.STRING,
+      arity: Constants.TOKEN.ARITY.UNARY,
+      type: Constants.TOKEN.TYPE.STRING,
       optional: false,
       defaultValue: null,
     };
@@ -199,38 +151,38 @@ export default class Parser {
 
     if (signatureAndType) {
       const modifiers = signatureAndType[2].toUpperCase().trim();
-      const { value: type, ...rest } = Parser.parseTokenModifiers(modifiers);
+      const { value: type, ...rest } = SignatureParser.parseTokenModifiers(modifiers);
 
-      if (!Parser.TOKEN.TYPE[type]) {
+      if (!Constants.TOKEN.TYPE[type]) {
         throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <[${parameter}]>.`);
       }
 
-      token = { ...token, ...rest, type: Parser.TOKEN.TYPE[type] };
+      token = { ...token, ...rest, type: Constants.TOKEN.TYPE[type] };
       signature = signatureAndType[1].trim();
     } else {
-      const { value, ...rest } = Parser.parseTokenModifiers(signature);
+      const { value, ...rest } = SignatureParser.parseTokenModifiers(signature);
       token = { ...token, ...rest };
       signature = value;
     }
 
-    if (token.arity === Parser.TOKEN.ARITY.VARIADIC) {
+    if (token.arity === Constants.TOKEN.ARITY.VARIADIC) {
       token.defaultValue = token.defaultValue ? stringArgv(token.defaultValue) : null;
     }
 
-    if (token.defaultValue && token.type !== Parser.TOKEN.TYPE.STRING) {
+    if (token.defaultValue && token.type !== Constants.TOKEN.TYPE.STRING) {
       const typeValidator = (value) => {
-        if (!Parser.TYPE_CHECKERS[token.type](value)) {
+        if (!Constants.TYPE_CHECKERS[token.type](value)) {
           throw new CommandParserError(`Expected default value <${value}> to be of type <${token.type}>. Given parameter: <[${parameter}]>.`);
         }
 
         return value;
       };
 
-      if (token.arity === Parser.TOKEN.ARITY.UNARY) {
-        token.defaultValue = Parser.TYPE_CONVERTERS[token.type](typeValidator(token.defaultValue));
+      if (token.arity === Constants.TOKEN.ARITY.UNARY) {
+        token.defaultValue = Constants.TYPE_CONVERTERS[token.type](typeValidator(token.defaultValue));
       } else {
         token.defaultValue = token.defaultValue.map(value => (
-          Parser.TYPE_CONVERTERS[token.type](typeValidator(value))
+          Constants.TYPE_CONVERTERS[token.type](typeValidator(value))
         ));
       }
     }
