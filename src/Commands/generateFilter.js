@@ -1,7 +1,3 @@
-/**
- * Created by kwu on 9/1/2016.
- */
-
 import { forOwn } from 'lodash/object';
 
 /**
