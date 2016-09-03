@@ -33,8 +33,8 @@ export const TYPE_CHECKERS = {
 
     return lower === 'true' || lower === 'false';
   },
-  [TOKEN.TYPE.INTEGER]: (value) => !isNaN(value) && isNumber(+value),
-  [TOKEN.TYPE.NUMBER]: (value) => !isNaN(value) && isNumber(+value),
+  [TOKEN.TYPE.INTEGER]: value => !isNaN(value) && isNumber(+value),
+  [TOKEN.TYPE.NUMBER]: value => !isNaN(value) && isNumber(+value),
 };
 
 /**

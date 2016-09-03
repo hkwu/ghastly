@@ -132,7 +132,7 @@ describe('SignatureParser', function() {
           arity: TOKEN.ARITY.VARIADIC,
           type: TOKEN.TYPE.STRING,
           optional: true,
-          defaultValue: null,
+          defaultValue: [],
         },
       ]);
     });
@@ -280,7 +280,7 @@ describe('SignatureParser', function() {
         name: 'array',
         arity: TOKEN.ARITY.VARIADIC,
         optional: true,
-        defaultValue: null,
+        defaultValue: [],
       });
     });
 

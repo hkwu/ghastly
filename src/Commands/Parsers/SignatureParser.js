@@ -166,7 +166,7 @@ export default class SignatureParser {
     }
 
     if (token.arity === Constants.TOKEN.ARITY.VARIADIC) {
-      token.defaultValue = token.defaultValue ? stringArgv(token.defaultValue) : null;
+      token.defaultValue = token.defaultValue ? stringArgv(token.defaultValue) : [];
     }
 
     if (token.defaultValue && token.type !== Constants.TOKEN.TYPE.STRING) {
