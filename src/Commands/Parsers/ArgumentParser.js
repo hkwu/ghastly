@@ -20,7 +20,7 @@ export default class ArgumentParser {
       const rule = rules[i];
 
       if (!rule.optional && args[i] === undefined) {
-        throw new ArgumentParserError();
+        throw new ArgumentParserError(`Missing a value for required argument: <${rule.name}>.`);
       }
 
       if (rule.arity === Constants.TOKEN.ARITY.VARIADIC) {
@@ -36,17 +36,12 @@ export default class ArgumentParser {
           parsed[rule.name].push(ArgumentParser.normalizeArgumentType(rule.type, args[j]));
         }
 
-        if (!rule.optional && !parsed[rule.name].length) {
-          throw new ArgumentParserError();
-        }
-
         return parsed;
       }
 
-      const argument = args[i];
-      parsed[rule.name] = argument === undefined
+      parsed[rule.name] = args[i] === undefined
         ? rule.defaultValue
-        : ArgumentParser.normalizeArgumentType(rule.type, argument);
+        : ArgumentParser.normalizeArgumentType(rule.type, args[i]);
     }
 
     return parsed;

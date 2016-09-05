@@ -1,10 +1,8 @@
-import chai, { expect } from 'chai';
-import chaiSubset from 'chai-subset';
+import { expect } from 'chai';
 import stringArgv from 'string-argv';
 import ArgumentParser from '../../../src/Commands/Parsers/ArgumentParser';
 import ArgumentParserError from '../../../src/Errors/ArgumentParserError';
 import SignatureParser from '../../../src/Commands/Parsers/SignatureParser';
-import CommandParserError from '../../../src/Errors/CommandParserError';
 import { TOKEN } from '../../../src/Commands/Parsers/Constants';
 
 describe('ArgumentParser', function() {
@@ -75,6 +73,22 @@ describe('ArgumentParser', function() {
         bar: false,
         baz: [0],
       });
+    });
+
+    it('disallows missing required arguments', function() {
+      let rules = SignatureParser.parse('!cmd [foo] [bar]').parameters;
+      expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
+        ArgumentParserError,
+        'required argument: <bar>.',
+      );
+
+      expect(() => ArgumentParser.parse(rules, stringArgv('foo bar'))).to.not.throw(ArgumentParserError);
+
+      rules = SignatureParser.parse('!cmd [foo] [bar*]').parameters;
+      expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
+        ArgumentParserError,
+        'required argument: <bar>.',
+      );
     });
 
     it('disallows invalid argument types', function() {
