@@ -2,7 +2,7 @@ import BaseResolver from './BaseResolver';
 
 /**
  * Options resolver for Event class.
- * @extends {BaseResolver}
+ * @extends BaseResolver
  */
 export default class EventResolver extends BaseResolver {
   constructor() {

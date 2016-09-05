@@ -3,7 +3,7 @@ import BaseResolver from './BaseResolver';
 
 /**
  * Options resolver for command classes.
- * @extends {BaseResolver}
+ * @extends BaseResolver
  */
 export default class CommandResolver extends BaseResolver {
   constructor() {

@@ -3,8 +3,8 @@ import Event from './Event';
 /**
  * @extends Event
  */
-export default class VoiceLeaveEvent extends Event {
+export default class ChannelUpdateEvent extends Event {
   static get type() {
-    return 'voiceLeave';
+    return 'channelUpdate';
   }
 }

@@ -3,8 +3,8 @@ import Event from './Event';
 /**
  * @extends Event
  */
-export default class VoiceSwitchEvent extends Event {
+export default class TypingStartEvent extends Event {
   static get type() {
-    return 'voiceSwitch';
+    return 'typingStart';
   }
 }

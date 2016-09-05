@@ -2,7 +2,7 @@ import Middleware from '../Middleware';
 
 /**
  * Middleware for handling commands received in messages.
- * @extends {Middleware}
+ * @extends Middleware
  */
 export default class CommandMiddleware extends Middleware {
   constructor(commands = []) {

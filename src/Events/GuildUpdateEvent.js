@@ -3,8 +3,8 @@ import Event from './Event';
 /**
  * @extends Event
  */
-export default class RawEvent extends Event {
+export default class GuildUpdateEvent extends Event {
   static get type() {
-    return 'raw';
+    return 'guildUpdate';
   }
 }
