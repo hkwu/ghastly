@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 import SignatureParser from '../../../src/Commands/Parsers/SignatureParser';
-import CommandParserError from '../../../src/Errors/CommandParserError';
+import SignatureParserError from '../../../src/Errors/SignatureParserError';
 import { TOKEN } from '../../../src/Commands/Parsers/Constants';
 
 describe('SignatureParser', function() {
@@ -88,18 +88,18 @@ describe('SignatureParser', function() {
 
     it('requires parameter values if text follows the command name', function() {
       expect(() => SignatureParser.parse('name and some values that shouldn\'t be here')).to.throw(
-        CommandParserError,
+        SignatureParserError,
         'Expected parameter definitions after command name',
       );
 
       expect(() => SignatureParser.parse('name and some values [with] [params]')).to.not.throw(
-        CommandParserError,
+        SignatureParserError,
         'Expected parameter definitions after command name',
       );
     });
 
     it('disallows empty signatures', function() {
-      expect(() => SignatureParser.parse('')).to.throw(CommandParserError, 'Signature cannot be empty');
+      expect(() => SignatureParser.parse('')).to.throw(SignatureParserError, 'Signature cannot be empty');
     });
   });
 
@@ -142,14 +142,14 @@ describe('SignatureParser', function() {
         'duplicate',
         'duplicate*?',
         'duplicate?',
-      ])).to.throw(CommandParserError, 'duplicate parameter names');
+      ])).to.throw(SignatureParserError, 'duplicate parameter names');
 
       expect(() => SignatureParser.parseParameters([
         'origin:terrace',
         'duplicate',
         'origin:super',
         'duplicate*:some',
-      ])).to.throw(CommandParserError, 'duplicate parameter names');
+      ])).to.throw(SignatureParserError, 'duplicate parameter names');
     });
 
     it('disallows variadic parameters except as the last parameter', function() {
@@ -157,18 +157,21 @@ describe('SignatureParser', function() {
         'single:description',
         'array*:should not be here',
         'singleTwo:description',
-      ])).to.throw(CommandParserError, 'array can only appear at the end');
+      ])).to.throw(
+        SignatureParserError,
+        'Variable length parameters can only appear at the end of the command signature.',
+      );
 
       expect(() => SignatureParser.parseParameters([
         'array*:should not be here',
-      ])).to.not.throw(CommandParserError);
+      ])).to.not.throw(SignatureParserError);
     });
 
     it('disallows required parameters after optional parameters', function() {
       expect(() => SignatureParser.parseParameters([
         'optional?',
         'required',
-      ])).to.throw(CommandParserError, 'required parameter after optional');
+      ])).to.throw(SignatureParserError, 'required parameter after optional');
     });
   });
 
@@ -479,25 +482,25 @@ describe('SignatureParser', function() {
     it('disallows invalid parameter types', function() {
       expect(() => (
         SignatureParser.parseParameter('name<func>')
-      )).to.throw(CommandParserError, 'not a valid parameter type');
+      )).to.throw(SignatureParserError, 'not a valid parameter type');
 
       expect(() => (
         SignatureParser.parseParameter('name <NUMB ?>: yeah it\'s me')
-      )).to.throw(CommandParserError, 'not a valid parameter type');
+      )).to.throw(SignatureParserError, 'not a valid parameter type');
     });
 
     it('disallows invalid default value types', function() {
       expect(() => (
         SignatureParser.parseParameter('array<int* >= hey not an integer 123 !'
-      ))).to.throw(CommandParserError, 'Expected default value <hey> to be of type <INTEGER>');
+      ))).to.throw(SignatureParserError, 'Expected default value <hey> to be of type <INTEGER>');
 
       expect(() => (
         SignatureParser.parseParameter('single<bool>=default:description')
-      )).to.throw(CommandParserError, 'Expected default value <default> to be of type <BOOLEAN>');
+      )).to.throw(SignatureParserError, 'Expected default value <default> to be of type <BOOLEAN>');
 
       expect(() => (
         SignatureParser.parseParameter('single<bool>=true:description')
-      )).to.not.throw(CommandParserError, 'Expected default value <true> to be of type <BOOLEAN>');
+      )).to.not.throw(SignatureParserError, 'Expected default value <true> to be of type <BOOLEAN>');
     });
   });
 });

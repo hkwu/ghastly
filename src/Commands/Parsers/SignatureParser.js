@@ -1,6 +1,6 @@
 import stringArgv from 'string-argv';
 import { endsWith, trimEnd } from 'lodash/string';
-import CommandParserError from '../../Errors/CommandParserError';
+import SignatureParserError from '../../Errors/SignatureParserError';
 import * as Constants from './Constants';
 
 /**
@@ -11,13 +11,13 @@ export default class SignatureParser {
    * Parses a given command signature.
    * @param {String} signature - The command signature.
    * @returns {Object} Object containing data on the command signature.
-   * @throws {CommandParserError}
+   * @throws {SignatureParserError}
    */
   static parse(signature) {
     const trimmed = signature.trim();
 
     if (!trimmed) {
-      throw new CommandParserError('Signature cannot be empty.');
+      throw new SignatureParserError('Signature cannot be empty.');
     }
 
     const partition = trimmed.split(' ');
@@ -34,7 +34,7 @@ export default class SignatureParser {
       }
 
       if (parameterString && !matches.length) {
-        throw new CommandParserError(`Expected parameter definitions after command name but found none. Given signature: <${signature}>.`);
+        throw new SignatureParserError(`Expected parameter definitions after command name but found none. Given signature: <${signature}>.`);
       }
 
       return {
@@ -52,7 +52,7 @@ export default class SignatureParser {
    * Parses the parameters in a command signature.
    * @param {Array.<String>} parameters - Array of parameters parsed from the signature.
    * @returns {Array.<Object>} Array containing data on the parsed parameters.
-   * @throws {CommandParserError}
+   * @throws {SignatureParserError}
    */
   static parseParameters(parameters) {
     return parameters.reduce(
@@ -60,11 +60,11 @@ export default class SignatureParser {
         const token = SignatureParser.parseParameter(current);
 
         if (previous.seen.parameterNames[token.name]) {
-          throw new CommandParserError(`Encountered duplicate parameter names: ${token.name}.`);
+          throw new SignatureParserError(`Encountered duplicate parameter names: <${token.name}>.`);
         } else if (token.arity === Constants.TOKEN.ARITY.VARIADIC && index < parameters.length - 1) {
-          throw new CommandParserError(`Parameter of type array can only appear at the end of the command signature. Given parameters: <[${parameters.join('] [')}]>.`);
+          throw new SignatureParserError(`Variable length parameters can only appear at the end of the command signature. Given parameters: <[${parameters.join('] [')}]>.`);
         } else if (!token.optional && previous.seen.optional) {
-          throw new CommandParserError(`Encountered required parameter after optional parameter: ${token.name}.`);
+          throw new SignatureParserError(`Encountered required parameter after optional parameter: <${token.name}>.`);
         }
 
         return {
@@ -117,7 +117,7 @@ export default class SignatureParser {
    * Parses a single command parameter.
    * @param {String} parameter - The parameter.
    * @returns {Object} Object containing data on the parsed parameter.
-   * @throws {CommandParserError}
+   * @throws {SignatureParserError}
    */
   static parseParameter(parameter) {
     let token = {
@@ -130,7 +130,7 @@ export default class SignatureParser {
     };
 
     let signature;
-    const signatureAndDescription = parameter.match(`(.+?):(.+)`);
+    const signatureAndDescription = parameter.match('(.+?):(.+)');
 
     if (signatureAndDescription) {
       signature = signatureAndDescription[1].trim();
@@ -154,7 +154,7 @@ export default class SignatureParser {
       const { value: type, ...rest } = SignatureParser.parseTokenModifiers(modifiers);
 
       if (!Constants.TOKEN.TYPE[type]) {
-        throw new CommandParserError(`${type} is not a valid parameter type. Given parameter: <[${parameter}]>.`);
+        throw new SignatureParserError(`<${type}> is not a valid parameter type. Given parameter: <[${parameter}]>.`);
       }
 
       token = { ...token, ...rest, type: Constants.TOKEN.TYPE[type] };
@@ -172,7 +172,7 @@ export default class SignatureParser {
     if (token.defaultValue && token.type !== Constants.TOKEN.TYPE.STRING) {
       const typeValidator = (value) => {
         if (!Constants.TYPE_CHECKERS[token.type](value)) {
-          throw new CommandParserError(`Expected default value <${value}> to be of type <${token.type}>. Given parameter: <[${parameter}]>.`);
+          throw new SignatureParserError(`Expected default value <${value}> to be of type <${token.type}>. Given parameter: <[${parameter}]>.`);
         }
 
         return value;
