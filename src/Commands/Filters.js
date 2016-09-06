@@ -8,9 +8,9 @@ import { forOwn } from 'lodash/object';
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const permissions = (filterValues, message) => {
-  const channelPermissions = message.channel.isPrivate
+  const channelPermissions = message.channel.type === 'text' || message.channel.type === 'voice'
     ? null
-    : message.channel.permissionsOf(message.author).serialize();
+    : message.channel.permissionsFor(message.author).serialize();
 
   if (channelPermissions) {
     let permissionsMatchRequirements = true;
@@ -39,14 +39,14 @@ export const permissions = (filterValues, message) => {
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const roleNames = (filterValues, message) => {
-  if (!message.server) {
+  if (!message.guild || (message.guild && !message.guild.available)) {
     return false;
   }
 
   const userRoleNameIndex = keyBy(filterValues);
-  const userRoles = message.server.rolesOfUser(message.author);
+  const userRoles = message.guild.members.find('id', message.author.id).roles;
 
-  for (const role of userRoles) {
+  for (const [roleId, role] of userRoles) {
     if (userRoleNameIndex[role.name]) {
       return false;
     }
@@ -62,15 +62,15 @@ export const roleNames = (filterValues, message) => {
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const roleIds = (filterValues, message) => {
-  if (!message.server) {
+  if (!message.guild || (message.guild && !message.guild.available)) {
     return false;
   }
 
   const userRoleIdIndex = keyBy(filterValues);
-  const userRoles = message.server.rolesOfUser(message.author);
+  const userRoles = message.guild.members.find('id', message.author.id).roles;
 
-  for (const role of userRoles) {
-    if (userRoleIdIndex[role.id]) {
+  for (const [roleId, role] of userRoles) {
+    if (userRoleIdIndex[roleId]) {
       return false;
     }
   }
