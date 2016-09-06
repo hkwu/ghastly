@@ -9,15 +9,15 @@ import { forOwn } from 'lodash/object';
  */
 export const permissions = (filterValues, message) => {
   const channelPermissions = message.channel.type === 'text' || message.channel.type === 'voice'
-    ? null
-    : message.channel.permissionsFor(message.author).serialize();
+    ? message.channel.permissionsFor(message.author)
+    : null;
 
   if (channelPermissions) {
     let permissionsMatchRequirements = true;
 
     forOwn(filterValues, (value, key) => {
       // the values of the permissions in the filter object and the channel permissions object must match
-      if ((value && !channelPermissions[key]) || (!value && channelPermissions[key])) {
+      if ((value && !channelPermissions.hasPermission(key)) || (!value && channelPermissions.hasPermission(key))) {
         permissionsMatchRequirements = false;
 
         return false;
@@ -44,7 +44,7 @@ export const roleNames = (filterValues, message) => {
   }
 
   const userRoleNameIndex = keyBy(filterValues);
-  const userRoles = message.guild.members.find('id', message.author.id).roles;
+  const userRoles = message.guild.members.get(message.author.id).roles;
 
   for (const [roleId, role] of userRoles) {
     if (userRoleNameIndex[role.name]) {
@@ -67,7 +67,7 @@ export const roleIds = (filterValues, message) => {
   }
 
   const userRoleIdIndex = keyBy(filterValues);
-  const userRoles = message.guild.members.find('id', message.author.id).roles;
+  const userRoles = message.guild.members.get(message.author.id).roles;
 
   for (const [roleId, role] of userRoles) {
     if (userRoleIdIndex[roleId]) {
