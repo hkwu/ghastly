@@ -1,5 +1,4 @@
 import { includes, keyBy } from 'lodash/collection';
-import { forOwn } from 'lodash/object';
 
 /**
  * Filters out commands based on user permissions.
@@ -15,14 +14,17 @@ export const permissions = (filterValues, message) => {
   if (channelPermissions) {
     let permissionsMatchRequirements = true;
 
-    forOwn(filterValues, (value, key) => {
+    for (const permission of Object.keys(filterValues)) {
       // the values of the permissions in the filter object and the channel permissions object must match
-      if ((value && !channelPermissions.hasPermission(key)) || (!value && channelPermissions.hasPermission(key))) {
+      const permissionRequired = filterValues[permission];
+      const hasPermission = channelPermissions.hasPermission(permission);
+
+      if ((permissionRequired && !hasPermission) || (!permissionRequired && hasPermission)) {
         permissionsMatchRequirements = false;
 
-        return false;
+        break;
       }
-    });
+    }
 
     if (!permissionsMatchRequirements) {
       return true;
