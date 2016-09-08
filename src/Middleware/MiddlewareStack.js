@@ -34,7 +34,7 @@ export default class MiddlewareStack {
 
   /**
    * Passes values through the middleware stack for processing.
-   * @param {Client} client - The Discord client.
+   * @param {Client} client - The Ghastly client.
    * @param {*} data - Data to be processed.
    * @returns {*}
    */
