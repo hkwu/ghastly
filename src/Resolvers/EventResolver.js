@@ -8,8 +8,8 @@ export default class EventResolver extends BaseResolver {
   constructor() {
     super();
 
-    this._resolver.setDefined([
-      'middleware',
-    ]).setAllowedTypes('middleware', 'array');
+    this._resolver.setDefaults({
+      middleware: [],
+    }).setAllowedTypes('middleware', 'array');
   }
 }

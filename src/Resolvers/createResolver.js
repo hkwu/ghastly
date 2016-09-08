@@ -347,7 +347,7 @@ export default function createResolver() {
       let valid = false;
 
       for (const allowedType of clone.allowedTypes[option]) {
-        const functionName = 'is' + allowedType.charAt(0).toUpperCase() + allowedType.substr(1).toLowerCase();
+        const functionName = 'is' + allowedType.charAt(0).toUpperCase() + allowedType.substr(1);
         if (lang.hasOwnProperty(functionName)) {
           if (lang[functionName](value)) {
             valid = true;

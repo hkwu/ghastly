@@ -45,6 +45,7 @@ export default class SignatureParser {
 
     return {
       identifier,
+      parameters: [],
     };
   }
 

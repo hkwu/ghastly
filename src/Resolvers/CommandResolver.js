@@ -1,5 +1,5 @@
-import createResolver from './createResolver';
 import BaseResolver from './BaseResolver';
+import createResolver from './createResolver';
 
 /**
  * Options resolver for command classes.
@@ -10,45 +10,34 @@ export default class CommandResolver extends BaseResolver {
     super();
 
     this._resolver.setRequired([
-      'name',
-      'action',
+      'signature',
+      'handle',
     ]).setDefaults({
-      prefix: '',
-      aliases: [],
       description: 'No description set for this command.',
-      usage: 'No usage information for this command.',
-    }).setDefined('filters')
-      .setAllowedTypes('name', 'string')
-      .setAllowedTypes('action', 'function')
-      .setAllowedTypes('prefix', 'string')
-      .setAllowedTypes('aliases', 'array')
+      filters: {},
+    }).setAllowedTypes('signature', 'string')
+      .setAllowedTypes('handle', 'function')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
-      .setAllowedTypes('usage', 'string')
-      .setAllowedValues('name', value => value && !/\s/.test(value))
-      .setAllowedValues('prefix', value => !/\s/.test(value));
-  }
+      .setAllowedValues('filters', (value) => {
+        const filtersResolver = createResolver();
+        filtersResolver.setDefaults({
+          permissions: {},
+          roleNames: [],
+          roleIds: [],
+          userIds: [],
+        }).setAllowedTypes('permissions', ['string', 'plainObject'])
+          .setAllowedTypes('roleNames', 'array')
+          .setAllowedTypes('roleIds', 'array')
+          .setAllowedTypes('userIds', 'array');
 
-  /**
-   * @inheritDoc
-   */
-  resolve(options = {}) {
-    const resolvedOptions = super.resolve(options);
+        try {
+          filtersResolver.resolve(value, false);
 
-    // resolve the restrictions object
-    const filterResolver = createResolver();
-    filterResolver.setDefaults({
-      permissions: {},
-      roleNames: [],
-      roleIds: [],
-      userIds: [],
-    }).setAllowedTypes('permissions', ['string', 'plainObject'])
-      .setAllowedTypes('roleNames', 'array')
-      .setAllowedTypes('roleIds', 'array')
-      .setAllowedTypes('userIds', 'array');
-
-    resolvedOptions.filters = filterResolver.resolve(resolvedOptions.filters, false);
-
-    return resolvedOptions;
+          return true;
+        } catch (error) {
+          return false;
+        }
+      });
   }
 }

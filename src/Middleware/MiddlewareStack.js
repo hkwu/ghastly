@@ -51,7 +51,7 @@ export default class MiddlewareStack {
   _generateMiddlewareProcess(action) {
     return this._stack.reduceRight(
       (previous, current) => (client, ...data) => current.handle(previous, client, ...data),
-      (client, ...data) => action(client, ...data)
+      (client, ...data) => action(client, ...data),
     );
   }
 
@@ -61,7 +61,7 @@ export default class MiddlewareStack {
    */
   _regenerateMiddlewareProcess() {
     this._middlewareProcess = this._generateMiddlewareProcess(
-      this._handler.action.bind(this._handler)
+      this._handler.action.bind(this._handler),
     );
   }
 }

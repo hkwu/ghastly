@@ -1,4 +1,6 @@
+import { isEmpty } from 'lodash/lang';
 import CommandResolver from '../Resolvers/CommandResolver';
+import SignatureParser from './Parsers/SignatureParser';
 import generateFilter from './generateFilter';
 import { permissions, roleNames, roleIds, userIds } from './Filters';
 
@@ -15,6 +17,8 @@ export default class Command {
       roleIds,
       userIds,
     });
+
+    ({ identifier: this.identifier, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 
   /**
@@ -28,15 +32,15 @@ export default class Command {
   /**
    * Calls the predefined action method of this command on the given message.
    * @param {Message} message - Message object containing the command.
-   * @param {String} messageContent - Content of message, stripped of the prefix and command.
+   * @param {Object} args - Arguments extracted from the command message.
    * @returns {*}
    */
-  handle(message, messageContent) {
+  handle(message, args) {
     if (this._isFilterable(message)) {
-      return;
+      return false;
     }
 
-    return this._resolvedStructure.action(message, messageContent);
+    return this._resolvedStructure.handle(message, args);
   }
 
   /**
@@ -46,8 +50,8 @@ export default class Command {
    * @private
    */
   _isFilterable(message) {
-    return this._resolvedStructure.filters
-      ? this._filter(this._resolvedStructure.filters, message)
-      : false;
+    return isEmpty(this._resolvedStructure.filters)
+      ? false
+      : this._filter(this._resolvedStructure.filters, message);
   }
 }
