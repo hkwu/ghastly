@@ -10,7 +10,7 @@ import MessageEvent from '../Events/MessageEvent';
 export default class CommandHandler extends MessageEvent {
   /**
    * Constructor.
-   * @param {Client} client - The Discord client.
+   * @param {Client} client - The Ghastly client.
    * @param {Object} [options={}] - Options for configuring the handler.
    */
   constructor(client, options = {}) {

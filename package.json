@@ -1,11 +1,33 @@
 {
-  "name": "discord-bot-framework",
+  "name": "ghastly",
   "version": "1.0.0",
-  "description": "Framework using Discord.js.",
+  "description": "A plugin library that helps to modularize applications built with Discord.js.",
+  "keywords": [
+    "discord.js",
+    "library",
+    "plugin",
+    "bot"
+  ],
+  "homepage": "https://github.com/hkwu/ghastly#readme",
+  "bugs": {
+    "url": "https://github.com/hkwu/ghastly/issues"
+  },
+  "license": "MIT",
+  "author": "Kelvin Wu <kelvinwu1996@gmail.com>",
   "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkwu/ghastly.git"
+  },
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "watch": "babel --watch src --out-dir lib",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "test": "mocha --require babel-register --recursive"
+  },
   "dependencies": {
     "babel-runtime": "^6.11.6",
-    "discord.js": "^9.0.0",
     "es6-error": "^3.0.1",
     "lodash": "^4.15.0",
     "string-argv": "0.0.2"
@@ -27,24 +49,10 @@
     "eslint-plugin-react": "^6.0.0",
     "mocha": "^3.0.2"
   },
-  "scripts": {
-    "build": "babel src --out-dir lib",
-    "watch": "babel --watch src --out-dir lib",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "test": "mocha --require babel-register --recursive"
+  "peerDependencies": {
+    "discord.js": "^9.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hkwu/discord-bot-framework.git"
-  },
-  "author": {
-    "name": "Kelvin Wu",
-    "email": "kelvinwu1996@gmail.com"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/hkwu/discord-bot-framework/issues"
-  },
-  "homepage": "https://github.com/hkwu/discord-bot-framework#readme"
+  "engines": {
+    "node": ">=6.0.0"
+  }
 }

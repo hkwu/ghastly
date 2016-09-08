@@ -1,4 +1,4 @@
-# discord-bot-framework
+# Ghastly
 
 A framework designed to make it easier to modularize clients built on top of [Discord.js](http://hydrabolt.github.io/discord.js/).
 

@@ -6,7 +6,7 @@ import MiddlewareStack from '../Middleware/MiddlewareStack';
  */
 export default class Event {
   /**
-   * @param {Client} client - The Discord client.
+   * @param {Client} client - The Ghastly client.
    * @param {Object} [options] - Options to customize event handling.
    */
   constructor(client, options = {}) {
@@ -49,7 +49,7 @@ export default class Event {
 
   /**
    * Wraps the event handler's action method.
-   * @param {*} args - Arguments passed to the event handler by the Discord client.
+   * @param {*} args - Arguments passed to the event handler by Discord.js.
    */
   handle(...args) {
     this._middlewareStack.process(this._client, ...args);
@@ -57,8 +57,8 @@ export default class Event {
 
   /**
    * The action to be performed upon receiving an event.
-   * @param {Client} client - The Discord client.
-   * @param {*} args - Arguments passed to the event handler by the Discord client.
+   * @param {Client} client - The Ghastly client.
+   * @param {*} args - Arguments passed to the event handler by Discord.js.
    */
   action(client, ...args) {
     return;
