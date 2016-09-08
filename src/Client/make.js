@@ -81,7 +81,7 @@ export default (discordClient, clientOptions = {}) => (
     }
 
     /**
-     * Adds a variable number of events to the client.
+     * Adds multiple events to the client.
      * @param {Array.<Array>} events - Array of arrays, where each inner array contains the
      *   label and the event handler constructor, in that order.
      * @returns {this}
