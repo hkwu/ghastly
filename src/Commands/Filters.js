@@ -1,4 +1,4 @@
-import { includes, keyBy } from 'lodash/collection';
+import { keyBy } from 'lodash/collection';
 
 /**
  * Filters out commands based on user permissions.
@@ -85,4 +85,4 @@ export const roleIds = (filterValues, message) => {
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
-export const userIds = (filterValues, message) => filterValues.length && !includes(filterValues, message.author.id);
+export const userIds = (filterValues, message) => filterValues.length && !filterValues.includes(message.author.id);
