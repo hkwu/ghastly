@@ -5,8 +5,8 @@
  */
 export default (mapFiltersToHandlers) => (
   (filters, message) => {
-    for (const filter of Object.keys(mapFiltersToHandlers)) {
-      if (mapFiltersToHandlers[filter](filters[filter], message)) {
+    for (const [filter, handler] of Object.entries(mapFiltersToHandlers)) {
+      if (handler(filters[filter], message)) {
         return true;
       }
     }

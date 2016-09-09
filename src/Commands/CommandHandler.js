@@ -60,9 +60,9 @@ export default class CommandHandler extends MessageEvent {
    * @returns {this}
    */
   addCommands(commands) {
-    Object.keys(commands).forEach((label) => {
-      this.addCommand(label, commands[label]);
-    });
+    for (const [label, handler] of Object.entries(commands)) {
+      this.addCommand(label, handler);
+    }
 
     return this;
   }

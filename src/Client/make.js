@@ -86,9 +86,9 @@ export default (discordClient, clientOptions = {}) => (
      * @returns {this}
      */
     addEvents(events) {
-      Object.keys(events).forEach((label) => {
-        this.addEvent(label, events[label]);
-      });
+      for (const [label, handler] of Object.entries(events)) {
+        this.addEvent(label, handler);
+      }
 
       return this;
     }

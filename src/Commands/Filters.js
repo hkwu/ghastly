@@ -14,12 +14,11 @@ export const permissions = (filterValues, message) => {
   if (channelPermissions) {
     let permissionsMatchRequirements = true;
 
-    for (const permission of Object.keys(filterValues)) {
+    for (const [permission, active] of Object.entries(filterValues)) {
       // the values of the permissions in the filter object and the channel permissions object must match
-      const permissionRequired = filterValues[permission];
       const hasPermission = channelPermissions.hasPermission(permission);
 
-      if ((permissionRequired && !hasPermission) || (!permissionRequired && hasPermission)) {
+      if ((active && !hasPermission) || (!active && hasPermission)) {
         permissionsMatchRequirements = false;
 
         break;
