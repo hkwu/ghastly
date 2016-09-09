@@ -56,14 +56,12 @@ export default class CommandHandler extends MessageEvent {
 
   /**
    * Adds multiple commands to the command handler.
-   * @param {Array.<Array>} commands - Array of arrays, where each inner array contains the
-   *   label and the command constructor, in that order.
+   * @param {Object} commands - Object mapping command labels to their constructors.
    * @returns {this}
    */
   addCommands(commands) {
-    commands.forEach((command) => {
-      const [label, handler] = command;
-      this.addCommand(label, handler);
+    Object.keys(commands).forEach((label) => {
+      this.addCommand(label, commands[label]);
     });
 
     return this;

@@ -82,14 +82,12 @@ export default (discordClient, clientOptions = {}) => (
 
     /**
      * Adds multiple events to the client.
-     * @param {Array.<Array>} events - Array of arrays, where each inner array contains the
-     *   label and the event handler constructor, in that order.
+     * @param {Object} events - Object mapping event labels to their constructors.
      * @returns {this}
      */
     addEvents(events) {
-      events.forEach((event) => {
-        const [label, handler] = event;
-        this.addEvent(label, handler);
+      Object.keys(events).forEach((label) => {
+        this.addEvent(label, events[label]);
       });
 
       return this;
