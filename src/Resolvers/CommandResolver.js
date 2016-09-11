@@ -1,5 +1,6 @@
 import BaseResolver from './BaseResolver';
 import createResolver from './createResolver';
+import { MENTIONABLE_ALLOW, MENTIONABLE_DENY, MENTIONABLE_ONLY } from '../Commands/Command';
 
 /**
  * Options resolver for command classes.
@@ -22,10 +23,12 @@ export default class CommandResolver extends BaseResolver {
         userIds: [],
         usernames: [],
       },
+      mentionable: MENTIONABLE_ALLOW,
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
+      .setAllowedTypes('mentionable', 'string')
       .setAllowedValues('filters', (value) => {
         const filtersResolver = createResolver();
         filtersResolver.setDefined('bot')
@@ -55,6 +58,7 @@ export default class CommandResolver extends BaseResolver {
         } catch (error) {
           return false;
         }
-      });
+      })
+      .setAllowedValues('mentionable', [MENTIONABLE_ALLOW, MENTIONABLE_DENY, MENTIONABLE_ONLY]);
   }
 }

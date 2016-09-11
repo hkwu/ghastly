@@ -2,7 +2,9 @@ import stringArgv from 'string-argv';
 import ArgumentParser from './Parsers/ArgumentParser';
 import CommandError from '../Errors/CommandError';
 import CommandHandlerResolver from '../Resolvers/CommandHandlerResolver';
+import CommandParser from './Parsers/CommandParser';
 import MessageEvent from '../Events/MessageEvent';
+import { MENTIONABLE_DENY, MENTIONABLE_ONLY } from './Command';
 
 /**
  * Handles the dispatching of commands.
@@ -144,16 +146,22 @@ export default class CommandHandler extends MessageEvent {
    * @private
    */
   _handleCommand(message) {
-    const split = message.content.split(' ');
+    const parsed = CommandParser.parse(message);
 
-    if (this._commandMap[split[0]]) {
+    if (this._commandMap[parsed.identifier]) {
+      if (parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_DENY) {
+        return false;
+      } else if (!parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_ONLY) {
+        return false;
+      }
+
       try {
         const commandArgs = ArgumentParser.parse(
-          this._commandMap[split[0]].parameters,
-          stringArgv(split.slice(1).join(' ')),
+          this._commandMap[parsed.identifier].parameters,
+          stringArgv(parsed.arguments.join(' ')),
         );
 
-        this._commandMap[split[0]].handle(message, commandArgs);
+        this._commandMap[parsed.identifier].handle(message, commandArgs);
 
         return true;
       } catch (error) {

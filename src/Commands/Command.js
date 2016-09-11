@@ -5,6 +5,24 @@ import coreFilters from './Filters/coreFilters';
 import generateFilter from './Filters/generateFilter';
 
 /**
+ * Allow mention triggers for commands.
+ * @type {string}
+ */
+export const MENTIONABLE_ALLOW = 'allow';
+
+/**
+ * Disallow mention triggers for commands.
+ * @type {string}
+ */
+export const MENTIONABLE_DENY = 'deny';
+
+/**
+ * Allow only mention triggers for commands.
+ * @type {string}
+ */
+export const MENTIONABLE_ONLY = 'only';
+
+/**
  * Base class for creating commands received in messages.
  */
 export default class Command {
@@ -17,11 +35,19 @@ export default class Command {
   }
 
   /**
-   * Returns an object containing information about the command.
-   * @returns {Object}
+   * Object containing information on the command.
+   * @type {Object}
    */
   get structure() {
     return {};
+  }
+
+  /**
+   * Determines how the command responds to mentions.
+   * @type {String}
+   */
+  get mentionable() {
+    return this._resolvedStructure.mentionable;
   }
 
   /**
