@@ -12,7 +12,7 @@ export default class CommandParser {
    */
   static parse(message) {
     const split = message.content.split(' ').filter(x => x.trim());
-    const matchedMention = split[0].match(/<@(\d+)>/);
+    const matchedMention = split[0].match(/<@!?(\d+)>/);
 
     if (matchedMention && split.length < 2) {
       throw new CommandParserError();
