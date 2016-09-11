@@ -21,7 +21,7 @@ export default class SignatureParser {
     }
 
     const partition = trimmed.split(' ');
-    const identifier = partition[0].trim();
+    const identifierString = partition[0].trim();
 
     if (partition.length > 1) {
       const parameterString = partition.slice(1).join(' ').trim();
@@ -38,15 +38,24 @@ export default class SignatureParser {
       }
 
       return {
-        identifier,
+        identifiers: SignatureParser.parseIdentifiers(identifierString),
         parameters: SignatureParser.parseParameters(matches),
       };
     }
 
     return {
-      identifier,
+      identifiers: SignatureParser.parseIdentifiers(identifierString),
       parameters: [],
     };
+  }
+
+  /**
+   * Parses an identifier for a command.
+   * @param {String} identifier - The command identifier, including any aliases.
+   * @returns {Array.<String>} An array of aliases for this command.
+   */
+  static parseIdentifiers(identifier) {
+    return identifier.split('|').map(alias => alias.trim());
   }
 
   /**

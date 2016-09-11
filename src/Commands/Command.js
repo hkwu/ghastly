@@ -18,7 +18,7 @@ export default class Command {
       userIds,
     });
 
-    ({ identifier: this.identifier, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
+    ({ identifiers: this.identifiers, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 
   /**

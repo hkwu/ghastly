@@ -12,7 +12,7 @@ describe('SignatureParser', function() {
   describe('#parse()', function() {
     it('parses basic signatures', function() {
       expect(SignatureParser.parse('sample [command] [other] [foo]')).to.deep.equal({
-        identifier: 'sample',
+        identifiers: ['sample'],
         parameters: [
           {
             name: 'command',
@@ -42,7 +42,7 @@ describe('SignatureParser', function() {
       });
 
       expect(SignatureParser.parse('!sample [param<num?>=123.5 : some description]')).to.deep.equal({
-        identifier: '!sample',
+        identifiers: ['!sample'],
         parameters: [
           {
             name: 'param',
@@ -58,13 +58,14 @@ describe('SignatureParser', function() {
 
     it('parses signatures without parameters', function() {
       expect(SignatureParser.parse('noParams')).to.deep.equal({
-        identifier: 'noParams',
+        identifiers: ['noParams'],
+        parameters: [],
       });
     });
 
     it('strips whitespace from command name and parameters', function() {
       expect(SignatureParser.parse('   white      [space]   [two]    ')).to.deep.equal({
-        identifier: 'white',
+        identifiers: ['white'],
         parameters: [
           {
             name: 'space',
@@ -100,6 +101,26 @@ describe('SignatureParser', function() {
 
     it('disallows empty signatures', function() {
       expect(() => SignatureParser.parse('')).to.throw(SignatureParserError, 'Signature cannot be empty');
+    });
+  });
+
+  describe('#parseIdentifiers()', function() {
+    it('parses a single identifier', function() {
+      expect(SignatureParser.parseIdentifiers('hello')).to.deep.equal(['hello']);
+    });
+
+    it('parses multiple identifiers', function() {
+      expect(SignatureParser.parseIdentifiers('hello|hey|there')).to.deep.equal([
+        'hello',
+        'hey',
+        'there',
+      ]);
+
+      expect(SignatureParser.parseIdentifiers('hello  |  hey  |  there')).to.deep.equal([
+        'hello',
+        'hey',
+        'there',
+      ]);
     });
   });
 

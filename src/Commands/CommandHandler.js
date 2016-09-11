@@ -1,5 +1,6 @@
 import stringArgv from 'string-argv';
 import ArgumentParser from './Parsers/ArgumentParser';
+import CommandError from '../Errors/CommandError';
 import CommandHandlerResolver from '../Resolvers/CommandHandlerResolver';
 import MessageEvent from '../Events/MessageEvent';
 
@@ -27,8 +28,15 @@ export default class CommandHandler extends MessageEvent {
 
     commands.forEach((command) => {
       const handler = new command.handler();
-      this.commands[command.label] = handler.identifier;
-      this._commandMap[handler.identifier] = handler;
+      this.commands[command.label] = [handler.identifiers];
+
+      handler.identifiers.forEach((identifier) => {
+        if (this._commandMap[identifier]) {
+          throw new CommandError(`Encountered duplicate command alias <${identifier}> while adding command with label <${command.label}>.`);
+        }
+
+        this._commandMap[identifier] = handler;
+      });
     });
 
     messageHandlers.forEach((messageHandler) => {
@@ -44,12 +52,19 @@ export default class CommandHandler extends MessageEvent {
    */
   addCommand(label, command) {
     if (this.commands[label]) {
-      throw new Error(`Encountered duplicate command label while adding command: ${label}.`);
+      throw new Error(`Encountered duplicate command label while adding command: <${label}>.`);
     }
 
     const handler = new command();
-    this.commands[label] = handler.identifier;
-    this._commandMap[handler.identifier] = handler;
+    this.commands[label] = handler.identifiers;
+
+    handler.identifiers.forEach((identifier) => {
+      if (this._commandMap[identifier]) {
+        throw new CommandError(`Encountered duplicate command alias <${identifier}> while adding command with label <${label}>.`);
+      }
+
+      this._commandMap[identifier] = handler;
+    });
 
     return this;
   }
@@ -74,7 +89,10 @@ export default class CommandHandler extends MessageEvent {
    */
   removeCommand(label) {
     if (this.commands[label]) {
-      delete this._commandMap[this.commands[label]];
+      this.commands[label].forEach((identifier) => {
+        delete this._commandMap[identifier];
+      });
+
       delete this.commands[label];
     }
 
@@ -89,7 +107,7 @@ export default class CommandHandler extends MessageEvent {
    */
   addMessageHandler(label, handler) {
     if (this.messageHandlers[label]) {
-      throw new Error(`Encountered duplicate label while adding message handler: ${label}.`);
+      throw new Error(`Encountered duplicate label while adding message handler: <${label}>.`);
     }
 
     this.messageHandlers[label] = new handler();
