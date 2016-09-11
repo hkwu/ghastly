@@ -6,19 +6,19 @@ import generateFilter from './Filters/generateFilter';
 
 /**
  * Allow mention triggers for commands.
- * @type {string}
+ * @type {String}
  */
 export const MENTIONABLE_ALLOW = 'allow';
 
 /**
  * Disallow mention triggers for commands.
- * @type {string}
+ * @type {String}
  */
 export const MENTIONABLE_DENY = 'deny';
 
 /**
  * Allow only mention triggers for commands.
- * @type {string}
+ * @type {String}
  */
 export const MENTIONABLE_ONLY = 'only';
 
