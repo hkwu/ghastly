@@ -1,4 +1,5 @@
 import { keyBy } from 'lodash/collection';
+import { isEmpty } from 'lodash/lang';
 
 /**
  * Filters out commands based on user permissions.
@@ -7,6 +8,10 @@ import { keyBy } from 'lodash/collection';
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const permissions = (filterValues, message) => {
+  if (isEmpty(filterValues)) {
+    return false;
+  }
+
   const channelPermissions = message.channel.type === 'text' || message.channel.type === 'voice'
     ? message.channel.permissionsFor(message.author)
     : null;
@@ -40,7 +45,7 @@ export const permissions = (filterValues, message) => {
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const roleNames = (filterValues, message) => {
-  if (!message.guild || (message.guild && !message.guild.available)) {
+  if (!filterValues.length || !message.guild || (message.guild && !message.guild.available)) {
     return false;
   }
 
@@ -63,7 +68,7 @@ export const roleNames = (filterValues, message) => {
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
 export const roleIds = (filterValues, message) => {
-  if (!message.guild || (message.guild && !message.guild.available)) {
+  if (!filterValues.length || !message.guild || (message.guild && !message.guild.available)) {
     return false;
   }
 

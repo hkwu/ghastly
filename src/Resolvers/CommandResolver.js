@@ -14,19 +14,23 @@ export default class CommandResolver extends BaseResolver {
       'handle',
     ]).setDefaults({
       description: 'No description set for this command.',
-      filters: {},
+      filters: {
+        permissions: {},
+        roleNames: [],
+        roleIds: [],
+        userIds: [],
+      },
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
       .setAllowedValues('filters', (value) => {
         const filtersResolver = createResolver();
-        filtersResolver.setDefaults({
-          permissions: {},
-          roleNames: [],
-          roleIds: [],
-          userIds: [],
-        }).setAllowedTypes('permissions', ['string', 'plainObject'])
+        filtersResolver.setDefined('permissions')
+          .setDefined('roleNames')
+          .setDefined('roleIds')
+          .setDefined('userIds')
+          .setAllowedTypes('permissions', ['string', 'plainObject'])
           .setAllowedTypes('roleNames', 'array')
           .setAllowedTypes('roleIds', 'array')
           .setAllowedTypes('userIds', 'array');
