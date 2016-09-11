@@ -15,10 +15,12 @@ export default class CommandResolver extends BaseResolver {
     ]).setDefaults({
       description: 'No description set for this command.',
       filters: {
+        bot: false,
         permissions: {},
         roleNames: [],
         roleIds: [],
         userIds: [],
+        usernames: [],
       },
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
@@ -26,17 +28,28 @@ export default class CommandResolver extends BaseResolver {
       .setAllowedTypes('filters', 'plainObject')
       .setAllowedValues('filters', (value) => {
         const filtersResolver = createResolver();
-        filtersResolver.setDefined('permissions')
+        filtersResolver.setDefined('bot')
+          .setDefined('permissions')
           .setDefined('roleNames')
           .setDefined('roleIds')
           .setDefined('userIds')
+          .setDefined('usernames')
+          .setAllowedTypes('bot', 'boolean')
           .setAllowedTypes('permissions', ['string', 'plainObject'])
           .setAllowedTypes('roleNames', 'array')
           .setAllowedTypes('roleIds', 'array')
-          .setAllowedTypes('userIds', 'array');
+          .setAllowedTypes('userIds', 'array')
+          .setAllowedTypes('usernames', 'array');
 
         try {
-          filtersResolver.resolve(value, false);
+          const { permissions, roleNames, roleIds, userIds, usernames, ...rest } = value;
+          filtersResolver.resolve({
+            permissions,
+            roleNames,
+            roleIds,
+            userIds,
+            usernames,
+          }, false);
 
           return true;
         } catch (error) {

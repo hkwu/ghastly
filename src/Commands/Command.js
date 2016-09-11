@@ -1,8 +1,8 @@
 import { isEmpty } from 'lodash/lang';
 import CommandResolver from '../Resolvers/CommandResolver';
 import SignatureParser from './Parsers/SignatureParser';
-import generateFilter from './generateFilter';
-import { permissions, roleNames, roleIds, userIds } from './Filters';
+import coreFilters from './Filters/coreFilters';
+import generateFilter from './Filters/generateFilter';
 
 /**
  * Base class for creating commands received in messages.
@@ -11,12 +11,7 @@ export default class Command {
   constructor() {
     const resolver = new CommandResolver();
     this._resolvedStructure = resolver.resolve(this.structure);
-    this._filter = generateFilter({
-      permissions,
-      roleNames,
-      roleIds,
-      userIds,
-    });
+    this._filter = generateFilter(coreFilters);
 
     ({ identifiers: this.identifiers, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
   }
