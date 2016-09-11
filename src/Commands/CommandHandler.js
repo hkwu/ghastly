@@ -146,29 +146,33 @@ export default class CommandHandler extends MessageEvent {
    * @private
    */
   _handleCommand(message) {
-    const parsed = CommandParser.parse(message);
+    let parsed;
 
-    if (this._commandMap[parsed.identifier]) {
-      if (parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_DENY) {
-        return false;
-      } else if (!parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_ONLY) {
-        return false;
-      }
-
-      try {
-        const commandArgs = ArgumentParser.parse(
-          this._commandMap[parsed.identifier].parameters,
-          stringArgv(parsed.arguments.join(' ')),
-        );
-
-        this._commandMap[parsed.identifier].handle(message, commandArgs);
-
-        return true;
-      } catch (error) {
-        return false;
-      }
+    try {
+      parsed = CommandParser.parse(message);
+    } catch (error) {
+      return false;
     }
 
-    return false;
+    if (!this._commandMap[parsed.identifier]) {
+      return false;
+    } else if (parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_DENY) {
+      return false;
+    } else if (!parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_ONLY) {
+      return false;
+    }
+
+    try {
+      const commandArgs = ArgumentParser.parse(
+        this._commandMap[parsed.identifier].parameters,
+        stringArgv(parsed.arguments.join(' ')),
+      );
+
+      this._commandMap[parsed.identifier].handle(message, commandArgs);
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
