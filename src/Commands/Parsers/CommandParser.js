@@ -11,7 +11,7 @@ export default class CommandParser {
    * @throws {CommandParserError} Thrown if message cannot be parsed as a command.
    */
   static parse(message) {
-    const split = message.content.split(' ').filter(x => x.trim());
+    const split = message.content.split(' ');
     const matchedMention = split[0].match(/<@!?(\d+)>/);
 
     if (matchedMention && split.length < 2) {
@@ -19,7 +19,7 @@ export default class CommandParser {
     }
 
     return {
-      identifier: matchedMention ? split[1] : split[0],
+      identifier: matchedMention ? split[1].trim() : split[0],
       arguments: matchedMention ? split.slice(2) : split.slice(1),
       mentioned: matchedMention && matchedMention[1] === message.client.user.id,
     };

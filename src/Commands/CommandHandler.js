@@ -4,7 +4,7 @@ import CommandError from '../Errors/CommandError';
 import CommandHandlerResolver from '../Resolvers/CommandHandlerResolver';
 import CommandParser from './Parsers/CommandParser';
 import MessageEvent from '../Events/MessageEvent';
-import { MENTIONABLE_DENY, MENTIONABLE_ONLY } from './Command';
+import Command, { MENTIONABLE_DENY, MENTIONABLE_ONLY } from './Command';
 
 /**
  * Handles the dispatching of commands.
@@ -29,16 +29,7 @@ export default class CommandHandler extends MessageEvent {
     this.messageHandlers = {};
 
     commands.forEach((command) => {
-      const handler = new command.handler();
-      this.commands[command.label] = [handler.identifiers];
-
-      handler.identifiers.forEach((identifier) => {
-        if (this._commandMap[identifier]) {
-          throw new CommandError(`Encountered duplicate command alias <${identifier}> while adding command with label <${command.label}>.`);
-        }
-
-        this._commandMap[identifier] = handler;
-      });
+      this.addCommand(command.label, command.handler);
     });
 
     messageHandlers.forEach((messageHandler) => {
@@ -54,18 +45,24 @@ export default class CommandHandler extends MessageEvent {
    */
   addCommand(label, command) {
     if (this.commands[label]) {
-      throw new Error(`Encountered duplicate command label while adding command: <${label}>.`);
+      throw new CommandError(`Encountered duplicate command label while adding command: <${label}>.`);
     }
 
     const handler = new command();
-    this.commands[label] = handler.identifiers;
+    this.commands[label] = handler.namespace ? [handler.namespace] : handler.identifiers;
+
+    if (handler.namespace && !this._commandMap[handler.namespace]) {
+      this._commandMap[handler.namespace] = {};
+    }
+
+    const submap = handler.namespace ? this._commandMap[handler.namespace] : this._commandMap;
 
     handler.identifiers.forEach((identifier) => {
-      if (this._commandMap[identifier]) {
+      if (submap[identifier]) {
         throw new CommandError(`Encountered duplicate command alias <${identifier}> while adding command with label <${label}>.`);
       }
 
-      this._commandMap[identifier] = handler;
+      submap[identifier] = handler;
     });
 
     return this;
@@ -135,7 +132,9 @@ export default class CommandHandler extends MessageEvent {
    */
   action(client, message) {
     if (!this._handleCommand(message)) {
-      Object.values(this.messageHandlers).forEach(handler => handler.handle(message));
+      Object.values(this.messageHandlers).forEach((handler) => {
+        handler.handle(message);
+      });
     }
   }
 
@@ -154,21 +153,36 @@ export default class CommandHandler extends MessageEvent {
       return false;
     }
 
-    if (!this._commandMap[parsed.identifier]) {
+    let handler = this._commandMap[parsed.identifier];
+    let args = parsed.arguments;
+
+    if (!handler) {
       return false;
-    } else if (parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_DENY) {
+    } else if (!(handler instanceof Command)) {
+      const filteredArgs = args.filter(x => x.trim());
+      const identifier = filteredArgs[0].trim();
+
+      if (!identifier || !handler[identifier]) {
+        return false;
+      }
+
+      handler = handler[identifier];
+      args = filteredArgs.slice(1);
+    }
+
+    if (parsed.mentioned && handler.mentionable === MENTIONABLE_DENY) {
       return false;
-    } else if (!parsed.mentioned && this._commandMap[parsed.identifier].mentionable === MENTIONABLE_ONLY) {
+    } else if (!parsed.mentioned && handler.mentionable === MENTIONABLE_ONLY) {
       return false;
     }
 
     try {
       const commandArgs = ArgumentParser.parse(
-        this._commandMap[parsed.identifier].parameters,
-        stringArgv(parsed.arguments.join(' ')),
+        handler.parameters,
+        stringArgv(args.join(' ')),
       );
 
-      this._commandMap[parsed.identifier].handle(message, commandArgs);
+      handler.handle(message, commandArgs);
 
       return true;
     } catch (error) {

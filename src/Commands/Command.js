@@ -51,6 +51,14 @@ export default class Command {
   }
 
   /**
+   * The namespace of the command, used as a prefix.
+   * @type {?String}
+   */
+  get namespace() {
+    return this._resolvedStructure.namespace;
+  }
+
+  /**
    * Calls the predefined action method of this command on the given message.
    * @param {Message} message - Message object containing the command.
    * @param {Object} args - Arguments extracted from the command message.

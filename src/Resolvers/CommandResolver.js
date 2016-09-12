@@ -24,11 +24,13 @@ export default class CommandResolver extends BaseResolver {
         usernames: [],
       },
       mentionable: MENTIONABLE_ALLOW,
+      namespace: null,
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
       .setAllowedTypes('mentionable', 'string')
+      .setAllowedTypes('namespace', ['string', 'null'])
       .setAllowedValues('filters', (value) => {
         const filtersResolver = createResolver();
         filtersResolver.setDefined('bot')
@@ -59,6 +61,7 @@ export default class CommandResolver extends BaseResolver {
           return false;
         }
       })
-      .setAllowedValues('mentionable', [MENTIONABLE_ALLOW, MENTIONABLE_DENY, MENTIONABLE_ONLY]);
+      .setAllowedValues('mentionable', [MENTIONABLE_ALLOW, MENTIONABLE_DENY, MENTIONABLE_ONLY])
+      .setAllowedValues('namespace', value => (value ? !/\s/.test(value) : true));
   }
 }
