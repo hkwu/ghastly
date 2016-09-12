@@ -18,10 +18,12 @@ export default class CommandParser {
       throw new CommandParserError();
     }
 
+    const mentioned = !!(matchedMention && matchedMention[1] === message.client.user.id);
+
     return {
-      identifier: matchedMention ? split[1].trim() : split[0],
-      arguments: matchedMention ? split.slice(2) : split.slice(1),
-      mentioned: matchedMention && matchedMention[1] === message.client.user.id,
+      identifier: mentioned ? split[1].trim() : split[0],
+      arguments: mentioned ? split.slice(2) : split.slice(1),
+      mentioned,
     };
   }
 }
