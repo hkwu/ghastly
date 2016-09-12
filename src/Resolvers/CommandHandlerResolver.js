@@ -9,9 +9,9 @@ export default class CommandHandlerResolver extends BaseResolver {
     super();
 
     this._resolver.setDefaults({
-      commands: [],
-      messageHandlers: [],
-    }).setAllowedTypes('commands', 'array')
-      .setAllowedTypes('messageHandlers', 'array');
+      commands: {},
+      messageHandlers: {},
+    }).setAllowedTypes('commands', 'plainObject')
+      .setAllowedTypes('messageHandlers', 'plainObject');
   }
 }

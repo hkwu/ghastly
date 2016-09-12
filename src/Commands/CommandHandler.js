@@ -17,24 +17,18 @@ export default class CommandHandler extends MessageEvent {
    * @param {Object} [options={}] - Options for configuring the handler.
    */
   constructor(client, options = {}) {
-    let { commands, messageHandlers, ...rest } = options;
+    const { commands, messageHandlers, ...rest } = options;
     super(client, rest);
 
     const resolver = new CommandHandlerResolver();
     const resolvedOptions = resolver.resolve({ commands, messageHandlers });
-    ({ commands, messageHandlers } = resolvedOptions);
 
     this.commands = {};
     this._commandMap = {};
     this.messageHandlers = {};
 
-    commands.forEach((command) => {
-      this.addCommand(command.label, command.handler);
-    });
-
-    messageHandlers.forEach((messageHandler) => {
-      this.messageHandlers[messageHandler.label] = new messageHandler.handler();
-    });
+    this.addCommands(resolvedOptions.commands);
+    this.addMessageHandlers(resolvedOptions.messageHandlers);
   }
 
   /**
@@ -115,6 +109,19 @@ export default class CommandHandler extends MessageEvent {
   }
 
   /**
+   * Adds multiple message handlers to the command handler.
+   * @param {Object} messageHandlers - Object mapping message handler labels to their constructors.
+   * @returns {this}
+   */
+  addMessageHandlers(messageHandlers) {
+    for (const [label, handler] of Object.entries(messageHandlers)) {
+      this.addMessageHandler(label, handler);
+    }
+
+    return this;
+  }
+
+  /**
    * Removes a message handler from the handler using its label.
    * @param {String} label - Label of the message handler to remove.
    * @returns {this}
@@ -177,11 +184,7 @@ export default class CommandHandler extends MessageEvent {
     }
 
     try {
-      const commandArgs = ArgumentParser.parse(
-        handler.parameters,
-        stringArgv(args.join(' ')),
-      );
-
+      const commandArgs = ArgumentParser.parse(handler.parameters, stringArgv(args.join(' ')));
       handler.handle(message, commandArgs);
 
       return true;

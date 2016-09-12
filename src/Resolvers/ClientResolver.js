@@ -9,9 +9,9 @@ export default class ClientResolver extends BaseResolver {
     super();
 
     this._resolver.setDefaults({
-      events: [],
-      commands: [],
-    }).setAllowedTypes('events', 'array')
-      .setAllowedTypes('commands', 'array');
+      events: {},
+      commands: {},
+    }).setAllowedTypes('events', 'plainObject')
+      .setAllowedTypes('commands', 'plainObject');
   }
 }

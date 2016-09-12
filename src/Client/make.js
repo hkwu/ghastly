@@ -1,3 +1,4 @@
+import { filter } from 'lodash/collection';
 import ClientResolver from '../Resolvers/ClientResolver';
 import CommandHandler from '../Commands/CommandHandler';
 import MessageEvent from '../Events/MessageEvent';
@@ -21,17 +22,26 @@ export default (discordClient, clientOptions = {}) => (
       const resolver = new ClientResolver();
       const resolvedOptions = resolver.resolve({ commands, events });
 
+      const messageHandlers = {};
+      const nonMessageHandlers = {};
+
+      for (const [label, handler] of Object.entries(resolvedOptions.events)) {
+        if (handler instanceof MessageEvent) {
+          messageHandlers[label] = handler;
+        } else {
+          nonMessageHandlers[label] = handler;
+        }
+      }
+
       this._commandHandler = new CommandHandler(this, {
         commands: resolvedOptions.commands,
-        messageHandlers: resolvedOptions.events.filter(event => event instanceof MessageEvent),
+        messageHandlers,
       });
+
       this.on(CommandHandler.type, this._commandHandler.handle.bind(this._commandHandler));
 
       this.registeredEvents = {};
-      resolvedOptions.events.forEach((event) => {
-        const [label, handler] = event;
-        this.addEvent(label, handler);
-      });
+      this.addEvents(nonMessageHandlers);
     }
 
     /**
@@ -48,8 +58,7 @@ export default (discordClient, clientOptions = {}) => (
 
     /**
      * Adds multiple commands to the client.
-     * @param {Array.<Array>} commands - Array of arrays, where each inner array contains the
-     *   label and the command constructor, in that order.
+     * @param {Object} commands - Object mapping command labels to their constructors.
      * @returns {this}
      */
     addCommands(commands) {
