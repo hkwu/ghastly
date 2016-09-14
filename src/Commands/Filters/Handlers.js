@@ -98,7 +98,7 @@ export const roleIds = (allowedRoleIds, message) => {
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
-export const userIds = (allowedUserIds, message) => allowedUserIds.length && !allowedUserIds.includes(message.author.id);
+export const userIds = (allowedUserIds, message) => !!(allowedUserIds.length && !allowedUserIds.includes(message.author.id));
 
 /**
  * Filters out commands based on usernames.
@@ -107,4 +107,4 @@ export const userIds = (allowedUserIds, message) => allowedUserIds.length && !al
  * @param {Message} message - The message being tested.
  * @returns {Boolean} Returns true if command can be filtered out, false otherwise.
  */
-export const usernames = (allowedUsernames, message) => allowedUsernames.length && !allowedUsernames.includes(message.author.username);
+export const usernames = (allowedUsernames, message) => !!(allowedUsernames.length && !allowedUsernames.includes(message.author.username));
