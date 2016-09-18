@@ -42,7 +42,7 @@ export default class Command {
     ));
 
     this._filter = generateFilter(coreFilters);
-    ({ identifiers: this.identifiers, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
+    ({ identifiers: this._identifiers, parameters: this._parameters } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 
   /**
@@ -62,12 +62,28 @@ export default class Command {
   }
 
   /**
+   * The identifiers parsed from the command signature.
+   * @type {Array.<String>}
+   */
+  get identifiers() {
+    return this._identifiers;
+  }
+
+  /**
+   * The parameters parsed from the command signature.
+   * @type {Array.<Object>}
+   */
+  get parameters() {
+    return this._parameters;
+  }
+
+  /**
    * Calls the predefined action method of this command on the given message.
    * @param {Message} message - Message object containing the command.
    * @param {Object} args - Arguments extracted from the command message.
    * @returns {*}
    */
-  handle(message, args) {
+  action(message, args) {
     if (this._isFilterable(message)) {
       return false;
     }

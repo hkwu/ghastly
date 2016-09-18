@@ -44,14 +44,14 @@ export default class MiddlewareStack {
 
   /**
    * Generates a function that links each middleware's processing methods in the stack together.
-   * @param {Function} action - Function that will process the data.
+   * @param {Function} handle - Function that will process the data.
    * @returns {*}
    * @private
    */
-  _generateMiddlewareProcess(action) {
+  _generateMiddlewareProcess(handle) {
     return this._stack.reduceRight(
       (previous, current) => (client, ...data) => current.handle(previous, client, ...data),
-      (client, ...data) => action(client, ...data),
+      (client, ...data) => handle(client, ...data),
     );
   }
 
@@ -61,7 +61,7 @@ export default class MiddlewareStack {
    */
   _regenerateMiddlewareProcess() {
     this._middlewareProcess = this._generateMiddlewareProcess(
-      this._handler.action.bind(this._handler),
+      this._handler.handle.bind(this._handler),
     );
   }
 }

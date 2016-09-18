@@ -8,9 +8,8 @@ import MiddlewareStack from '../Middleware/MiddlewareStack';
 export default class Event {
   /**
    * @param {Client} client - The Ghastly client.
-   * @param {Object} [options] - Options to customize event handling.
    */
-  constructor(client, options = {}) {
+  constructor(client) {
     const resolver = new EventResolver();
     this._resolvedStructure = resolver.resolve(merge(
       { ...this.structure },
@@ -20,7 +19,7 @@ export default class Event {
     ));
 
     this._client = client;
-    this._middlewareStack = new MiddlewareStack(this, options.middleware);
+    this._middlewareStack = new MiddlewareStack(this, this._resolvedStructure.middleware);
   }
 
   /**
@@ -67,7 +66,7 @@ export default class Event {
    * Wraps the event handler's action method.
    * @param {*} args - Arguments passed to the event handler by Discord.js.
    */
-  handle(...args) {
+  action(...args) {
     this._middlewareStack.process(this._client, ...args);
   }
 
@@ -76,7 +75,7 @@ export default class Event {
    * @param {Client} client - The Ghastly client.
    * @param {*} args - Arguments passed to the event handler by Discord.js.
    */
-  action(client, ...args) {
+  handle(client, ...args) {
     return;
   }
 }

@@ -37,7 +37,7 @@ export default (discordClient, clientOptions = {}) => (
         messageHandlers,
       });
 
-      this.on(CommandHandler.type, this._commandHandler.handle.bind(this._commandHandler));
+      this.on(CommandHandler.type, this._commandHandler.action.bind(this._commandHandler));
 
       this.registeredEvents = {};
       this.addEvents(nonMessageHandlers);
@@ -82,7 +82,7 @@ export default (discordClient, clientOptions = {}) => (
       const eventInstance = new event(this);
       this.registeredEvents[label] = {
         type: event.type,
-        handler: eventInstance.handle.bind(eventInstance),
+        handler: eventInstance.action.bind(eventInstance),
       };
 
       return this.on(event.type, this.registeredEvents[label].handler);

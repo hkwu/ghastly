@@ -137,7 +137,7 @@ export default class CommandHandler extends MessageEvent {
   /**
    * @inheritdoc
    */
-  action(client, message) {
+  handle(client, message) {
     if (!this._handleCommand(message)) {
       Object.values(this.messageHandlers).forEach((handler) => {
         handler.handle(message);
@@ -185,7 +185,7 @@ export default class CommandHandler extends MessageEvent {
 
     try {
       const commandArgs = ArgumentParser.parse(handler.parameters, stringArgv(args.join(' ')));
-      handler.handle(message, commandArgs);
+      handler.action(message, commandArgs);
 
       return true;
     } catch (error) {
