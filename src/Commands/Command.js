@@ -55,7 +55,7 @@ export default class Command {
 
   /**
    * Object containing the validated command configuration.
-   * @returns {Object}
+   * @type {Object}
    */
   get resolvedStructure() {
     return this._resolvedStructure;

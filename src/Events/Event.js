@@ -1,3 +1,4 @@
+import { merge } from 'lodash/object';
 import EventResolver from '../Resolvers/EventResolver';
 import MiddlewareStack from '../Middleware/MiddlewareStack';
 
@@ -11,21 +12,36 @@ export default class Event {
    */
   constructor(client, options = {}) {
     const resolver = new EventResolver();
-    this._options = resolver.resolve(options);
+    this._resolvedStructure = resolver.resolve(merge(
+      { ...this.structure },
+      {
+        middleware: this.middleware,
+      },
+    ));
 
     this._client = client;
     this._middlewareStack = new MiddlewareStack(this, options.middleware);
   }
 
   /**
-   * @returns {Object}
+   * Object containing information on the event.
+   * @type {Object}
    */
-  get options() {
-    return this._options;
+  get structure() {
+    return {};
   }
 
   /**
-   * @returns {Client}
+   * Object containing the validated event configuration.
+   * @type {Object}
+   */
+  get resolvedStructure() {
+    return this._resolvedStructure;
+  }
+
+  /**
+   * The client attached to this event.
+   * @type {Client}
    */
   get client() {
     return this._client;
