@@ -1,7 +1,7 @@
 {
   "name": "ghastly",
   "version": "0.1.0",
-  "description": "A plugin library that helps to modularize applications built with Discord.js.",
+  "description": "A lightweight, pluggable library that helps to modularize applications built with Discord.js.",
   "keywords": [
     "discord.js",
     "library",
@@ -14,7 +14,7 @@
   },
   "license": "MIT",
   "author": "Kelvin Wu <kelvinwu1996@gmail.com>",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hkwu/ghastly.git"
@@ -51,8 +51,5 @@
   },
   "peerDependencies": {
     "discord.js": "9.2.x"
-  },
-  "engines": {
-    "node": ">=6.0.0"
   }
 }

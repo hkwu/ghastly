@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash/lang';
+import { merge } from 'lodash/object';
 import CommandResolver from '../Resolvers/CommandResolver';
 import SignatureParser from './Parsers/SignatureParser';
 import coreFilters from './Filters/coreFilters';
@@ -28,9 +29,19 @@ export const MENTIONABLE_ONLY = 'only';
 export default class Command {
   constructor() {
     const resolver = new CommandResolver();
-    this._resolvedStructure = resolver.resolve(this.structure);
-    this._filter = generateFilter(coreFilters);
+    this._resolvedStructure = resolver.resolve(merge(
+      { ...this.structure },
+      {
+        signature: this.signature,
+        handle: this.handle,
+        description: this.description,
+        filters: this.filters,
+        mentionable: this.mentionable,
+        namespace: this.namespace,
+      },
+    ));
 
+    this._filter = generateFilter(coreFilters);
     ({ identifiers: this.identifiers, parameters: this.parameters } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 

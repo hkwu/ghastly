@@ -1,4 +1,3 @@
-import { filter } from 'lodash/collection';
 import ClientResolver from '../Resolvers/ClientResolver';
 import CommandHandler from '../Commands/CommandHandler';
 import MessageEvent from '../Events/MessageEvent';
