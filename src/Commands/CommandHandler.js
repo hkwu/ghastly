@@ -34,7 +34,7 @@ export default class CommandHandler extends MessageEvent {
   /**
    * Adds a command to the handler.
    * @param {String} label - The unique label used to identify the registered command.
-   * @param {Command} command - Constructor for a class derived from Command.
+   * @param {Function} command - Constructor for a class derived from Command.
    * @returns {this}
    */
   addCommand(label, command) {
@@ -95,7 +95,7 @@ export default class CommandHandler extends MessageEvent {
   /**
    * Adds a message handler.
    * @param {String} label - The unique label used to identify this handler.
-   * @param {Event} handler - Constructor for the handler.
+   * @param {Function} handler - Constructor for the handler.
    * @returns {this}
    */
   addMessageHandler(label, handler) {

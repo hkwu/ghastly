@@ -4,7 +4,7 @@
 export default class MiddlewareStack {
   /**
    * @param {Event} handler - The event handler this middleware is attached to.
-   * @param {Array.<Middleware>} [stack=[]] - Array of middleware constructors.
+   * @param {Array.<Function>} [stack=[]] - Array of middleware constructors.
    */
   constructor(handler, stack = []) {
     this._handler = handler;

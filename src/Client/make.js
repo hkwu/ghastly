@@ -46,7 +46,7 @@ export default (discordClient, clientOptions = {}) => (
     /**
      * Adds a command to the client.
      * @param {String} label - The unique label used to identify the registered command.
-     * @param {Command} command - Constructor for a class derived from Command.
+     * @param {Function} command - Constructor for a class derived from Command.
      * @returns {this}
      */
     addCommand(label, command) {
@@ -69,7 +69,7 @@ export default (discordClient, clientOptions = {}) => (
     /**
      * Adds an event handler to the client.
      * @param {String} label - Unique label for the event.
-     * @param {Event} event - A constructor for a class derived from Event.
+     * @param {Function} event - A constructor for a class derived from Event.
      * @returns {this} The client.
      */
     addEvent(label, event) {
