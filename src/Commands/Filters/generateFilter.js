@@ -1,4 +1,4 @@
-import { isEmpty, isFunction } from 'lodash/lang';
+import { isEmpty, isFunction, isObjectLike } from 'lodash/lang';
 
 /**
  * Generates a filter function using a mapping of filters to filter handlers.
@@ -18,8 +18,16 @@ export default (mapFiltersToHandlers) => (
     for (const [filter, filterValue] of Object.entries(filters)) {
       if (isFunction(filterValue) && !filterValue(message)) {
         return false;
-      } else if (mapFiltersToHandlers[filter] && !isEmpty(filterValue) && !mapFiltersToHandlers[filter](filterValue, message)) {
-        return false;
+      }
+
+      if (mapFiltersToHandlers[filter] && isObjectLike(filterValue)) {
+        if (!isEmpty(filterValue) && !mapFiltersToHandlers[filter](filterValue, message)) {
+          return false;
+        }
+      } else if (mapFiltersToHandlers[filter]) {
+        if (!mapFiltersToHandlers[filter](filterValue, message)) {
+          return false;
+        }
       }
     }
 
