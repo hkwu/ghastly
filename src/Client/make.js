@@ -4,7 +4,7 @@ import MessageEvent from '../Events/MessageEvent';
 
 /**
  * Generates a Ghastly client given a Discord.js client.
- * @param {Function} discordClient - The Discord.js client constructor which acts as the base for the returned client.
+ * @param {Client} discordClient - The Discord.js client which acts as the base for the returned client.
  * @param {Object} [clientOptions={}] - Options to specify configuration upon creation of the client.
  * @returns {Ghastly} The Ghastly client.
  */
@@ -46,7 +46,7 @@ export default (discordClient, clientOptions = {}) => (
     /**
      * Adds a command to the client.
      * @param {String} label - The unique label used to identify the registered command.
-     * @param {Function} command - Constructor for a class derived from Command.
+     * @param {Command} command - Constructor for a class derived from Command.
      * @returns {this}
      */
     addCommand(label, command) {
@@ -69,7 +69,7 @@ export default (discordClient, clientOptions = {}) => (
     /**
      * Adds an event handler to the client.
      * @param {String} label - Unique label for the event.
-     * @param {Function} event - A constructor for a class derived from Event.
+     * @param {Event} event - A constructor for a class derived from Event.
      * @returns {this} The client.
      */
     addEvent(label, event) {

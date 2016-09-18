@@ -177,9 +177,9 @@ export default class CommandHandler extends MessageEvent {
       args = filteredArgs.slice(1);
     }
 
-    if (parsed.mentioned && handler.mentionable === MENTIONABLE_DENY) {
+    if (parsed.mentioned && handler.resolvedStructure.mentionable === MENTIONABLE_DENY) {
       return false;
-    } else if (!parsed.mentioned && handler.mentionable === MENTIONABLE_ONLY) {
+    } else if (!parsed.mentioned && handler.resolvedStructure.mentionable === MENTIONABLE_ONLY) {
       return false;
     }
 

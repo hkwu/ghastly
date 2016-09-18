@@ -54,19 +54,11 @@ export default class Command {
   }
 
   /**
-   * Determines how the command responds to mentions.
-   * @type {String}
+   * Object containing the validated command configuration.
+   * @returns {Object}
    */
-  get mentionable() {
-    return this._resolvedStructure.mentionable;
-  }
-
-  /**
-   * The namespace of the command, used as a prefix.
-   * @type {?String}
-   */
-  get namespace() {
-    return this._resolvedStructure.namespace;
+  get resolvedStructure() {
+    return this._resolvedStructure;
   }
 
   /**
