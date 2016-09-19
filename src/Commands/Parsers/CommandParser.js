@@ -12,13 +12,11 @@ export default class CommandParser {
    */
   static parse(message) {
     const split = message.content.split(' ');
-    const matchedMention = split[0].match(/<@!?(\d+)>/);
+    const mentioned = !!split[0].match(`<@!?${message.client.user.id}>`);
 
-    if (matchedMention && split.length < 2) {
+    if (mentioned && split.length < 2) {
       throw new CommandParserError();
     }
-
-    const mentioned = !!(matchedMention && matchedMention[1] === message.client.user.id);
 
     return {
       identifier: mentioned ? split[1].trim() : split[0],
