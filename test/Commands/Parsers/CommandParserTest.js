@@ -7,6 +7,11 @@ describe('CommandParser', function() {
     it('parses basic commands', function() {
       let message = {
         content: '!cmd pro',
+        client: {
+          user: {
+            id: '123456789',
+          },
+        },
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
@@ -17,6 +22,11 @@ describe('CommandParser', function() {
 
       message = {
         content: '!cmd',
+        client: {
+          user: {
+            id: '123456789',
+          },
+        },
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
