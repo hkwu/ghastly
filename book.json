@@ -1,4 +1,8 @@
 {
   "gitbook": "^3.2.0",
-  "author": "Kelvin Wu"
+  "author": "Kelvin Wu",
+  "plugins": [
+    "prism",
+    "-highlight"
+  ]
 }
