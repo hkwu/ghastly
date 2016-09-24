@@ -1,6 +1,7 @@
+export { default as make } from './Client/make';
 export { default as Command } from './Commands/Command';
 export { default as Middleware } from './Middleware/Middleware';
-export { default as make } from './Client/make';
+export { default as MessageBuffer } from './Util/MessageBuffer';
 
 // events
 export { default as ChannelCreateEvent } from './Events/ChannelCreateEvent';
