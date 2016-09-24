@@ -57,6 +57,8 @@ export default class CommandHandler extends MessageEvent {
     } else if (handler.namespace && !this._commandMap.has(handler.namespace)) {
       this._commandMap.set(handler.namespace, new Map());
       submap = handler.namespace ? this._commandMap.get(handler.namespace) : this._commandMap;
+    } else {
+      submap = this._commandMap;
     }
 
     handler.identifiers.forEach((identifier) => {
