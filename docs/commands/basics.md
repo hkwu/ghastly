@@ -38,12 +38,12 @@ The following table lists the properties you may define on a command.
 
 | Property | Required | Default |
 | :------: | :------: | :-----: |
-| `signature` | Yes | - |
-| `handle` | Yes | - |
-| `description` | No | `'No description set for this command.'` |
-| `filters` | No | See section on command filters. |
-| `mentionable` | No | `'allow'` |
-| `namespace` | No | `null` |
+| signature | Yes | - |
+| handle | Yes | - |
+| description | No | 'No description set for this command.' |
+| filters | No | See section on command filters. |
+| mentionable | No | 'allow' |
+| namespace | No | null |
 
 ## Example
 
