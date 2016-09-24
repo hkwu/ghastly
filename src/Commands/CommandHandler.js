@@ -23,9 +23,9 @@ export default class CommandHandler extends MessageEvent {
     const resolver = new CommandHandlerResolver();
     const resolvedOptions = resolver.resolve({ commands, messageHandlers });
 
-    this.commands = {};
-    this._commandMap = {};
-    this.messageHandlers = {};
+    this.commands = new Map();
+    this._commandMap = new Map();
+    this.messageHandlers = new Map();
 
     this.addCommands(resolvedOptions.commands);
     this.addMessageHandlers(resolvedOptions.messageHandlers);
@@ -38,25 +38,25 @@ export default class CommandHandler extends MessageEvent {
    * @returns {this}
    */
   addCommand(label, command) {
-    if (this.commands[label]) {
+    if (this.commands.has(label)) {
       throw new CommandError(`Encountered duplicate command label while adding command: <${label}>.`);
     }
 
     const handler = new command();
-    this.commands[label] = handler.namespace ? [handler.namespace] : handler.identifiers;
+    this.commands.set(label, handler.namespace ? [handler.namespace] : handler.identifiers);
 
-    if (handler.namespace && !this._commandMap[handler.namespace]) {
-      this._commandMap[handler.namespace] = {};
+    if (handler.namespace && !this._commandMap.has(handler.namespace)) {
+      this._commandMap.set(handler.namespace, new Map());
     }
 
-    const submap = handler.namespace ? this._commandMap[handler.namespace] : this._commandMap;
+    const submap = handler.namespace ? this._commandMap.get(handler.namespace) : this._commandMap;
 
     handler.identifiers.forEach((identifier) => {
-      if (submap[identifier]) {
+      if (submap.has(identifier)) {
         throw new CommandError(`Encountered duplicate command alias <${identifier}> while adding command with label <${label}>.`);
       }
 
-      submap[identifier] = handler;
+      submap.set(identifier, handler);
     });
 
     return this;
@@ -81,12 +81,12 @@ export default class CommandHandler extends MessageEvent {
    * @returns {this}
    */
   removeCommand(label) {
-    if (this.commands[label]) {
-      this.commands[label].forEach((identifier) => {
-        delete this._commandMap[identifier];
+    if (this.commands.has(label)) {
+      this.commands.get(label).forEach((identifier) => {
+        this._commandMap.delete(identifier);
       });
 
-      delete this.commands[label];
+      this.commands.delete(label);
     }
 
     return this;
@@ -99,11 +99,11 @@ export default class CommandHandler extends MessageEvent {
    * @returns {this}
    */
   addMessageHandler(label, handler) {
-    if (this.messageHandlers[label]) {
+    if (this.messageHandlers.has(label)) {
       throw new Error(`Encountered duplicate label while adding message handler: <${label}>.`);
     }
 
-    this.messageHandlers[label] = new handler();
+    this.messageHandlers.set(label, new handler());
 
     return this;
   }
@@ -127,8 +127,8 @@ export default class CommandHandler extends MessageEvent {
    * @returns {this}
    */
   removeMessageHandler(label) {
-    if (this.messageHandlers[label]) {
-      delete this.messageHandlers[label];
+    if (this.messageHandlers.has(label)) {
+      this.messageHandlers.delete(label);
     }
 
     return this;
@@ -139,7 +139,7 @@ export default class CommandHandler extends MessageEvent {
    */
   handle(client, message) {
     if (!this._handleCommand(message)) {
-      Object.values(this.messageHandlers).forEach((handler) => {
+      this.messageHandlers.forEach((handler) => {
         handler.handle(message);
       });
     }
@@ -160,7 +160,7 @@ export default class CommandHandler extends MessageEvent {
       return false;
     }
 
-    let handler = this._commandMap[parsed.identifier];
+    let handler = this._commandMap.get(parsed.identifier);
     let args = parsed.arguments;
 
     if (!handler) {
@@ -169,11 +169,11 @@ export default class CommandHandler extends MessageEvent {
       const filteredArgs = args.filter(x => x.trim());
       const identifier = filteredArgs[0].trim();
 
-      if (!identifier || !handler[identifier]) {
+      if (!identifier || !handler.get(identifier)) {
         return false;
       }
 
-      handler = handler[identifier];
+      handler = handler.get(identifier);
       args = filteredArgs.slice(1);
     }
 

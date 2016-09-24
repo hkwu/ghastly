@@ -39,7 +39,7 @@ export default (discordClient, clientOptions = {}) => (
 
       this.on(CommandHandler.type, this._commandHandler.action.bind(this._commandHandler));
 
-      this.registeredEvents = {};
+      this.registeredEvents = new Map();
       this.addEvents(nonMessageHandlers);
     }
 
@@ -80,12 +80,12 @@ export default (discordClient, clientOptions = {}) => (
       }
 
       const eventInstance = new event(this);
-      this.registeredEvents[label] = {
+      this.registeredEvents.set(label, {
         type: event.type,
         handler: eventInstance.action.bind(eventInstance),
-      };
+      });
 
-      return this.on(event.type, this.registeredEvents[label].handler);
+      return this.on(event.type, this.registeredEvents.get(label).handler);
     }
 
     /**
@@ -107,8 +107,8 @@ export default (discordClient, clientOptions = {}) => (
      * @returns {this}
      */
     removeEvent(label) {
-      const { type, handler } = this.registeredEvents[label];
-      delete this.registeredEvents[label];
+      const { type, handler } = this.registeredEvents.get(label);
+      this.registeredEvents.delete(label);
 
       return this.removeListener(type, handler);
     }
