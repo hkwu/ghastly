@@ -32,6 +32,7 @@
     "docs:publish": "npm run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs.' && git checkout -b gh-pages && git add . && git commit -am 'Update docs.' && git push git@github.com:hkwu/ghastly gh-pages --force"
   },
   "dependencies": {
+    "babel-runtime": "^6.11.6",
     "es6-error": "^3.0.1",
     "lodash": "^4.15.0",
     "string-argv": "0.0.2"
@@ -40,6 +41,7 @@
     "babel-cli": "^6.11.4",
     "babel-eslint": "^6.1.2",
     "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
     "babel-preset-es2015-node6": "^0.3.0",
     "babel-preset-stage-2": "^6.13.0",
     "babel-register": "^6.14.0",
