@@ -1,6 +1,6 @@
 # Ghastly
 
-A library designed to make it easier to modularize clients built on top of [Discord.js](http://hydrabolt.github.io/discord.js/).
+A lightweight library designed to make it easier to modularize clients built on top of [Discord.js](http://hydrabolt.github.io/discord.js/).
 
 ## Installation
 
@@ -10,7 +10,7 @@ To install, use
 npm install --save ghastly
 ```
 
-Discord.js is a peer dependency for this package, so make sure you have it installed as well. The current supported version is **9.2.x**.
+Discord.js is a peer dependency for this package, so make sure you have it installed as well.
 
 ## Quick Start
 

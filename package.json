@@ -51,6 +51,6 @@
     "mocha": "^3.0.2"
   },
   "peerDependencies": {
-    "discord.js": "9.2.x"
+    "discord.js": "9.2 - 9"
   }
 }
