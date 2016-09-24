@@ -115,11 +115,28 @@ describe('SignatureParser', function() {
         'hey',
         'there',
       ]);
+    });
 
-      expect(SignatureParser.parseIdentifiers('hello  |  hey  |  there')).to.deep.equal([
-        'hello',
-        'hey',
-        'there',
+    it('parses RegEx identifiers', function() {
+      expect(SignatureParser.parseIdentifiers('/thisis|areg[0-9]xstr\\d/')).to.deep.equal([
+        /thisis|areg[0-9]xstr\d/,
+      ]);
+
+      expect(SignatureParser.parseIdentifiers('/thisis|areg[0-9]xstr\\d/im')).to.deep.equal([
+        /thisis|areg[0-9]xstr\d/im,
+      ]);
+
+      expect(SignatureParser.parseIdentifiers('/thisis|a[^not]reg[0-9]xstr\\d')).to.deep.equal([
+        '/thisis',
+        'a[^not]reg[0-9]xstr\\d',
+      ]);
+
+      expect(SignatureParser.parseIdentifiers('/thisis|a[^not]//reg[0-9]xstr\\d/')).to.deep.equal([
+        /thisis|a[^not]\/\/reg[0-9]xstr\d/,
+      ]);
+
+      expect(SignatureParser.parseIdentifiers('//')).to.deep.equal([
+        '//',
       ]);
     });
   });

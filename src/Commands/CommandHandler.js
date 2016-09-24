@@ -25,6 +25,7 @@ export default class CommandHandler extends MessageEvent {
 
     this.commands = new Map();
     this._commandMap = new Map();
+    this._reCommandMap = new Map();
     this.messageHandlers = new Map();
 
     this.addCommands(resolvedOptions.commands);
@@ -45,11 +46,18 @@ export default class CommandHandler extends MessageEvent {
     const handler = new command();
     this.commands.set(label, handler.namespace ? [handler.namespace] : handler.identifiers);
 
-    if (handler.namespace && !this._commandMap.has(handler.namespace)) {
-      this._commandMap.set(handler.namespace, new Map());
-    }
+    let submap;
 
-    const submap = handler.namespace ? this._commandMap.get(handler.namespace) : this._commandMap;
+    if (handler.regexTriggerable) {
+      if (handler.namespace && !this._reCommandMap.has(handler.namespace)) {
+        this._reCommandMap.set(handler.namespace, new Map());
+      }
+
+      submap = handler.namespace ? this._reCommandMap.get(handler.namespace) : this._reCommandMap;
+    } else if (handler.namespace && !this._commandMap.has(handler.namespace)) {
+      this._commandMap.set(handler.namespace, new Map());
+      submap = handler.namespace ? this._commandMap.get(handler.namespace) : this._commandMap;
+    }
 
     handler.identifiers.forEach((identifier) => {
       if (submap.has(identifier)) {
@@ -84,6 +92,7 @@ export default class CommandHandler extends MessageEvent {
     if (this.commands.has(label)) {
       this.commands.get(label).forEach((identifier) => {
         this._commandMap.delete(identifier);
+        this._reCommandMap.delete(identifier);
       });
 
       this.commands.delete(label);
@@ -163,9 +172,8 @@ export default class CommandHandler extends MessageEvent {
     let handler = this._commandMap.get(parsed.identifier);
     let args = parsed.arguments;
 
-    if (!handler) {
-      return false;
-    } else if (!(handler instanceof Command)) {
+    if (handler instanceof Map) {
+      // regular string trigger with namespace
       const filteredArgs = args.filter(x => x.trim());
       const identifier = filteredArgs[0].trim();
 
@@ -175,6 +183,41 @@ export default class CommandHandler extends MessageEvent {
 
       handler = handler.get(identifier);
       args = filteredArgs.slice(1);
+    } else if (this._reCommandMap.has(parsed.identifier)) {
+      // regex trigger with namespace
+      handler = this._reCommandMap.get(parsed.identifier);
+
+      if (handler instanceof Map) {
+        const filteredArgs = args.filter(x => x.trim());
+        const identifier = filteredArgs[0].trim();
+
+        if (!identifier) {
+          return false;
+        }
+
+        for (const [regex, command] of handler) {
+          if (identifier.search(regex) !== -1) {
+            handler = command;
+
+            break;
+          }
+        }
+
+        args = filteredArgs.slice(1);
+      }
+    } else {
+      // regex trigger without namespace
+      for (const [key, value] of this._reCommandMap) {
+        if (key instanceof RegExp && parsed.identifier.search(key) !== -1) {
+          handler = value;
+
+          break;
+        }
+      }
+    }
+
+    if (!handler) {
+      return false;
     }
 
     if (parsed.mentioned && handler.resolvedStructure.mentionable === MENTIONABLE_DENY) {

@@ -55,7 +55,9 @@ export default class SignatureParser {
    * @returns {Array.<String>} An array of aliases for this command.
    */
   static parseIdentifiers(identifier) {
-    return identifier.split('|').map(alias => alias.trim());
+    const matches = identifier.match(/^\/(.+)\/(.*)$/);
+
+    return matches ? [new RegExp(matches[1], matches[2])] : identifier.split('|').map(alias => alias.trim());
   }
 
   /**

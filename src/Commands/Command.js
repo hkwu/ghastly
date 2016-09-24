@@ -43,7 +43,10 @@ export default class Command {
     ));
 
     this._filter = generateFilter(coreFilters);
-    ({ identifiers: this._identifiers, parameters: this._parameters } = SignatureParser.parse(this._resolvedStructure.signature));
+    ({
+      identifiers: this._identifiers,
+      parameters: this._parameters,
+    } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 
   /**
@@ -76,6 +79,14 @@ export default class Command {
    */
   get parameters() {
     return this._parameters;
+  }
+
+  /**
+   * Whether or not the command accepts triggers based on a RegEx pattern.
+   * @returns {Boolean}
+   */
+  get regexTriggerable() {
+    return this._identifiers.some(alias => alias instanceof RegExp);
   }
 
   /**
