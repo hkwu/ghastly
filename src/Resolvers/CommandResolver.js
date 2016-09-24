@@ -49,8 +49,18 @@ export default class CommandResolver extends BaseResolver {
           .setAllowedTypes('usernames', 'array');
 
         try {
-          const { permissions, roleNames, roleIds, userIds, usernames, ...rest } = value;
+          const {
+            bot,
+            permissions,
+            roleNames,
+            roleIds,
+            userIds,
+            usernames,
+            ...rest,
+          } = value;
+
           filtersResolver.resolve({
+            bot,
             permissions,
             roleNames,
             roleIds,
