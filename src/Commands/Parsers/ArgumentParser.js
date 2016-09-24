@@ -8,7 +8,7 @@ export default class ArgumentParser {
   /**
    * Parses an array of arguments for a command call.
    * @param {Array.<Object>} rules - An array of rules for the command being evaluated whose
-   *                                 order matches that of the arguments.
+   *   order matches that of the arguments.
    * @param {Array.<String>} args - The set of arguments for the command.
    * @returns {Object} The parsed arguments given in a mapping between argument names and values.
    * @throws {ArgumentParserError} Thrown if required arguments are missing.
