@@ -16,6 +16,8 @@ Discord.js is a peer dependency for this package, so make sure you have it insta
 
 Import the Ghastly client constructor, define some commands, register them and login. That's it!
 
+Further documentation is available on the [GitHub project page](https://hkwu.github.io/ghastly).
+
 ```js
 import Discord from 'discord.js';
 import { Command, make } from 'ghastly';
