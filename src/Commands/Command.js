@@ -38,6 +38,7 @@ export default class Command {
         filters: this.filters,
         mentionable: this.mentionable,
         namespace: this.namespace,
+        onBadArgs: this.onBadArgs,
       },
     ));
 

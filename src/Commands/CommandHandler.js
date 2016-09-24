@@ -189,6 +189,8 @@ export default class CommandHandler extends MessageEvent {
 
       return true;
     } catch (error) {
+      handler.onBadArgs(message);
+
       return false;
     }
   }

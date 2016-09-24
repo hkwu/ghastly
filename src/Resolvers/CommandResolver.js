@@ -25,12 +25,14 @@ export default class CommandResolver extends BaseResolver {
       },
       mentionable: MENTIONABLE_ALLOW,
       namespace: null,
+      onBadArgs: (message) => {},
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
       .setAllowedTypes('mentionable', 'string')
       .setAllowedTypes('namespace', ['string', 'null'])
+      .setAllowedTypes('onBadArgs', 'function')
       .setAllowedValues('filters', (value) => {
         const filtersResolver = createResolver();
         filtersResolver.setDefined('bot')
