@@ -34,12 +34,16 @@ export default class MessageBuffer {
    * @returns {this}
    */
   write(value) {
+    if (!value) {
+      return this;
+    }
+
     if (this._pointer === this.length) {
       this._buffer.push('');
     }
 
     try {
-      this._buffer[this._pointer] += `${value}`;
+      this._buffer[this._pointer] += value.toString();
     } catch (error) {
       this._buffer.pop();
     }
@@ -166,6 +170,6 @@ export default class MessageBuffer {
    * @returns {String}
    */
   toString() {
-    return this.unload().join('\n');
+    return this._buffer.join('\n');
   }
 }
