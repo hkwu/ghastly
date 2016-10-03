@@ -101,7 +101,7 @@ export default class Command {
       return false;
     }
 
-    return this._resolvedStructure.handle(message, args);
+    return this._resolvedStructure.handle.call(this, message, args);
   }
 
   /**
