@@ -28,6 +28,15 @@ export default class MessageBuffer {
   }
 
   /**
+   * Returns the line at the given index in the buffer.
+   * @param {Number} index - The index of the line to get.
+   * @returns {?String} The line at the given index in the buffer.
+   */
+  at(index) {
+    return this._buffer[index];
+  }
+
+  /**
    * Buffers a value, formatted as plain text. The value's toString() method is used to obtain
    *   the text to be buffered. If the value cannot be buffered, the buffer remains unchanged.
    * @param {*} value - The value to buffer.
@@ -77,6 +86,36 @@ export default class MessageBuffer {
       this.writeLine(value);
     });
 
+    return this;
+  }
+
+  /**
+   * Removes lines from the buffer.
+   * @param {Number} [lines=1] - The number of lines to remove. If greater than
+   *   the number of lines stored in the buffer, the buffer will be cleared.
+   * @returns {this}
+   */
+  unbuffer(lines = 1) {
+    if (lines > this._buffer.length) {
+      return this.clear();
+    }
+
+    for (let i = 0; i < lines; ++i) {
+      this._buffer.pop();
+      this._pointer -= 1;
+    }
+
+    return this;
+  }
+
+  /**
+   * Empties the buffer.
+   * @returns {this}
+   */
+  clear() {
+    this._buffer = [];
+    this._pointer = 0;
+    
     return this;
   }
 
