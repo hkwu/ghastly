@@ -234,9 +234,7 @@ export default class CommandHandler extends MessageEvent {
 
       return true;
     } catch (error) {
-      if (handler.onBadArgs) {
-        handler.onBadArgs(message);
-      }
+      handler.resolvedStructure.onBadArgs(message);
 
       return false;
     }

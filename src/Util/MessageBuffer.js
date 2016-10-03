@@ -64,6 +64,23 @@ export default class MessageBuffer {
   }
 
   /**
+   * Buffers another array, appending its contents to the current buffer.
+   * @param {Array.<String>} values - The array to buffer contents from.
+   * @returns {this}
+   */
+  buffer(values) {
+    if (!Array.isArray(values)) {
+      throw new TypeError('Expected values argument to be an array.');
+    }
+
+    values.forEach((value) => {
+      this.writeLine(value);
+    });
+
+    return this;
+  }
+
+  /**
    * Buffers a string, formatted as italic text.
    * @param {*} value -The value to buffer.
    * @returns {this}
