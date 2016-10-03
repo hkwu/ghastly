@@ -14,6 +14,7 @@ export default class CommandResolver extends BaseResolver {
       'signature',
       'handle',
     ]).setDefaults({
+      caseInsensitive: true,
       description: 'No description set for this command.',
       filters: {
         bot: false,
@@ -28,6 +29,7 @@ export default class CommandResolver extends BaseResolver {
       onBadArgs: (message) => {},
     }).setAllowedTypes('signature', 'string')
       .setAllowedTypes('handle', 'function')
+      .setAllowedTypes('caseInsensitive', 'boolean')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('filters', 'plainObject')
       .setAllowedTypes('mentionable', 'string')

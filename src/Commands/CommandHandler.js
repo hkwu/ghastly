@@ -4,7 +4,7 @@ import CommandError from '../Errors/CommandError';
 import CommandHandlerResolver from '../Resolvers/CommandHandlerResolver';
 import CommandParser from './Parsers/CommandParser';
 import MessageEvent from '../Events/MessageEvent';
-import Command, { MENTIONABLE_DENY, MENTIONABLE_ONLY } from './Command';
+import { MENTIONABLE_DENY, MENTIONABLE_ONLY } from './Command';
 
 /**
  * Handles the dispatching of commands.

@@ -34,6 +34,7 @@ export default class Command {
       {
         signature: this.signature,
         handle: this.handle,
+        caseInsensitive: this.caseInsensitive,
         description: this.description,
         filters: this.filters,
         mentionable: this.mentionable,
