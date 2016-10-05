@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash/lang';
-import { merge } from 'lodash/object';
+import { mapValues, merge } from 'lodash/object';
 import CommandResolver from '../Resolvers/CommandResolver';
 import SignatureParser from './Parsers/SignatureParser';
 import coreFilters from './Filters/coreFilters';
@@ -29,8 +29,8 @@ export const MENTIONABLE_ONLY = 'only';
 export default class Command {
   constructor() {
     const resolver = new CommandResolver();
-    this._resolvedStructure = resolver.resolve(merge(
-      { ...this.structure },
+    const resolvedStructure = resolver.resolve(merge(
+      this.structure,
       {
         signature: this.signature,
         handle: this.handle,
@@ -43,11 +43,17 @@ export default class Command {
       },
     ));
 
+    const { identifiers, parameters } = SignatureParser.parse(resolvedStructure.signature);
+    Object.defineProperties(this, mapValues({
+      ...resolvedStructure,
+      identifiers,
+      parameters,
+    }, value => ({
+      enumerable: true,
+      value,
+    }));
+
     this._filter = generateFilter(coreFilters);
-    ({
-      identifiers: this._identifiers,
-      parameters: this._parameters,
-    } = SignatureParser.parse(this._resolvedStructure.signature));
   }
 
   /**
@@ -56,30 +62,6 @@ export default class Command {
    */
   get structure() {
     return {};
-  }
-
-  /**
-   * Object containing the validated command configuration.
-   * @type {Object}
-   */
-  get resolvedStructure() {
-    return this._resolvedStructure;
-  }
-
-  /**
-   * The identifiers parsed from the command signature.
-   * @type {Array.<String>}
-   */
-  get identifiers() {
-    return this._identifiers;
-  }
-
-  /**
-   * The parameters parsed from the command signature.
-   * @type {Array.<Object>}
-   */
-  get parameters() {
-    return this._parameters;
   }
 
   /**
@@ -101,7 +83,7 @@ export default class Command {
       return false;
     }
 
-    return this._resolvedStructure.handle.call(this, message, args);
+    return this.handle.call(this, message, args);
   }
 
   /**
@@ -111,8 +93,8 @@ export default class Command {
    * @private
    */
   _isFilterable(message) {
-    return isEmpty(this._resolvedStructure.filters)
+    return isEmpty(this.filters)
       ? false
-      : this._filter(this._resolvedStructure.filters, message);
+      : this._filter(this.filters, message);
   }
 }

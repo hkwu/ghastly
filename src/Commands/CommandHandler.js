@@ -222,9 +222,9 @@ export default class CommandHandler extends MessageEvent {
       return false;
     }
 
-    if (parsed.mentioned && handler.resolvedStructure.mentionable === MENTIONABLE_DENY) {
+    if (parsed.mentioned && handler.mentionable === MENTIONABLE_DENY) {
       return false;
-    } else if (!parsed.mentioned && handler.resolvedStructure.mentionable === MENTIONABLE_ONLY) {
+    } else if (!parsed.mentioned && handler.mentionable === MENTIONABLE_ONLY) {
       return false;
     }
 
@@ -234,7 +234,7 @@ export default class CommandHandler extends MessageEvent {
 
       return true;
     } catch (error) {
-      handler.resolvedStructure.onBadArgs(message);
+      handler.onBadArgs(message);
 
       return false;
     }
