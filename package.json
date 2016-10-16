@@ -1,6 +1,6 @@
 {
   "name": "ghastly",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A lightweight, pluggable library that helps to modularize applications built with Discord.js.",
   "keywords": [
     "discord.js",
