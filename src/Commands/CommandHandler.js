@@ -114,7 +114,7 @@ export default class CommandHandler extends MessageEvent {
       throw new Error(`Encountered duplicate label while adding message handler: <${label}>.`);
     }
 
-    this.messageHandlers.set(label, new handler());
+    this.messageHandlers.set(label, new handler(this._client));
 
     return this;
   }

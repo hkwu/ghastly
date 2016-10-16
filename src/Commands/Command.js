@@ -51,7 +51,7 @@ export default class Command {
     }, value => ({
       enumerable: true,
       value,
-    }));
+    })));
 
     this._filter = generateFilter(coreFilters);
   }
@@ -69,7 +69,7 @@ export default class Command {
    * @returns {Boolean}
    */
   get regexTriggerable() {
-    return this._identifiers.some(alias => alias instanceof RegExp);
+    return this.identifiers.some(alias => alias instanceof RegExp);
   }
 
   /**
@@ -83,7 +83,7 @@ export default class Command {
       return false;
     }
 
-    return this.handle.call(this, message, args);
+    return this.handle(message, args);
   }
 
   /**
