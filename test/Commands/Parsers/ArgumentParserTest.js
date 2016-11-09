@@ -3,7 +3,7 @@ import stringArgv from 'string-argv';
 import ArgumentParser from '../../../src/Commands/Parsers/ArgumentParser';
 import ArgumentParserError from '../../../src/Errors/ArgumentParserError';
 import SignatureParser from '../../../src/Commands/Parsers/SignatureParser';
-import { TOKEN } from '../../../src/Commands/Parsers/Constants';
+import { TOKEN } from '../../../src/Parsers/Constants';
 
 describe('ArgumentParser', function() {
   describe('#parse()', function() {
