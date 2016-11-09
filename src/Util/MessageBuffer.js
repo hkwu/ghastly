@@ -115,7 +115,7 @@ export default class MessageBuffer {
   clear() {
     this._buffer = [];
     this._pointer = 0;
-    
+
     return this;
   }
 

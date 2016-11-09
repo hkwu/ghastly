@@ -29,7 +29,7 @@ export default function createResolver() {
     }
 
     if (!state.defined.hasOwnProperty(option)
-      || null === state.defined[option]
+      || state.defined[option] === null
       || state.resolved.hasOwnProperty(option)) {
       state.resolved[option] = value;
     }
@@ -71,7 +71,7 @@ export default function createResolver() {
 
   function isRequired(option) {
     return (state.required.hasOwnProperty(option)
-    && null !== state.required[option]);
+    && state.required[option] !== null);
   }
 
   function getRequiredOptions() {
@@ -103,7 +103,7 @@ export default function createResolver() {
   }
 
   function isDefined(option) {
-    return (state.defined.hasOwnProperty(option) && null !== state.defined[option]);
+    return (state.defined.hasOwnProperty(option) && state.defined[option] !== null);
   }
 
   function getDefinedOptions() {
@@ -156,7 +156,7 @@ export default function createResolver() {
       values = [values];
     }
 
-    if (!state.allowedValues.hasOwnProperty(option) || null === state.allowedValues[option]) {
+    if (!state.allowedValues.hasOwnProperty(option) || state.allowedValues[option] === null) {
       state.allowedValues[option] = values;
     } else {
       state.allowedValues[option] = [...state.allowedValues[option], ...values];
@@ -197,7 +197,7 @@ export default function createResolver() {
       types = [types];
     }
 
-    if (!state.allowedTypes.hasOwnProperty(option) || null === state.allowedTypes[option]) {
+    if (!state.allowedTypes.hasOwnProperty(option) || state.allowedTypes[option] === null) {
       state.allowedTypes[option] = types;
     } else {
       state.allowedTypes[option] = [...state.allowedTypes[option], ...types];
@@ -331,7 +331,7 @@ export default function createResolver() {
     }
 
     if (!clone.defaults.hasOwnProperty(option)) {
-      if (!clone.defined.hasOwnProperty(option) || null === clone.defined[option]) {
+      if (!clone.defined.hasOwnProperty(option) || clone.defined[option] === null) {
         const definedOptions = Object.keys(clone.defined).join('", "');
         throw new Error(`The option "${option}" does not exist. Defined options are : "${definedOptions}"`);
       }
@@ -343,11 +343,11 @@ export default function createResolver() {
 
     // @todo : process lazy option
     if (clone.allowedTypes.hasOwnProperty(option)
-      && null !== clone.allowedTypes[option]) {
+      && clone.allowedTypes[option] !== null) {
       let valid = false;
 
       for (const allowedType of clone.allowedTypes[option]) {
-        const functionName = 'is' + allowedType.charAt(0).toUpperCase() + allowedType.substr(1);
+        const functionName = `is${allowedType.charAt(0).toUpperCase()}${allowedType.substr(1)}`;
         if (lang.hasOwnProperty(functionName)) {
           if (lang[functionName](value)) {
             valid = true;
@@ -370,7 +370,7 @@ export default function createResolver() {
     }
 
     if (clone.allowedValues.hasOwnProperty(option)
-      && null !== clone.allowedValues[option]) {
+      && clone.allowedValues[option] !== null) {
       let success = false;
       const printableAllowedValues = [];
 
@@ -393,7 +393,7 @@ export default function createResolver() {
       if (!success) {
         let message = `The option "${option}" is invalid.`;
         if (printableAllowedValues.length) {
-          message += ' Accepted values are : ' + printableAllowedValues.join(', ');
+          message += ` Accepted values are : ${printableAllowedValues.join(', ')}`;
         }
 
         throw new Error(message);
@@ -401,8 +401,8 @@ export default function createResolver() {
     }
 
     if (clone.normalizers.hasOwnProperty(option)
-      && null !== clone.normalizers[option]) {
-      if (clone.calling.hasOwnProperty(option) && null !== clone.calling[option]) {
+      && clone.normalizers[option] !== null) {
+      if (clone.calling.hasOwnProperty(option) && clone.calling[option] !== null) {
         const callingKeys = Object.keys(clone.calling).join('", "');
         throw new Error(`The options "${callingKeys}" have a cyclic dependency`);
       }

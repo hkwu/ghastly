@@ -1,37 +1,3 @@
 export { default as make } from './Client/make';
-export { default as Command } from './Commands/Command';
 export { default as Middleware } from './Middleware/Middleware';
 export { default as MessageBuffer } from './Util/MessageBuffer';
-
-// events
-export { default as ChannelCreateEvent } from './Events/ChannelCreateEvent';
-export { default as ChannelDeleteEvent } from './Events/ChannelDeleteEvent';
-export { default as ChannelPinsUpdateEvent } from './Events/ChannelPinsUpdateEvent';
-export { default as ChannelUpdateEvent } from './Events/ChannelUpdateEvent';
-export { default as ErrorEvent } from './Events/ErrorEvent';
-export { default as GuildBanAddEvent } from './Events/GuildBanAddEvent';
-export { default as GuildBanRemoveEvent } from './Events/GuildBanRemoveEvent';
-export { default as GuildCreateEvent } from './Events/GuildCreateEvent';
-export { default as GuildDeleteEvent } from './Events/GuildDeleteEvent';
-export { default as GuildMemberAddEvent } from './Events/GuildMemberAddEvent';
-export { default as GuildMemberAvailableEvent } from './Events/GuildMemberAvailableEvent';
-export { default as GuildMemberRemoveEvent } from './Events/GuildMemberRemoveEvent';
-export { default as GuildMembersChunkEvent } from './Events/GuildMembersChunkEvent';
-export { default as GuildMemberSpeakingEvent } from './Events/GuildMemberSpeakingEvent';
-export { default as GuildMemberUpdateEvent } from './Events/GuildMemberUpdateEvent';
-export { default as GuildRoleCreateEvent } from './Events/GuildRoleCreateEvent';
-export { default as GuildRoleDeleteEvent } from './Events/GuildRoleDeleteEvent';
-export { default as GuildRoleUpdateEvent } from './Events/GuildRoleUpdateEvent';
-export { default as GuildUnavailableEvent } from './Events/GuildUnavailableEvent';
-export { default as GuildUpdateEvent } from './Events/GuildUpdateEvent';
-export { default as MessageEvent } from './Events/MessageEvent';
-export { default as MessageDeleteEvent } from './Events/MessageDeleteEvent';
-export { default as MessageDeleteBulkEvent } from './Events/MessageDeleteBulkEvent';
-export { default as MessageUpdateEvent } from './Events/MessageUpdateEvent';
-export { default as PresenceUpdateEvent } from './Events/PresenceUpdateEvent';
-export { default as ReadyEvent } from './Events/ReadyEvent';
-export { default as ReconnectingEvent } from './Events/ReconnectingEvent';
-export { default as TypingStartEvent } from './Events/TypingStartEvent';
-export { default as TypingStopEvent } from './Events/TypingStopEvent';
-export { default as UserUpdateEvent } from './Events/UserUpdateEvent';
-export { default as VoiceStateUpdateEvent } from './Events/VoiceStateUpdateEvent';
