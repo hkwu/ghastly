@@ -25,11 +25,11 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "mocha --require babel-register --recursive",
-    "prepublish": "yarn run build && yarn run test",
+    "prepublish": "yarn run build && yarn test",
     "docs:prepare": "gitbook install",
     "docs:watch": "yarn run docs:prepare && gitbook serve",
     "docs:build": "yarn run docs:prepare && rm -rf _book && gitbook build",
-    "docs:publish": "yarn run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs.' && git checkout -b gh-pages && git add . && git commit -am 'Update docs.' && git push git@github.com:hkwu/ghastly gh-pages --force"
+    "docs:publish": "yarn run docs:build && cd _book && echo 'ghastly.js.org' > CNAME && git init && git commit --allow-empty -m 'Update docs.' && git checkout -b gh-pages && git add . && git commit -am 'Update docs.' && git push git@github.com:hkwu/ghastly gh-pages --force"
   },
   "dependencies": {
     "es6-error": "^4.0.0",
