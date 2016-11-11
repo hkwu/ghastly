@@ -4,9 +4,13 @@ import { isFunction, isString } from 'lodash/lang';
  * Class which wraps a command handler with additional useful data.
  */
 export default class CommandObject {
+  /**
+   * Constructor.
+   * @param {Function} handler - The command handler function.
+   */
   constructor(handler) {
     if (!isFunction(handler)) {
-      throw new TypeError('Expected function as CommandObject constructor argument.');
+      throw new TypeError('Expected constructor argument to be a function.');
     }
 
     this.handler = handler;
@@ -20,15 +24,22 @@ export default class CommandObject {
    * Sets the triggers for this command.
    * @param {String} trigger - The main trigger for this command.
    * @param {...String} [aliases] - Additional aliases for this command.
-   * @returns {CommandObject} The instance the method was called on..
+   * @returns {CommandObject}The instance this method was called on.
    */
   react(trigger, ...aliases) {
     if (!isString(trigger)) {
-      throw new TypeError('Command trigger must be a string.');
+      throw new TypeError('Expected command trigger to be a string.');
     }
 
     this.trigger = trigger;
-    this.aliases = aliases.filter(alias => isString(alias));
+
+    aliases.forEach((alias) => {
+      if (!isString(alias)) {
+        throw new TypeError('Expected command alias to be a string.');
+      }
+    });
+
+    this.aliases = aliases;
 
     return this;
   }
@@ -36,7 +47,7 @@ export default class CommandObject {
   /**
    * Sets the arguments for this command.
    * @param {...String} [argdefs] - The argument definitions.
-   * @returns {CommandObject} The instance the method was called on..
+   * @returns {CommandObject}The instance this method was called on.
    */
   args(...argdefs) {
     argdefs.forEach((argdef) => {
@@ -53,7 +64,7 @@ export default class CommandObject {
   /**
    * Sets the description of the command.
    * @param {String} description - The description of the command.
-   * @returns {CommandObject} The instance the method was called on..
+   * @returns {CommandObject}The instance this method was called on.
    */
   describe(description) {
     if (!isString(description)) {
