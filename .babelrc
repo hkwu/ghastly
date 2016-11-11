@@ -1,5 +1,9 @@
 {
   "presets": [
     "node7"
+  ],
+  "plugins": [
+    "transform-es2015-destructuring",
+    ["transform-object-rest-spread", { "useBuiltIns": true }]
   ]
 }
