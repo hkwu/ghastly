@@ -299,7 +299,7 @@ babel-preset-node7@^1.2.0:
     babel-plugin-syntax-trailing-function-commas "^6.13.0"
     babel-plugin-transform-es2015-modules-commonjs "^6.18.0"
 
-babel-register@^6.18.0:
+babel-register, babel-register@^6.18.0:
   version "6.18.0"
   resolved "https://registry.yarnpkg.com/babel-register/-/babel-register-6.18.0.tgz#892e2e03865078dd90ad2c715111ec4449b32a68"
   dependencies:
