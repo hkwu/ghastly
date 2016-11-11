@@ -1,4 +1,4 @@
-import CommandParserError from '../../Errors/CommandParserError';
+import CommandParserError from '../../errors/CommandParserError';
 
 /**
  * Handles parsing a message for a command.

@@ -20,7 +20,7 @@ export default class CommandObject {
    * Sets the triggers for this command.
    * @param {String} trigger - The main trigger for this command.
    * @param {...String} [aliases] - Additional aliases for this command.
-   * @returns {CommandObject} The current CommandObject.
+   * @returns {CommandObject} The instance the method was called on..
    */
   react(trigger, ...aliases) {
     if (!isString(trigger)) {
@@ -36,7 +36,7 @@ export default class CommandObject {
   /**
    * Sets the arguments for this command.
    * @param {...String} [argdefs] - The argument definitions.
-   * @returns {CommandObject} The current CommandObject.
+   * @returns {CommandObject} The instance the method was called on..
    */
   args(...argdefs) {
     argdefs.forEach((argdef) => {
@@ -53,7 +53,7 @@ export default class CommandObject {
   /**
    * Sets the description of the command.
    * @param {String} description - The description of the command.
-   * @returns {CommandObject} The current CommandObject.
+   * @returns {CommandObject} The instance the method was called on..
    */
   describe(description) {
     if (!isString(description)) {

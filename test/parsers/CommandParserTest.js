@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import CommandParser from '../../../src/Commands/Parsers/CommandParser';
-import CommandParserError from '../../../src/Errors/CommandParserError';
+import CommandParser from '../../src/parsers/CommandParser';
+import CommandParserError from '../../src/errors/CommandParserError';
 
 describe('CommandParser', function() {
   describe('#parse()', function() {

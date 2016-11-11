@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import stringArgv from 'string-argv';
-import ArgumentParser from '../../../src/Commands/Parsers/ArgumentParser';
-import ArgumentParserError from '../../../src/Errors/ArgumentParserError';
-import SignatureParser from '../../../src/Commands/Parsers/SignatureParser';
-import { TOKEN } from '../../../src/Parsers/Constants';
+import ArgumentParser from '../../src/parsers/ArgumentParser';
+import ArgumentParserError from '../../src/errors/ArgumentParserError';
+import SignatureParser from '../../src/parsers/SignatureParser';
+import { TOKEN } from '../../src/parsers/Constants';
 
 describe('ArgumentParser', function() {
   describe('#parse()', function() {

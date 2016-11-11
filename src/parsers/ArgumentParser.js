@@ -1,4 +1,4 @@
-import ArgumentParserError from '../../Errors/ArgumentParserError';
+import ArgumentParserError from '../../errors/ArgumentParserError';
 import * as Constants from './Constants';
 
 /**

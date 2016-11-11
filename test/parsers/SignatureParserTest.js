@@ -1,8 +1,8 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import SignatureParser from '../../../src/Commands/Parsers/SignatureParser';
-import SignatureParserError from '../../../src/Errors/SignatureParserError';
-import { TOKEN } from '../../../src/Commands/Parsers/Constants';
+import SignatureParser from '../../src/parsers/SignatureParser';
+import SignatureParserError from '../../src/errors/SignatureParserError';
+import { TOKEN } from '../../src/parsers/Constants';
 
 describe('SignatureParser', function() {
   before(function() {

@@ -1,6 +1,6 @@
 import stringArgv from 'string-argv';
 import { endsWith, trimEnd } from 'lodash/string';
-import SignatureParserError from '../../Errors/SignatureParserError';
+import SignatureParserError from '../../errors/SignatureParserError';
 import * as Constants from './Constants';
 
 /**
