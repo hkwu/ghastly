@@ -6,15 +6,39 @@ import { isFunction, isString } from 'lodash/lang';
 export default class CommandObject {
   /**
    * Constructor.
-   * @param {Function|CommandObject} source - The command handler function, or
+   * @param {(Function|CommandObject)} source - The command handler function, or
    *   a CommandObject instance whose data will be copied over.
    */
   constructor(source) {
     if (isFunction(source)) {
+      /**
+       * The command handler function.
+       * @type {Function}
+       */
       this.handler = source;
+
+      /**
+       * The main trigger of the command, also acting as its name.
+       * @type {string}
+       */
       this.trigger = null;
+
+      /**
+       * An array of aliases for the command.
+       * @type {Array.<string>}
+       */
       this.aliases = [];
+
+      /**
+       * An array of parsed parameter definitions for the command.
+       * @type {Array.<Object>}
+       */
       this.params = [];
+
+      /**
+       * The description for the command.
+       * @type {?string}
+       */
       this.description = null;
     } else if (source instanceof CommandObject) {
       this.handler = source.handler;
@@ -30,7 +54,7 @@ export default class CommandObject {
   /**
    * Sets the triggers for this command.
    * @param {string} trigger - The main trigger for this command.
-   * @param {...string} [aliases] - Additional aliases for this command.
+   * @param {...string} aliases - Additional aliases for this command.
    * @returns {CommandObject} The instance this method was called on.
    */
   react(trigger, ...aliases) {
@@ -53,7 +77,7 @@ export default class CommandObject {
 
   /**
    * Sets the parameters for this command.
-   * @param {...string} [paramdefs] - The parameter definitions.
+   * @param {...string} paramdefs - The parameter definitions.
    * @returns {CommandObject} The instance this method was called on.
    */
   params(...paramdefs) {

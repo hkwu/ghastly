@@ -10,7 +10,16 @@ export default class CommandRegistry {
    * Constructor.
    */
   constructor() {
+    /**
+     * The commands stored in this registry.
+     * @type {Map.<string, CommandObject>}
+     */
     this.commands = new Map();
+
+    /**
+     * The command aliases stored in this registry.
+     * @type {Map.<string, CommandObject>}
+     */
     this.aliases = new Map();
   }
 
@@ -41,7 +50,7 @@ export default class CommandRegistry {
 
   /**
    * Removes a command from the registry, along with its aliases.
-   * @param {String} name - The command's main trigger.
+   * @param {string} name - The command's main trigger.
    * @returns {CommandObject} The removed CommandObject.
    */
   removeCommand(name) {
@@ -66,8 +75,8 @@ export default class CommandRegistry {
 
   /**
    * Adds a command alias to the registry.
-   * @param {String} alias - The command alias.
-   * @param {String} name - The name of the command to add an alias to.
+   * @param {string} alias - The command alias.
+   * @param {string} name - The name of the command to add an alias to.
    * @returns {CommandRegistry} The instance this method was called on.
    */
   addAlias(alias, name) {
@@ -88,7 +97,7 @@ export default class CommandRegistry {
 
   /**
    * Removes a command alias from the registry.
-   * @param {String} alias - The command alias.
+   * @param {string} alias - The command alias.
    * @returns {CommandRegistry} The instance this method was called on.
    */
   removeAlias(alias) {
