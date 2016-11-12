@@ -52,5 +52,8 @@
   },
   "peerDependencies": {
     "discord.js": "^10.0.1"
+  },
+  "engines": {
+    "node": ">=7.0.0"
   }
 }
