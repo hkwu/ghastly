@@ -6,25 +6,32 @@ import { isFunction, isString } from 'lodash/lang';
 export default class CommandObject {
   /**
    * Constructor.
-   * @param {Function} handler - The command handler function.
+   * @param {Function|CommandObject} source - The command handler function, or
+   *   a CommandObject instance whose data will be copied over.
    */
-  constructor(handler) {
-    if (!isFunction(handler)) {
-      throw new TypeError('Expected constructor argument to be a function.');
+  constructor(source) {
+    if (isFunction(source)) {
+      this.handler = source;
+      this.trigger = null;
+      this.aliases = [];
+      this.params = [];
+      this.description = null;
+    } else if (source instanceof CommandObject) {
+      this.handler = source.handler;
+      this.trigger = source.trigger;
+      this.aliases = [...source.aliases];
+      this.params = [...source.params];
+      this.description = source.description;
+    } else {
+      throw new TypeError('Expected constructor argument to be a function or a CommandObject instance.');
     }
-
-    this.handler = handler;
-    this.trigger = null;
-    this.aliases = [];
-    this.args = [];
-    this.description = null;
   }
 
   /**
    * Sets the triggers for this command.
-   * @param {String} trigger - The main trigger for this command.
-   * @param {...String} [aliases] - Additional aliases for this command.
-   * @returns {CommandObject}The instance this method was called on.
+   * @param {string} trigger - The main trigger for this command.
+   * @param {...string} [aliases] - Additional aliases for this command.
+   * @returns {CommandObject} The instance this method was called on.
    */
   react(trigger, ...aliases) {
     if (!isString(trigger)) {
@@ -45,13 +52,13 @@ export default class CommandObject {
   }
 
   /**
-   * Sets the arguments for this command.
-   * @param {...String} [argdefs] - The argument definitions.
-   * @returns {CommandObject}The instance this method was called on.
+   * Sets the parameters for this command.
+   * @param {...string} [paramdefs] - The parameter definitions.
+   * @returns {CommandObject} The instance this method was called on.
    */
-  args(...argdefs) {
-    argdefs.forEach((argdef) => {
-      if (!isString(argdef)) {
+  params(...paramdefs) {
+    paramdefs.forEach((paramdef) => {
+      if (!isString(paramdef)) {
         throw new TypeError('Expected command argument definitions to be strings.');
       }
 
@@ -63,8 +70,8 @@ export default class CommandObject {
 
   /**
    * Sets the description of the command.
-   * @param {String} description - The description of the command.
-   * @returns {CommandObject}The instance this method was called on.
+   * @param {string} description - The description of the command.
+   * @returns {CommandObject} The instance this method was called on.
    */
   describe(description) {
     if (!isString(description)) {
