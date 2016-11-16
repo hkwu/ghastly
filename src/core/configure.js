@@ -1,5 +1,3 @@
-import apply from './apply';
-
 /**
  * Provides a bridge to provide configuration data for plugins. Consumes an
  *   optional config object containing the configuration data and produces a
@@ -15,9 +13,9 @@ import apply from './apply';
 export default (config = {}) => {
   return plugin => (generatorApi) => {
     // merge the original config and the trickled config
-    const { config: trickledConfig = {}, ...rest } = generatorApi;
+    const { apply, config: trickledConfig = {}, ...rest } = generatorApi;
     const updatedConfig = { ...config, ...trickledConfig };
-    let command = plugin({ ...rest, config: updatedConfig });
+    let command = plugin({ ...rest, apply, config: updatedConfig });
 
     // extract default keys
     const {
