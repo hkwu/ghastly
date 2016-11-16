@@ -1,3 +1,5 @@
+import { isFunction, isPlainObject } from 'lodash/lang';
+
 /**
  * Provides a bridge to provide configuration data for plugins. Consumes an
  *   optional config object containing the configuration data and produces a
@@ -11,28 +13,38 @@
  *   with the provided config applied to it.
  */
 export default (config = {}) => {
-  return plugin => (generatorApi) => {
-    // merge the original config and the trickled config
-    const { apply, config: trickledConfig = {}, ...rest } = generatorApi;
-    const updatedConfig = { ...config, ...trickledConfig };
-    let command = plugin({ ...rest, apply, config: updatedConfig });
+  if (!isPlainObject(config)) {
+    throw new TypeError('Expected given config to be a plain object.');
+  }
 
-    // extract default keys
-    const {
-      triggers: [],
-      middleware: [],
-      description,
-    } = updatedConfig;
-
-    // update the command accordingly
-    if (triggers.length) {
-      command.react(...triggers);
-    } else if (middleware.length) {
-      command = apply(...middleware)(command);
-    } else if (description) {
-      command.describe(description);
+  return (plugin) => {
+    if (!isFunction(plugin)) {
+      throw new TypeError('Expected given plugin to be a function.')
     }
 
-    return command;
+    return (generatorApi) => {
+      // merge the original config and the trickled config
+      const { apply, config: trickledConfig = {}, ...rest } = generatorApi;
+      const updatedConfig = { ...config, ...trickledConfig };
+      let command = plugin({ ...rest, apply, config: updatedConfig });
+
+      // extract default keys
+      const {
+        triggers: [],
+        middleware: [],
+        description,
+      } = updatedConfig;
+
+      // update the command accordingly
+      if (triggers.length) {
+        command.react(...triggers);
+      } else if (middleware.length) {
+        command = apply(...middleware)(command);
+      } else if (description) {
+        command.describe(description);
+      }
+
+      return command;
+    };
   };
 };
