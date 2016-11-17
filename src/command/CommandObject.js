@@ -1,7 +1,7 @@
 import { isFunction, isString } from 'lodash/lang';
 
 /**
- * Class which wraps a command handler with additional useful data.
+ * @classdesc Class which wraps a command handler with additional useful data.
  */
 export default class CommandObject {
   /**

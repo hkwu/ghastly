@@ -3,7 +3,7 @@ import CommandError from '../errors/CommandError';
 import CommandObject from './CommandObject';
 
 /**
- * Class handling storage and access control for commands.
+ * @classdesc Class handling storage and access control for commands.
  */
 export default class CommandRegistry {
   /**
