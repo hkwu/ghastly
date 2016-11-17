@@ -27,7 +27,7 @@ export default (config = {}) => {
       // merge the original config and the trickled config
       const { apply, config: trickledConfig = {}, ...rest } = generatorApi;
       const updatedConfig = { ...config, ...trickledConfig };
-      let command = plugin({ ...rest, apply, config: updatedConfig });
+      const command = plugin({ ...rest, apply, config: updatedConfig });
 
       // extract default keys
       const {
@@ -40,7 +40,7 @@ export default (config = {}) => {
       if (triggers.length) {
         command.react(...triggers);
       } else if (middleware.length) {
-        command = apply(...middleware)(command);
+        command.handler = apply(...middleware)(command.handler);
       } else if (description) {
         command.describe(description);
       }

@@ -1,6 +1,17 @@
 import { isFunction } from 'lodash/lang';
 
 /**
+ * A function called when its associated command is to be executed. Receives a
+ *   context object and returns a value to indicate how to respond.
+ * @callback commandHandler
+ * @param {Object} context - An object containing data passed down to the handler.
+ *   Includes things such as the received Discord.js Message object and arguments
+ *   parsed in the message.
+ * @returns {(string|Array.<string>|Function)} A value indicating how to respond
+ *   to the received message.
+ */
+
+/**
  * A function which acts as one of the layers in a middleware chain.
  * @callback middlewareLayer
  * @param {(middlewareLayer|commandHandler)} next - The next layer in the middleware
@@ -9,17 +20,6 @@ import { isFunction } from 'lodash/lang';
  * @param {Object} context - The current context object being passed through
  *   the middleware layers.
  * @returns {*} The value to be returned to the caller of this middleware layer.
- */
-
-/**
- * A function called when its associated command is to be executed. Receives a
- *   context object and returns a value to indicate how to respond.
- * @callback commandHandler
- * @param {Object} context - An object containing data passed down to the handler.
- *   Includes things such as the received Discord.js Message object and arguments
- *   parsed in the message.
- * @returns {string|Array.<string>|Function} A value indicating how to respond to
- *   the received message.
  */
 
 /**
