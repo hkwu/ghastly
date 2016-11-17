@@ -19,7 +19,7 @@ export default (config = {}) => {
 
   return (plugin) => {
     if (!isFunction(plugin)) {
-      throw new TypeError('Expected given plugin to be a function.')
+      throw new TypeError('Expected given plugin to be a function.');
     }
 
     return (generatorApi) => {
@@ -30,8 +30,8 @@ export default (config = {}) => {
 
       // extract default keys
       const {
-        triggers: [],
-        middleware: [],
+        triggers = [],
+        middleware = [],
         description,
       } = updatedConfig;
 
