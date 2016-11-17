@@ -27,6 +27,8 @@ export default class CommandRegistry {
    * Adds a command to the registry.
    * @param {CommandObject} command - The command to register.
    * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if a duplicate command name or alias is found.
+   * @throws {TypeError} Thrown if the given command is not a CommandObject instance.
    */
   addCommand(command) {
     if (!(command instanceof CommandObject)) {
@@ -52,6 +54,8 @@ export default class CommandRegistry {
    * Removes a command from the registry, along with its aliases.
    * @param {string} name - The command's main trigger.
    * @returns {CommandObject} The removed CommandObject.
+   * @throws {CommandError} Thrown if given command name doesn't exist in the registry.
+   * @throws {TypeError} Thrown if the given command name is not a string.
    */
   removeCommand(name) {
     if (!isString(name)) {
@@ -78,6 +82,9 @@ export default class CommandRegistry {
    * @param {string} alias - The command alias.
    * @param {string} name - The name of the command to add an alias to.
    * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if given command name doesn't exist in the registry,
+   *   or if a duplicate alias is detected.
+   * @throws {TypeError} Thrown if the given command alias and name are not strings.
    */
   addAlias(alias, name) {
     if (!isString(alias) || !isString(name)) {
@@ -99,6 +106,8 @@ export default class CommandRegistry {
    * Removes a command alias from the registry.
    * @param {string} alias - The command alias.
    * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if the given command alias doesn't exist in the registry.
+   * @throws {TypeError} Thrown if the given command alias is not a string.
    */
   removeAlias(alias) {
     if (!isString(alias)) {

@@ -11,6 +11,7 @@ import { isFunction, isPlainObject } from 'lodash/lang';
  *   pass to the plugin.
  * @returns {Function} A function consuming a plugin and producing another plugin
  *   with the provided config applied to it.
+ * @throws {TypeError} Thrown if the given config argument is not a plain object.
  */
 export default (config = {}) => {
   if (!isPlainObject(config)) {

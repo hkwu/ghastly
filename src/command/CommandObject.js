@@ -8,6 +8,8 @@ export default class CommandObject {
    * Constructor.
    * @param {(Function|CommandObject)} source - The command handler function, or
    *   a CommandObject instance whose data will be copied over.
+   * @throws {TypeError} Thrown if the given source is not a function or
+   *   a CommandObject instance.
    */
   constructor(source) {
     if (isFunction(source)) {
@@ -56,6 +58,7 @@ export default class CommandObject {
    * @param {string} trigger - The main trigger for this command.
    * @param {...string} aliases - Additional aliases for this command.
    * @returns {CommandObject} The instance this method was called on.
+   * @throws {TypeError} Thrown if the given trigger and aliases are not strings.
    */
   react(trigger, ...aliases) {
     if (!isString(trigger)) {
@@ -79,6 +82,7 @@ export default class CommandObject {
    * Sets the parameters for this command.
    * @param {...string} paramdefs - The parameter definitions.
    * @returns {CommandObject} The instance this method was called on.
+   * @throws {TypeError} Thrown if the given paramdefs are not strings.
    */
   params(...paramdefs) {
     paramdefs.forEach((paramdef) => {
@@ -96,6 +100,7 @@ export default class CommandObject {
    * Sets the description of the command.
    * @param {string} description - The description of the command.
    * @returns {CommandObject} The instance this method was called on.
+   * @throws {TypeError} Thrown if the given description is not a string.
    */
   describe(description) {
     if (!isString(description)) {
