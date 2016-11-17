@@ -1,8 +1,8 @@
-import ArgumentParserError from '../../errors/ArgumentParserError';
+import ArgumentParserError from '../errors/ArgumentParserError';
 import * as Constants from './Constants';
 
 /**
- * Handles parsing of commands given by users.
+ * @classdesc Handles parsing of commands given by users.
  */
 export default class ArgumentParser {
   /**

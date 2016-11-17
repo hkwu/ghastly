@@ -1,10 +1,10 @@
 import stringArgv from 'string-argv';
 import { endsWith, trimEnd } from 'lodash/string';
-import SignatureParserError from '../../errors/SignatureParserError';
+import SignatureParserError from '../errors/SignatureParserError';
 import * as Constants from './Constants';
 
 /**
- * Parses the signature of a command.
+ * @classdesc Parses the signature of a command.
  */
 export default class SignatureParser {
   /**

@@ -1,21 +1,28 @@
-import CommandParserError from '../../errors/CommandParserError';
+/**
+ * @typedef {Object} ParsedCommand
+ * @property {string} identifier - The name of the command being invoked.
+ * @property {Array.<string>} arguments - A space-delimited array of arguments
+ *   that were given as part of the command.
+ * @property {boolean} mentioned - True if the client that received the message
+ *   was mentioned at the beginning of the message.
+ */
 
 /**
- * Handles parsing a message for a command.
+ * @classdesc Handles parsing a message for a command.
  */
 export default class CommandParser {
   /**
    * Parses the given message for a command.
    * @param {Message} message - The Discord.js Message object.
-   * @returns {Object} Object containing information on the parsed message.
-   * @throws {CommandParserError} Thrown if message cannot be parsed as a command.
+   * @returns {(ParsedCommand|boolean)} Object containing information on the parsed
+   *   message, or false if the given message could not be parsed as a command.
    */
   static parse(message) {
     const split = message.content.split(' ');
     const mentioned = !!split[0].match(`<@!?${message.client.user.id}>`);
 
     if (mentioned && split.length < 2) {
-      throw new CommandParserError();
+      return false;
     }
 
     return {
