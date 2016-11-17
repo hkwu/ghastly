@@ -1,22 +1,28 @@
+import CommandRegistry from '../command/CommandRegistry';
+
 /**
- * Generates a Ghastly client given a Discord.js client.
- * @param {Function} discordClient - The Discord.js client constructor which acts as the base for the returned client.
- * @param {Object} [clientOptions={}] - Options to specify configuration upon creation of the client.
- * @returns {Ghastly} The Ghastly client.
+ * Generates a Ghastly client constructor given a Discord.js client.
+ * @param {Function} client - The Discord.js client constructor which acts as
+ *   the base for the returned client.
+ * @returns {Function} The Ghastly client constructor.
  */
-export default (discordClient, clientOptions = {}) => (
-  new (class extends discordClient {
+export default client => (
+  /**
+   * @classdesc The Ghastly client class.
+   */
+  class Ghastly extends client {
     /**
      * Constructor.
      * @param {Object} [options={}] - Options to configure the client.
      */
     constructor(options = {}) {
-      const { ...discordOptions } = options;
-      super(discordOptions);
-    }
+      super(options);
 
-    addCommand(command) {
-      return this;
+      /**
+       * The command registry for the client.
+       * @type {CommandRegistry}
+       */
+      this.registry = new CommandRegistry();
     }
-  })(clientOptions)
+  }
 );
