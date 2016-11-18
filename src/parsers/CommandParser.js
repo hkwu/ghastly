@@ -1,9 +1,9 @@
 /**
  * @typedef {Object} ParsedCommand
- * @property {string} identifier - The name of the command being invoked.
- * @property {Array.<string>} arguments - A space-delimited array of arguments
+ * @property {!string} identifier - The name of the command being invoked.
+ * @property {!Array.<string>} arguments - A space-delimited array of arguments
  *   that were given as part of the command.
- * @property {boolean} mentioned - True if the client that received the message
+ * @property {!boolean} mentioned - True if the client that received the message
  *   was mentioned at the beginning of the message.
  */
 

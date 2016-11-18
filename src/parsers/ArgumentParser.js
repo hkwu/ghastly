@@ -1,5 +1,6 @@
+import { isUndefined } from 'lodash/lang';
 import ArgumentParserError from '../errors/ArgumentParserError';
-import * as Constants from './Constants';
+import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
 
 /**
  * @classdesc Handles parsing of commands given by users.
@@ -7,10 +8,11 @@ import * as Constants from './Constants';
 export default class ArgumentParser {
   /**
    * Parses an array of arguments for a command call.
-   * @param {Array.<Object>} rules - An array of rules for the command being evaluated whose
-   *   order matches that of the arguments.
-   * @param {Array.<String>} args - The set of arguments for the command.
-   * @returns {Object} The parsed arguments given in a mapping between argument names and values.
+   * @param {Array.<ParsedParameter>} rules - An array of rules for the command
+   *   being evaluated whose order matches that of the arguments.
+   * @param {Array.<string>} args - The set of arguments for the command.
+   * @returns {Object} The parsed arguments given in a mapping between argument
+   *   names and values.
    * @throws {ArgumentParserError} Thrown if required arguments are missing.
    */
   static parse(rules, args) {
@@ -19,12 +21,11 @@ export default class ArgumentParser {
     for (let i = 0; i < rules.length; ++i) {
       const rule = rules[i];
 
-      if (!rule.optional && args[i] === undefined) {
-        throw new ArgumentParserError(`Missing a value for required argument: <${rule.name}>.`);
-      }
-
-      if (rule.arity === Constants.TOKEN.ARITY.VARIADIC) {
-        if (args[i] === undefined) {
+      if (!rule.optional && isUndefined(args[i])) {
+        throw new ArgumentParserError(`Missing a value for required argument: '${rule.name}'.`);
+      } else if (rule.repeatable) {
+        if (isUndefined(args[i])) {
+          // put the default value in and return since there's no other args
           parsed[rule.name] = rule.defaultValue;
 
           return parsed;
@@ -32,6 +33,7 @@ export default class ArgumentParser {
 
         parsed[rule.name] = [];
 
+        // get the rest of the arguments
         for (let j = i; j < args.length; ++j) {
           parsed[rule.name].push(ArgumentParser.normalizeArgumentType(rule.type, args[j]));
         }
@@ -39,7 +41,8 @@ export default class ArgumentParser {
         return parsed;
       }
 
-      parsed[rule.name] = args[i] === undefined
+      // get the arg or default value if no arg is given
+      parsed[rule.name] = isUndefined(args[i])
         ? rule.defaultValue
         : ArgumentParser.normalizeArgumentType(rule.type, args[i]);
     }
@@ -49,18 +52,22 @@ export default class ArgumentParser {
 
   /**
    * Converts an argument to the given type, ignoring string arguments.
-   * @param {String} type - The type the argument should be converted to.
-   * @param {String} argument - The argument to convert.
-   * @returns {*} The converted argument.
-   * @throws {ArgumentParserError} Thrown if the argument is not convertable to the specified type.
+   * @param {string} type - The type the argument should be converted to.
+   * @param {string} argument - The argument to convert.
+   * @returns {ParameterType} The converted argument.
+   * @throws {ArgumentParserError} Thrown if the argument is not convertable to
+   *   the specified type.
    */
   static normalizeArgumentType(type, argument) {
-    if (type === Constants.TOKEN.TYPE.STRING) {
+    const checker = TYPE_CHECKERS[type];
+    const converter = TYPE_CONVERTERS[type];
+
+    if (type === TYPES.STRING) {
       return argument;
-    } else if (!Constants.TYPE_CHECKERS[type](argument)) {
-      throw new ArgumentParserError(`Expected argument <${argument}> to be of type <${type}>.`);
+    } else if (!checker(argument)) {
+      throw new ArgumentParserError(`Expected argument '${argument}' to be of type '${type}'.`);
     }
 
-    return Constants.TYPE_CONVERTERS[type](argument);
+    return converter(argument);
   }
 }
