@@ -1,14 +1,19 @@
-import { expect } from 'chai';
 import stringArgv from 'string-argv';
+import { expect } from 'chai';
 import ArgumentParser from '../../src/parsers/ArgumentParser';
 import ArgumentParserError from '../../src/errors/ArgumentParserError';
-import SignatureParser from '../../src/parsers/SignatureParser';
-import { TOKEN } from '../../src/parsers/Constants';
+import ParameterParser from '../../src/parsers/ParameterParser';
+import { TYPES } from '../../src/parsers/Constants';
 
 describe('ArgumentParser', function() {
   describe('#parse()', function() {
     it('parses basic arguments', function() {
-      const rules = SignatureParser.parse('!hello [pool] [hello] [poor=house]').parameters;
+      const rules = [
+        'pool',
+        'hello',
+        'poor=house',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv('bored boo'))).to.deep.equal({
         pool: 'bored',
         hello: 'boo',
@@ -17,7 +22,13 @@ describe('ArgumentParser', function() {
     });
 
     it('parses single arguments', function() {
-      const rules = SignatureParser.parse('!cmd [foo<num>] [bar] [baz?] [qux<int>=123]').parameters;
+      const rules = [
+        '(num) foo',
+        'bar',
+        '-baz',
+        '(int) qux = 123',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv('-0 "mark my words"'))).to.deep.equal({
         foo: -0,
         bar: 'mark my words',
@@ -34,19 +45,32 @@ describe('ArgumentParser', function() {
     });
 
     it('parses variable length arguments', function() {
-      let rules = SignatureParser.parse('!cmd [foo] [bar*]').parameters;
+      let rules = [
+        'foo',
+        'bar*',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv('foo bar baz qux'))).to.deep.equal({
         foo: 'foo',
         bar: ['bar', 'baz', 'qux'],
       });
 
-      rules = SignatureParser.parse('!cmd [foo] [bar*?]').parameters;
+      rules = [
+        'foo',
+        '-bar*',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv('foo'))).to.deep.equal({
         foo: 'foo',
         bar: [],
       });
 
-      rules = SignatureParser.parse('!cmd [foo] [bar=true] [baz*?]').parameters;
+      rules = [
+        'foo',
+        'bar = true',
+        '-baz*',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv('foo bar bazzy'))).to.deep.equal({
         foo: 'foo',
         bar: 'bar',
@@ -55,7 +79,12 @@ describe('ArgumentParser', function() {
     });
 
     it('parses default arguments', function() {
-      const rules = SignatureParser.parse('!cmd [foo=123] [bar<bool>=false] [baz<int*>=0 1 2 3]').parameters;
+      const rules = [
+        'foo = 123',
+        '(bool) bar = false',
+        '(int) baz* = 0 1 2 3',
+      ].map(ParameterParser.parse);
+
       expect(ArgumentParser.parse(rules, stringArgv(''))).to.deep.equal({
         foo: '123',
         bar: false,
@@ -76,32 +105,46 @@ describe('ArgumentParser', function() {
     });
 
     it('disallows missing required arguments', function() {
-      let rules = SignatureParser.parse('!cmd [foo] [bar]').parameters;
+      let rules = [
+        'foo',
+        'bar',
+      ].map(ParameterParser.parse);
+
       expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
         ArgumentParserError,
-        'required argument: <bar>.',
+        'required argument: \'bar\'.',
       );
 
       expect(() => ArgumentParser.parse(rules, stringArgv('foo bar'))).to.not.throw(ArgumentParserError);
 
-      rules = SignatureParser.parse('!cmd [foo] [bar*]').parameters;
+      rules = [
+        'foo',
+        'bar*',
+      ].map(ParameterParser.parse);
+
       expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
         ArgumentParserError,
-        'required argument: <bar>.',
+        'required argument: \'bar\'.',
       );
     });
 
     it('disallows invalid argument types', function() {
-      let rules = SignatureParser.parse('!cmd [foo<int>]').parameters;
+      let rules = [
+        '(int) foo',
+      ].map(ParameterParser.parse);
+
       expect(() => ArgumentParser.parse(rules, stringArgv('hello'))).to.throw(
         ArgumentParserError,
-        'Expected argument <hello> to be of type <INTEGER>.',
+        'Expected argument \'hello\' to be of type \'INTEGER\'.',
       );
 
-      rules = SignatureParser.parse('!cmd [foo<bool*>]').parameters;
+      rules = [
+        '(bool) foo*',
+      ].map(ParameterParser.parse);
+
       expect(() => ArgumentParser.parse(rules, stringArgv('true false t'))).to.throw(
         ArgumentParserError,
-        'Expected argument <t> to be of type <BOOLEAN>.',
+        'Expected argument \'t\' to be of type \'BOOLEAN\'.',
       );
 
       expect(() => ArgumentParser.parse(rules, stringArgv('false false true'))).to.not.throw(ArgumentParserError);
@@ -110,39 +153,39 @@ describe('ArgumentParser', function() {
 
   describe('#normalizeArgumentType()', function() {
     it('does nothing to string arguments', function() {
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.STRING, 'hallelujah')).to.equal('hallelujah');
+      expect(ArgumentParser.normalizeArgumentType(TYPES.STRING, 'hallelujah')).to.equal('hallelujah');
     });
 
     it('converts boolean, number and integer argument types', function() {
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.BOOLEAN, 'true')).to.be.true;
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.BOOLEAN, 'false')).to.be.false;
+      expect(ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'true')).to.be.true;
+      expect(ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'false')).to.be.false;
 
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.INTEGER, '10')).to.equal(10);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.INTEGER, '10.5')).to.equal(10);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.INTEGER, '-10')).to.equal(-10);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.INTEGER, '-10.5')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '10')).to.equal(10);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '10.5')).to.equal(10);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '-10')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '-10.5')).to.equal(-10);
 
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, '123.4')).to.equal(123.4);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, '0')).to.equal(0);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, '+0')).to.equal(+0);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, '-0')).to.equal(-0);
-      expect(ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, '-10')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '123.4')).to.equal(123.4);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '0')).to.equal(0);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '+0')).to.equal(+0);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '-0')).to.equal(-0);
+      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '-10')).to.equal(-10);
     });
 
     it('disallows invalid argument types', function() {
-      expect(() => ArgumentParser.normalizeArgumentType(TOKEN.TYPE.BOOLEAN, 'h')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'h')).to.throw(
         ArgumentParserError,
-        'Expected argument <h> to be of type <BOOLEAN>.',
+        'Expected argument \'h\' to be of type \'BOOLEAN\'.',
       );
 
-      expect(() => ArgumentParser.normalizeArgumentType(TOKEN.TYPE.NUMBER, 'h')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(TYPES.NUMBER, 'h')).to.throw(
         ArgumentParserError,
-        'Expected argument <h> to be of type <NUMBER>.',
+        'Expected argument \'h\' to be of type \'NUMBER\'.',
       );
 
-      expect(() => ArgumentParser.normalizeArgumentType(TOKEN.TYPE.INTEGER, 'NaN')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(TYPES.INTEGER, 'NaN')).to.throw(
         ArgumentParserError,
-        'Expected argument <NaN> to be of type <INTEGER>.',
+        'Expected argument \'NaN\' to be of type \'INTEGER\'.',
       );
     });
   });
