@@ -20,13 +20,20 @@ export const TYPES = {
  * @type {Object}
  */
 export const TYPE_CHECKERS = {
-  [TYPES.BOOLEAN]: (value) => {
+  [TYPES.BOOLEAN](value) {
     const lower = value.toLowerCase();
 
     return lower === 'true' || lower === 'false';
   },
-  [TYPES.INTEGER]: value => !isNaN(value) && isNumber(+value),
-  [TYPES.NUMBER]: value => !isNaN(value) && isNumber(+value),
+  [TYPES.INTEGER](value) {
+    return !isNaN(value) && isNumber(+value);
+  },
+  [TYPES.NUMBER](value) {
+    return !isNaN(value) && isNumber(+value);
+  },
+  [TYPES.STRING](value) {
+    return value;
+  },
 };
 
 /**
@@ -34,7 +41,12 @@ export const TYPE_CHECKERS = {
  * @type {Object}
  */
 export const TYPE_CONVERTERS = {
-  [TYPES.BOOLEAN]: value => value === 'true',
+  [TYPES.BOOLEAN](value) {
+    return value === 'true';
+  },
   [TYPES.INTEGER]: toInteger,
   [TYPES.NUMBER]: toNumber,
+  [TYPES.STRING](value) {
+    return value;
+  },
 };

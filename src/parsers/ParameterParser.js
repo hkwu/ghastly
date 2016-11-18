@@ -1,3 +1,4 @@
+import stringArgv from 'string-argv';
 import { trimEnd, trimStart } from 'lodash/string';
 import ParameterParserError from '../errors/ParameterParserError';
 import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
@@ -45,7 +46,7 @@ export default class ParameterParser {
 
     const parsed = { description: null };
     // description?
-    const matched = trimmed.match(/^(.+?):(.+)$/);
+    const matched = trimmed.match(/^(.+?)\s*:\s*(.+)$/);
 
     if (matched) {
       parsed.description = matched[2];
@@ -79,13 +80,13 @@ export default class ParameterParser {
     // optional parameter?
     if (temp.startsWith('-')) {
       parsed.optional = true;
-      temp = trimStart(temp, '-');
+      temp = trimStart(temp, '- ');
     } else if (temp.startsWith('+')) {
-      temp = trimStart(temp, '+');
+      temp = trimStart(temp, '+ ');
     }
 
     // type declaration?
-    let matched = temp.match(/(\(\w+\))\s*(.+)/);
+    let matched = temp.match(/\(\s*(\w+)\s*\)\s*(.+)/);
 
     if (matched) {
       const declaredType = matched[1];
@@ -100,20 +101,23 @@ export default class ParameterParser {
     }
 
     // name, repeatable, default value?
-    matched = temp.match(/(\w+\*?)\s*=\s*(.+)/);
+    matched = temp.match(/(\w+\s*?\*?)\s*=\s*(.+)/);
+    const name = matched ? matched[1] : temp;
+
+    if (name.endsWith('*')) {
+      parsed.name = trimEnd(name, '* ');
+      parsed.repeatable = true;
+      parsed.defaultValue = [];
+    } else if (name.includes(' ')) {
+      throw new ParameterParserError(`Parameter name must not contain spaces: '${definition}'.`);
+    } else {
+      parsed.name = name;
+    }
 
     if (matched) {
-      const name = matched[1];
-      const defaults = matched[2].split(' ').filter(x => x);
+      const defaults = stringArgv(matched[2]);
       // default value automatically makes it optional
       parsed.optional = true;
-
-      if (name.endsWith('*')) {
-        parsed.repeatable = true;
-        parsed.name = trimEnd(name, '*');
-      } else {
-        parsed.name = name;
-      }
 
       if (!parsed.repeatable && defaults.length > 1) {
         throw new ParameterParserError(`Cannot provide more than one default argument for non-repeatable parameters: '${definition}'.`);
@@ -131,11 +135,6 @@ export default class ParameterParser {
       });
 
       parsed.defaultValue = parsed.repeatable ? typedDefaults : typedDefaults[0];
-    } else if (temp.includes(' ')) {
-      // no default value(s), it's just the name
-      throw new ParameterParserError(`Parameter name must not contain spaces: '${definition}'.`);
-    } else {
-      parsed.name = temp;
     }
 
     return parsed;

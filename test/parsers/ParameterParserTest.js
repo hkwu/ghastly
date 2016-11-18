@@ -1,0 +1,349 @@
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
+import ParameterParser from '../../src/parsers/ParameterParser';
+import ParameterParserError from '../../src/errors/ParameterParserError';
+import { TYPES } from '../../src/parsers/Constants';
+
+describe('ParameterParser', function() {
+  before(function() {
+    chai.use(chaiSubset);
+  });
+
+  describe('#parse()', function() {
+    it('parses basic parameters', function() {
+      expect(ParameterParser.parse('+foo')).to.deep.equal({
+        name: 'foo',
+        optional: false,
+        description: null,
+        type: TYPES.STRING,
+        repeatable: false,
+        defaultValue: null,
+      });
+
+      expect(ParameterParser.parse('-(num) param = 123.5 : some description')).to.deep.equal({
+        name: 'param',
+        optional: true,
+        description: 'some description',
+        type: TYPES.NUMBER,
+        repeatable: false,
+        defaultValue: 123.5,
+      });
+
+      expect(ParameterParser.parse('name:description')).to.deep.equal({
+        name: 'name',
+        optional: false,
+        description: 'description',
+        type: TYPES.STRING,
+        repeatable: false,
+        defaultValue: null,
+      });
+
+      expect(ParameterParser.parse('-argument:optional')).to.deep.equal({
+        name: 'argument',
+        optional: true,
+        description: 'optional',
+        type: TYPES.STRING,
+        repeatable: false,
+        defaultValue: null,
+      });
+
+      expect(ParameterParser.parse('array*:description')).to.deep.equal({
+        name: 'array',
+        optional: false,
+        description: 'description',
+        type: TYPES.STRING,
+        repeatable: true,
+        defaultValue: [],
+      });
+    });
+
+    it('parses descriptions', function() {
+      expect(ParameterParser.parse('name:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('name*:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('-name:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('-name*:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('name=default:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('name*=default1 default2:description')).to.containSubset({
+        name: 'name',
+        description: 'description',
+      });
+
+      expect(ParameterParser.parse('name*=default1 default2:description with a : colon')).to.containSubset({
+        name: 'name',
+        description: 'description with a : colon',
+      });
+    });
+
+    it('strips whitespace in parameter definitions', function() {
+      expect(ParameterParser.parse('    -   (   str   )   white  *    =   space   :   man  the    ')).to.deep.equal({
+        name: 'white',
+        optional: true,
+        description: 'man  the',
+        type: TYPES.STRING,
+        repeatable: true,
+        defaultValue: ['space'],
+      });
+    });
+
+    it('disallows empty parameters', function() {
+      expect(() => ParameterParser.parse('')).to.throw(ParameterParserError, 'Parameter cannot be empty');
+    });
+  });
+
+  describe('#parseDefinition()', function() {
+    it('parses basic arguments', function() {
+      expect(ParameterParser.parseDefinition('basic')).to.deep.equal({
+        name: 'basic',
+        type: TYPES.STRING,
+        optional: false,
+        repeatable: false,
+        defaultValue: null,
+      });
+    });
+
+    it('parses repeatable arguments', function() {
+      expect(ParameterParser.parseDefinition('array*')).to.containSubset({
+        name: 'array',
+        optional: false,
+        repeatable: true,
+      });
+    });
+
+    it('parses optional arguments', function() {
+      expect(ParameterParser.parseDefinition('-optional')).to.containSubset({
+        name: 'optional',
+        optional: true,
+        repeatable: false,
+        defaultValue: null,
+      });
+    });
+
+    it('parses optional repeatable arguments', function() {
+      expect(ParameterParser.parseDefinition('-array*')).to.containSubset({
+        name: 'array',
+        optional: true,
+        repeatable: true,
+        defaultValue: [],
+      });
+    });
+
+    it('parses default single arguments', function() {
+      expect(ParameterParser.parseDefinition('single=true')).to.containSubset({
+        name: 'single',
+        defaultValue: 'true',
+      });
+    });
+
+    it('parses default repeatable arguments', function() {
+      expect(ParameterParser.parseDefinition('array*=one two three four')).to.containSubset({
+        name: 'array',
+        optional: true,
+        repeatable: true,
+        defaultValue: ['one', 'two', 'three', 'four'],
+      });
+    });
+
+    it('parses default repeatable values with spaces', function() {
+      expect(ParameterParser.parseDefinition('array*=\'single quotes\' "double quotes" \'nested "quotes"\'')).to.containSubset({
+        name: 'array',
+        defaultValue: ['single quotes', 'double quotes', 'nested "quotes"'],
+      });
+    });
+
+    it('parses parameter types', function() {
+      expect(ParameterParser.parseDefinition('(bool)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.BOOLEAN,
+      });
+
+      expect(ParameterParser.parseDefinition('(boolean)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.BOOLEAN,
+      });
+
+      expect(ParameterParser.parseDefinition('(integer)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.INTEGER,
+      });
+
+      expect(ParameterParser.parseDefinition('(int)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.INTEGER,
+      });
+
+      expect(ParameterParser.parseDefinition('(number)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.NUMBER,
+      });
+
+      expect(ParameterParser.parseDefinition('(num)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.NUMBER,
+      });
+
+      expect(ParameterParser.parseDefinition('(string)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.STRING,
+      });
+
+      expect(ParameterParser.parseDefinition('(str)variable')).to.containSubset({
+        name: 'variable',
+        type: TYPES.STRING,
+      });
+
+      expect(ParameterParser.parseDefinition('(num)variable*')).to.containSubset({
+        name: 'variable',
+        type: TYPES.NUMBER,
+        repeatable: true,
+      });
+    });
+
+    it('parses typed default values', function() {
+      expect(ParameterParser.parseDefinition('(bool)name=true')).to.containSubset({
+        name: 'name',
+        type: TYPES.BOOLEAN,
+        defaultValue: true,
+      });
+
+      expect(ParameterParser.parseDefinition('(bool)name=false')).to.containSubset({
+        name: 'name',
+        type: TYPES.BOOLEAN,
+        defaultValue: false,
+      });
+
+      expect(ParameterParser.parseDefinition('(int)name=123')).to.containSubset({
+        name: 'name',
+        type: TYPES.INTEGER,
+        defaultValue: 123,
+      });
+
+      expect(ParameterParser.parseDefinition('(int)name=123.555')).to.containSubset({
+        name: 'name',
+        type: TYPES.INTEGER,
+        defaultValue: 123,
+      });
+
+      expect(ParameterParser.parseDefinition('(num)name=123.555')).to.containSubset({
+        name: 'name',
+        type: TYPES.NUMBER,
+        defaultValue: 123.555,
+      });
+
+      expect(ParameterParser.parseDefinition('(str)name=false')).to.containSubset({
+        name: 'name',
+        type: TYPES.STRING,
+        defaultValue: 'false',
+      });
+
+      expect(ParameterParser.parseDefinition('(bool)name*=true false "true" false')).to.containSubset({
+        name: 'name',
+        type: TYPES.BOOLEAN,
+        defaultValue: [true, false, true, false],
+      });
+
+      expect(ParameterParser.parseDefinition('(number)name*=123 -233 -100.5 0 23.4')).to.containSubset({
+        name: 'name',
+        type: TYPES.NUMBER,
+        defaultValue: [123, -233, -100.5, 0, 23.4],
+      });
+    });
+
+    it('strips redundant pluses and minuses', function() {
+      expect(ParameterParser.parseDefinition('+single')).to.containSubset({
+        name: 'single',
+        optional: false,
+      });
+
+      expect(ParameterParser.parseDefinition('++++++++single')).to.containSubset({
+        name: 'single',
+        optional: false,
+      });
+
+      expect(ParameterParser.parseDefinition('-single=true')).to.containSubset({
+        name: 'single',
+        optional: true,
+        repeatable: false,
+        defaultValue: 'true',
+      });
+
+      expect(ParameterParser.parseDefinition('-----------array*=one two')).to.containSubset({
+        name: 'array',
+        optional: true,
+        repeatable: true,
+        defaultValue: ['one', 'two'],
+      });
+    });
+
+    it('strips redundant asterisks', function() {
+      expect(ParameterParser.parseDefinition('array********')).to.containSubset({
+        name: 'array',
+        repeatable: true,
+      });
+
+      expect(ParameterParser.parseDefinition('-array****')).to.containSubset({
+        name: 'array',
+        optional: true,
+        repeatable: true,
+      });
+    });
+
+    it('strips whitespace', function() {
+      expect(ParameterParser.parseDefinition('name   =   someVal')).to.containSubset({
+        name: 'name',
+        optional: true,
+        defaultValue: 'someVal',
+      });
+
+      expect(ParameterParser.parseDefinition('- array   *   = someVal')).to.containSubset({
+        name: 'array',
+        optional: true,
+        repeatable: true,
+        defaultValue: ['someVal'],
+      });
+    });
+
+    it('disallows invalid parameter types', function() {
+      expect(() => (
+        ParameterParser.parseDefinition('(func) name')
+      )).to.throw(ParameterParserError, 'Unrecognized parameter type declaration');
+
+      expect(() => (
+        ParameterParser.parseDefinition('-(NUMB) name')
+      )).to.throw(ParameterParserError, 'Unrecognized parameter type declaration');
+    });
+
+    it('disallows invalid default value types', function() {
+      expect(() => (
+        ParameterParser.parseDefinition('(int) array* = hey not an integer 123 !')
+      )).to.throw(ParameterParserError, 'Given default value \'hey\' is not of the correct type');
+
+      expect(() => (
+        ParameterParser.parseDefinition('(bool) single = default')
+      )).to.throw(ParameterParserError, 'Given default value \'default\' is not of the correct type');
+
+      expect(() => (
+        ParameterParser.parseDefinition('(bool) single = true')
+      )).to.not.throw(ParameterParserError, 'Given default value \'true\' is not of the correct type');
+    });
+  });
+});
