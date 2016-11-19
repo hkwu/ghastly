@@ -1,9 +1,12 @@
+import EventEmitter from 'events';
 import { isFunction, isString } from 'lodash/lang';
+import ParameterParser from '../parsers/ParameterParser';
 
 /**
  * @classdesc Class which wraps a command handler with additional useful data.
+ * @extends EventEmitter
  */
-export default class CommandObject {
+export default class CommandObject extends EventEmitter {
   /**
    * Constructor.
    * @param {(Function|CommandObject)} source - The command handler function, or
@@ -12,6 +15,8 @@ export default class CommandObject {
    *   a CommandObject instance.
    */
   constructor(source) {
+    super();
+
     if (isFunction(source)) {
       /**
        * The command handler function.
@@ -35,7 +40,7 @@ export default class CommandObject {
        * An array of parsed parameter definitions for the command.
        * @type {Array.<Object>}
        */
-      this.params = [];
+      this.parameters = [];
 
       /**
        * The description for the command.
@@ -46,7 +51,7 @@ export default class CommandObject {
       this.handler = source.handler;
       this.trigger = source.trigger;
       this.aliases = [...source.aliases];
-      this.params = [...source.params];
+      this.parameters = [...source.parameters];
       this.description = source.description;
     } else {
       throw new TypeError('Expected constructor argument to be a function or a CommandObject instance.');
@@ -61,19 +66,22 @@ export default class CommandObject {
    * @throws {TypeError} Thrown if the given trigger and aliases are not strings.
    */
   react(trigger, ...aliases) {
-    if (!isString(trigger)) {
-      throw new TypeError('Expected command trigger to be a string.');
+    if (!trigger || !isString(trigger)) {
+      throw new TypeError('Expected command trigger to be a non-empty string.');
     }
 
+    const oldTrigger = this.trigger;
     this.trigger = trigger;
 
     aliases.forEach((alias) => {
-      if (!isString(alias)) {
-        throw new TypeError('Expected command alias to be a string.');
+      if (!alias || !isString(alias)) {
+        throw new TypeError('Expected command alias to be a non-empty string.');
       }
     });
 
+    const oldAliases = [...this.aliases];
     this.aliases = aliases;
+    this.emit('triggerUpdate', oldTrigger, oldAliases);
 
     return this;
   }
@@ -85,12 +93,12 @@ export default class CommandObject {
    * @throws {TypeError} Thrown if the given paramdefs are not strings.
    */
   params(...paramdefs) {
-    paramdefs.forEach((paramdef) => {
-      if (!isString(paramdef)) {
-        throw new TypeError('Expected command argument definitions to be strings.');
+    this.parameters = paramdefs.map((paramdef) => {
+      if (!paramdef || !isString(paramdef)) {
+        throw new TypeError('Expected command argument definitions to be non-empty strings.');
       }
 
-      // parse
+      return ParameterParser.parse(paramdef);
     });
 
     return this;
@@ -103,8 +111,8 @@ export default class CommandObject {
    * @throws {TypeError} Thrown if the given description is not a string.
    */
   describe(description) {
-    if (!isString(description)) {
-      throw new TypeError('Expected command description to be a string.');
+    if (!description || !isString(description)) {
+      throw new TypeError('Expected command description to be a non-empty string.');
     }
 
     this.description = description;

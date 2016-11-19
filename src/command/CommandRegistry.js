@@ -1,3 +1,4 @@
+import { difference } from 'lodash/array';
 import { isString } from 'lodash/lang';
 import CommandError from '../errors/CommandError';
 import CommandObject from './CommandObject';
@@ -13,12 +14,14 @@ export default class CommandRegistry {
     /**
      * The commands stored in this registry.
      * @type {Map.<string, CommandObject>}
+     * @private
      */
     this.commands = new Map();
 
     /**
      * The command aliases stored in this registry.
      * @type {Map.<string, CommandObject>}
+     * @private
      */
     this.aliases = new Map();
   }
@@ -47,6 +50,17 @@ export default class CommandRegistry {
       this.aliases.set(alias, command);
     });
 
+    // listen for updates that require resynchronization
+    command.on('triggerUpdate', (commandObject, oldTrigger, oldAliases) => {
+      this.renameCommand(commandObject.trigger, commandObject);
+
+      const removedAliases = difference(oldAliases, commandObject.aliases);
+      const addedAliases = difference(commandObject.aliases, oldAliases);
+
+      this.removeAlias(...removedAliases);
+      this.addAlias(commandObject.trigger, ...addedAliases);
+    });
+
     return this;
   }
 
@@ -55,11 +69,11 @@ export default class CommandRegistry {
    * @param {string} name - The command's main trigger.
    * @returns {CommandObject} The removed CommandObject.
    * @throws {CommandError} Thrown if given command name doesn't exist in the registry.
-   * @throws {TypeError} Thrown if the given command name is not a string.
+   * @throws {TypeError} Thrown if the given command name is not a non-empty string.
    */
   removeCommand(name) {
-    if (!isString(name)) {
-      throw new TypeError('Expected command name to be a string.');
+    if (!name || !isString(name)) {
+      throw new TypeError('Expected command name to be a non-empty string.');
     }
 
     const command = this.commands.get(name);
@@ -73,52 +87,89 @@ export default class CommandRegistry {
     });
 
     this.commands.delete(name);
+    command.removeAllListeners('triggerUpdate').removeAllListeners('aliasUpdate');
 
     return command;
   }
 
   /**
-   * Adds a command alias to the registry.
-   * @param {string} alias - The command alias.
-   * @param {string} name - The name of the command to add an alias to.
+   * Moves a command's entry in the registry from one key to another.
+   * @param {string} name - The name to rename the command to.
+   * @param {CommandObject} command - The command to rename.
    * @returns {CommandRegistry} The instance this method was called on.
-   * @throws {CommandError} Thrown if given command name doesn't exist in the registry,
-   *   or if a duplicate alias is detected.
-   * @throws {TypeError} Thrown if the given command alias and name are not strings.
+   * @throws {CommandError} Thrown if there is a name conflict in the registry.
+   * @throws {TypeError} Thrown if the given command name is not a non-empty string,
+   *   or if the given command is not a CommandObject instance.
+   * @private
    */
-  addAlias(alias, name) {
-    if (!isString(alias) || !isString(name)) {
-      throw new TypeError('Expected alias and command name to be strings.');
-    } else if (!this.commands.has(name)) {
-      throw new CommandError(`Attempting to add alias to non-existent command '${name}'.`);
-    } else if (this.aliases.has(alias)) {
-      throw new CommandError(`Attempting to add duplicate alias '${alias}' to command '${name}'.`);
+  renameCommand(name, command) {
+    if (!name || !isString(name)) {
+      throw new TypeError('Expected command name to be a non-empty string.');
+    } else if (!(command instanceof CommandObject)) {
+      throw new TypeError('Expected command to be an instance of CommandObject.');
+    } else if (name === command.trigger) {
+      return this;
+    } else if (this.commands.has(name)) {
+      throw new CommandError(`Attempting to add duplicate command: '${command.trigger}'.`);
     }
 
-    const command = this.commands.get(name);
-    this.aliases.set(alias, command);
-    command.react(command.trigger, ...command.aliases, alias);
+    this.commands.delete(command.trigger);
+    this.commands.set(name, command);
 
     return this;
   }
 
   /**
-   * Removes a command alias from the registry.
-   * @param {string} alias - The command alias.
+   * Adds command aliases to the registry.
+   * @param {string} name - The name of the command to add aliases to.
+   * @param {...string} aliases - The command aliases.
    * @returns {CommandRegistry} The instance this method was called on.
-   * @throws {CommandError} Thrown if the given command alias doesn't exist in the registry.
-   * @throws {TypeError} Thrown if the given command alias is not a string.
+   * @throws {CommandError} Thrown if given command name doesn't exist in the
+   *   registry, or if a duplicate alias is detected.
+   * @throws {TypeError} Thrown if the given name and aliases are not non-empty
+   *   strings.
+   * @private
    */
-  removeAlias(alias) {
-    if (!isString(alias)) {
-      throw new TypeError('Expected alias to be a string.');
-    } else if (!this.aliases.has(alias)) {
-      throw new CommandError(`Attempting to remove non-existent alias: '${alias}'.`);
+  addAlias(name, ...aliases) {
+    if (!name || !isString(name)) {
+      throw new TypeError('Expected command name to be a non-empty string.');
     }
 
-    const command = this.aliases.get(alias);
-    this.aliases.delete(alias);
-    command.react(command.trigger, ...command.aliases.filter(commandAlias => commandAlias !== alias));
+    aliases.forEach((alias) => {
+      if (!alias || !isString(alias)) {
+        throw new TypeError('Expected alias to be a non-empty string.');
+      } else if (!this.commands.has(name)) {
+        throw new CommandError(`Attempting to add alias to non-existent command '${name}'.`);
+      } else if (this.aliases.has(alias)) {
+        throw new CommandError(`Attempting to add duplicate alias '${alias}' to command '${name}'.`);
+      }
+
+      this.aliases.set(alias, this.commands.get(name));
+    });
+
+    return this;
+  }
+
+  /**
+   * Removes command aliases from the registry.
+   * @param {...string} aliases - The command aliases.
+   * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if the given command aliases don't exist in
+   *   the registry.
+   * @throws {TypeError} Thrown if the given command aliases are not non-empty
+   *   strings.
+   * @private
+   */
+  removeAlias(...aliases) {
+    aliases.forEach((alias) => {
+      if (!alias || !isString(alias)) {
+        throw new TypeError('Expected alias to be a string.');
+      } else if (!this.aliases.has(alias)) {
+        throw new CommandError(`Attempting to remove non-existent alias: '${alias}'.`);
+      }
+
+      this.aliases.delete(alias);
+    });
 
     return this;
   }
