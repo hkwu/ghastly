@@ -13,16 +13,16 @@ import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
  * @typedef {Object} ParsedParameter
  * @property {!string} name - The name of the parameter.
  * @property {!boolean} optional - True if the parameter is optional, else false.
- * @property {?string} [description=null] - A description of the parameter.
- * @property {!string} [type='STRING'] - The expected type of the parameter.
- * @property {!boolean} [repeatable=false] - True if the parameter accepts a
- *   variable number of input arguments, else false.
- * @property {?(ParameterType|Array.<ParameterType>)} [defaultValue=null] - The
- *   default value of the parameter. This is non-null only if the parameter is
- *   optional. The default value for a repeatable parameter will be an array of
- *   values while non-repeatable parameters store a single primitive as a default
- *   value. The types of these values are determined by the parameters's type
- *   declaration defaulting to strings.
+ * @property {?string} description - A description of the parameter.
+ * @property {!string} type - The expected type of the parameter.
+ * @property {!boolean} repeatable - True if the parameter accepts a variable
+ *   number of input arguments, else false.
+ * @property {?(ParameterType|Array.<ParameterType>)} defaultValue - The default
+ *   value of the parameter. This is non-null only if the parameter is optional.
+ *   The default value for a repeatable parameter will be an array of values
+ *   while non-repeatable parameters store a single primitive as a default value.
+ *   The types of these values are determined by the parameters's type declaration
+ *   defaulting to strings.
  */
 
 /**
