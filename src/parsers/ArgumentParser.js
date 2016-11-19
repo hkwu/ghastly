@@ -1,6 +1,6 @@
 import { isUndefined } from 'lodash/lang';
 import ArgumentParserError from '../errors/ArgumentParserError';
-import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
+import { TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
 
 /**
  * @classdesc Handles parsing of commands given by users.
@@ -62,9 +62,7 @@ export default class ArgumentParser {
     const checker = TYPE_CHECKERS[type];
     const converter = TYPE_CONVERTERS[type];
 
-    if (type === TYPES.STRING) {
-      return argument;
-    } else if (!checker(argument)) {
+    if (!checker(argument)) {
       throw new ArgumentParserError(`Expected argument '${argument}' to be of type '${type}'.`);
     }
 
