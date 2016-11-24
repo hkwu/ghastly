@@ -1,11 +1,14 @@
 import createResolver from './createResolver';
 
 /**
- * Base class for creating options resolvers.
+ * @classdesc Base class for creating options resolvers.
  */
 export default class BaseResolver {
+  /**
+   * Constructor.
+   */
   constructor() {
-    this._resolver = createResolver();
+    this.resolver = createResolver();
   }
 
   /**
@@ -14,6 +17,6 @@ export default class BaseResolver {
    * @returns {Object}
    */
   resolve(options = {}) {
-    return this._resolver.resolve(options, false);
+    return this.resolver.resolve(options, false);
   }
 }

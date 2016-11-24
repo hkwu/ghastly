@@ -3,9 +3,11 @@ import { sortBy } from 'lodash/collection';
 import { merge, omit } from 'lodash/object';
 import * as lang from 'lodash/lang';
 
+/* eslint-disable */
+
 /**
  * Custom version of krachot/options-resolver that supports synchronous resolution.
- * @returns {Object|Promise<Object>}
+ * @returns {Object|Promise.<Object>}
  */
 export default function createResolver() {
   const state = {
