@@ -1,4 +1,5 @@
 import stringArgv from 'string-argv';
+import { isString } from 'lodash/lang';
 import { trimEnd, trimStart } from 'lodash/string';
 import ParameterParserError from '../errors/ParameterParserError';
 import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
@@ -34,10 +35,15 @@ export default class ParameterParser {
    * @param {String} parameter - The command parameter definition.
    * @returns {ParsedParameter} Object containing data on the command parameter.
    * @throws {ParameterParserError} Thrown if the parameter definition is not well-formed.
+   * @throws {TypeError} Thrown if the parameter definition is not a string.
    * @example
    * ParameterParser.parse('-(int) num* : A parameter.');
    */
   static parse(parameter) {
+    if (!isString(parameter)) {
+      throw new TypeError('Expected parameter to be a string.');
+    }
+
     const trimmed = parameter.trim();
 
     if (!trimmed) {
