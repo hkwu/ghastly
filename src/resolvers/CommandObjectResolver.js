@@ -19,7 +19,7 @@ export default class CommandObjectResolver extends BaseResolver {
       description: null,
       middleware: [],
     }).setAllowedTypes('handler', 'function')
-      .setAllowedTypes('triggers', 'string')
+      .setAllowedTypes('triggers', 'array')
       .setAllowedTypes('parameters', 'array')
       .setAllowedTypes('description', 'string')
       .setAllowedTypes('middleware', 'array');
