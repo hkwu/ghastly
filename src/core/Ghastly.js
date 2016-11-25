@@ -18,6 +18,7 @@ import create from '../core/create';
  *   if it is a function.
  *   The Promise rejects with a `TypeError` if the command handler's returned
  *   indicator is not of a valid type.
+ * @this Ghastly
  */
 async function dispatch(message, newMessage) {
   if (newMessage && message.content === newMessage.content) {
@@ -32,10 +33,16 @@ async function dispatch(message, newMessage) {
     return false;
   }
 
-  const initialContext = {
-    message: commandMessage,
-    args: ArgumentParser.parse(command.parameters, parsedCommand.arguments),
-  };
+  let initialContext;
+
+  try {
+    initialContext = {
+      message: commandMessage,
+      args: ArgumentParser.parse(command.parameters, parsedCommand.arguments),
+    };
+  } catch (error) {
+    return false;
+  }
 
   const indicator = await command.handler(initialContext);
 
