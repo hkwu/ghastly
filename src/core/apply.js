@@ -29,10 +29,13 @@ import { isFunction } from 'lodash/lang';
  * @param {...Function} functions - The set of functions to compose.
  * @returns {Function} The composed chain of middleware.
  */
-const compose = (...functions) => functions.reduceRight(
-  (composed, next) => (...args) => next(composed, ...args),
-  functions[functions.length - 1],
-);
+const compose = (...functions) => {
+  if (functions.length === 1) {
+    return functions[0];
+  }
+
+  return functions.reduceRight((composed, next) => (...args) => next(composed, ...args));
+};
 
 /**
  * Takes a set of middleware functions and returns a function which consumes a
