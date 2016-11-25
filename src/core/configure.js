@@ -18,6 +18,8 @@ export default (config = {}) => {
     throw new TypeError('Expected given config to be a plain object.');
   }
 
+  const { middleware = [] } = config;
+
   return (plugin) => {
     if (!isFunction(plugin)) {
       throw new TypeError('Expected given plugin to be a function.');
@@ -25,27 +27,20 @@ export default (config = {}) => {
 
     return (generatorApi) => {
       // merge the original config and the trickled config
-      const { apply, config: trickledConfig = {}, ...rest } = generatorApi;
-      const updatedConfig = { ...config, ...trickledConfig };
-      const command = plugin({ ...rest, apply, config: updatedConfig });
+      const { config: trickledConfig = {}, ...rest } = generatorApi;
+      // do not pass down middleware to prevent duplication
+      const updatedConfig = { ...config, ...trickledConfig, middleware: [] };
+      const command = plugin({ ...rest, config: updatedConfig });
 
       // extract default keys
-      const {
-        triggers = [],
-        middleware = [],
-        description,
-      } = updatedConfig;
+      const { triggers, description } = updatedConfig;
 
-      // update the command accordingly
-      if (triggers.length) {
-        command.react(...triggers);
-      } else if (middleware.length) {
-        command.handler = apply(...middleware)(command.handler);
-      } else if (description) {
-        command.describe(description);
-      }
-
-      return command;
+      return {
+        ...command,
+        triggers: triggers || command.triggers,
+        description: description || command.description,
+        middleware: [...middleware, ...command.middleware],
+      };
     };
   };
 };
