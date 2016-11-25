@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
-import { isFunction, isString } from 'lodash/lang';
+import { isPlainObject } from 'lodash/lang';
+import CommandObjectResolver from '../resolvers/CommandObjectResolver';
 import ParameterParser from '../parsers/ParameterParser';
 
 /**
@@ -10,43 +11,51 @@ export default class CommandObject extends EventEmitter {
   /**
    * Constructor.
    * @param {(Function|CommandObject)} source - The command handler function, or
-   *   a CommandObject instance whose data will be copied over.
+   *   a `CommandObject` instance whose data will be copied over.
    * @throws {TypeError} Thrown if the given source is not a function or
-   *   a CommandObject instance.
+   *   a `CommandObject` instance.
    */
   constructor(source) {
     super();
 
-    if (isFunction(source)) {
+    if (isPlainObject(source)) {
+      const resolver = new CommandObjectResolver();
+      const {
+        handler,
+        triggers: [trigger, ...aliases],
+        parameters,
+        description,
+      } = resolver.resolve(source);
+
       /**
        * The command handler function.
        * @type {Function}
        */
-      this.handler = source;
+      this.handler = handler;
 
       /**
        * The main trigger of the command, also acting as its name.
        * @type {string}
        */
-      this.trigger = null;
+      this.trigger = trigger;
 
       /**
        * An array of aliases for the command.
        * @type {Array.<string>}
        */
-      this.aliases = [];
+      this.aliases = aliases;
 
       /**
        * An array of parsed parameter definitions for the command.
-       * @type {Array.<Object>}
+       * @type {Array.<ParsedParameter>}
        */
-      this.parameters = [];
+      this.parameters = parameters.map(ParameterParser.parse);
 
       /**
        * The description for the command.
        * @type {?string}
        */
-      this.description = null;
+      this.description = description;
     } else if (source instanceof CommandObject) {
       this.handler = source.handler;
       this.trigger = source.trigger;
@@ -59,64 +68,10 @@ export default class CommandObject extends EventEmitter {
   }
 
   /**
-   * Sets the triggers for this command.
-   * @param {string} trigger - The main trigger for this command.
-   * @param {...string} aliases - Additional aliases for this command.
-   * @returns {CommandObject} The instance this method was called on.
-   * @throws {TypeError} Thrown if the given trigger and aliases are not strings.
+   * The primary name/identifier of the command. Same as `this.trigger`.
+   * @type {string}
    */
-  react(trigger, ...aliases) {
-    if (!trigger || !isString(trigger)) {
-      throw new TypeError('Expected command trigger to be a non-empty string.');
-    }
-
-    const oldTrigger = this.trigger;
-    this.trigger = trigger;
-
-    aliases.forEach((alias) => {
-      if (!alias || !isString(alias)) {
-        throw new TypeError('Expected command alias to be a non-empty string.');
-      }
-    });
-
-    const oldAliases = [...this.aliases];
-    this.aliases = aliases;
-    this.emit('triggerUpdate', oldTrigger, oldAliases);
-
-    return this;
-  }
-
-  /**
-   * Sets the parameters for this command.
-   * @param {...string} paramdefs - The parameter definitions.
-   * @returns {CommandObject} The instance this method was called on.
-   * @throws {TypeError} Thrown if the given paramdefs are not strings.
-   */
-  params(...paramdefs) {
-    this.parameters = paramdefs.map((paramdef) => {
-      if (!paramdef || !isString(paramdef)) {
-        throw new TypeError('Expected command argument definitions to be non-empty strings.');
-      }
-
-      return ParameterParser.parse(paramdef);
-    });
-
-    return this;
-  }
-
-  /**
-   * Sets the description of the command.
-   * @param {string} description - The description of the command.
-   * @returns {CommandObject} The instance this method was called on.
-   * @throws {TypeError} Thrown if the given description is not a string.
-   */
-  describe(description) {
-    if (!description || !isString(description)) {
-      throw new TypeError('Expected command description to be a non-empty string.');
-    }
-
-    this.description = description;
-
-    return this;
+  get name() {
+    return this.trigger;
   }
 }

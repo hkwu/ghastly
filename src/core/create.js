@@ -1,8 +1,9 @@
 import CommandObject from '../command/CommandObject';
 
 /**
- * Returns a CommandObject wrapper given a command handler.
- * @param {Function} handler - The command handler function.
- * @returns {CommandObject} A CommandObject instance wrapping the given handler.
+ * Returns a CommandObject wrapper given a set of configuration options.
+ * @param {Object} config - The command configuration.
+ * @returns {CommandObject} A CommandObject instance instantiated with the given
+ *   configuration options.
  */
-export default handler => new CommandObject(handler);
+export default config => new CommandObject(config);
