@@ -3,8 +3,8 @@ import { isArray, isFunction, isString } from 'lodash/lang';
 import ArgumentParser from '../parsers/ArgumentParser';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
-import apply from '../core/apply';
-import create from '../core/create';
+import apply from './apply';
+import create from './create';
 
 /**
  * Receives message update events and dispatches commands found in the messages.
@@ -83,9 +83,8 @@ export default class Ghastly extends Discord.Client {
     this.registry = new CommandRegistry();
 
     // register our events
-    const dispatcher = dispatch.bind(this);
-    this.on('message', dispatcher);
-    this.on('messageUpdate', dispatcher);
+    this.on('message', dispatch);
+    this.on('messageUpdate', dispatch);
   }
 
   /**
