@@ -2,6 +2,7 @@
   "extends": "airbnb-base",
   "rules": {
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
-    "no-prototype-builtins": "off"
+    "no-prototype-builtins": "off",
+    "no-restricted-syntax": "warn"
   }
 }
