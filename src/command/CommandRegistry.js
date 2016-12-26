@@ -1,6 +1,6 @@
-import { isString } from 'lodash/lang';
 import CommandError from '../errors/CommandError';
 import CommandObject from './CommandObject';
+import StringMap from '../util/StringMap';
 
 /**
  * @classdesc Class handling storage and access control for commands.
@@ -12,17 +12,17 @@ export default class CommandRegistry {
   constructor() {
     /**
      * The commands stored in this registry.
-     * @type {Map.<string, CommandObject>}
+     * @type {StringMap.<CommandObject>}
      * @private
      */
-    this.commands = new Map();
+    this.commands = new StringMap();
 
     /**
      * The command aliases stored in this registry.
-     * @type {Map.<string, CommandObject>}
+     * @type {StringMap.<CommandObject>}
      * @private
      */
-    this.aliases = new Map();
+    this.aliases = new StringMap();
   }
 
   /**
@@ -53,10 +53,6 @@ export default class CommandRegistry {
    * @throws {TypeError} Thrown if the given command name is not a non-empty string.
    */
   unload(name) {
-    if (!name || !isString(name)) {
-      throw new TypeError('Expected command name to be a non-empty string.');
-    }
-
     const command = this.commands.get(name);
 
     if (!command) {
@@ -78,10 +74,6 @@ export default class CommandRegistry {
    * @throws {TypeError} Thrown if the given command name is not a non-empty string.
    */
   get(name) {
-    if (!name || !isString(name)) {
-      throw new TypeError('Expected command name to be a non-empty string.');
-    }
-
     return this.commands.get(name) || this.aliases.get(name) || null;
   }
 
@@ -96,9 +88,7 @@ export default class CommandRegistry {
    * @private
    */
   rename(name, command) {
-    if (!name || !isString(name)) {
-      throw new TypeError('Expected command name to be a non-empty string.');
-    } else if (!(command instanceof CommandObject)) {
+    if (!(command instanceof CommandObject)) {
       throw new TypeError('Expected command to be an instance of CommandObject.');
     } else if (name === command.name) {
       return this;
@@ -124,14 +114,8 @@ export default class CommandRegistry {
    * @private
    */
   alias(name, ...aliases) {
-    if (!name || !isString(name)) {
-      throw new TypeError('Expected command name to be a non-empty string.');
-    }
-
     aliases.forEach((alias) => {
-      if (!alias || !isString(alias)) {
-        throw new TypeError('Expected alias to be a non-empty string.');
-      } else if (!this.commands.has(name)) {
+      if (!this.commands.has(name)) {
         throw new CommandError(`Attempting to add alias to non-existent command '${name}'.`);
       } else if (this.aliases.has(alias)) {
         throw new CommandError(`Attempting to add duplicate alias '${alias}' to command '${name}'.`);
@@ -155,9 +139,7 @@ export default class CommandRegistry {
    */
   unalias(...aliases) {
     aliases.forEach((alias) => {
-      if (!alias || !isString(alias)) {
-        throw new TypeError('Expected alias to be a string.');
-      } else if (!this.aliases.has(alias)) {
+      if (!this.aliases.has(alias)) {
         throw new CommandError(`Attempting to remove non-existent alias: '${alias}'.`);
       }
 
