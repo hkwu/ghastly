@@ -39,7 +39,7 @@ export default (source, target) => {
     names.set(source, target);
   }
 
-  return (next, context) => {
+  return async (next, context) => {
     const services = {};
 
     if (!source) {
@@ -58,9 +58,6 @@ export default (source, target) => {
       }
     }
 
-    return next({
-      ...context,
-      ...services,
-    });
+    return next({ ...context, ...services });
   };
 };

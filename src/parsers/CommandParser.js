@@ -1,8 +1,9 @@
 /**
  * @typedef {Object} ParsedCommand
+ * @property {!string} raw - The raw message content.
  * @property {!string} identifier - The name of the command being invoked.
- * @property {!Array.<string>} arguments - A space-delimited array of arguments
- *   that were given as part of the command.
+ * @property {!Array.<string>} args - A space-delimited array of arguments that
+ *   were given as part of the command.
  * @property {!boolean} mentioned - True if the client that received the message
  *   was mentioned at the beginning of the message.
  */
@@ -26,8 +27,9 @@ export default class CommandParser {
     }
 
     return {
+      raw: message.content,
       identifier: mentioned ? split[1].trim() : split[0],
-      arguments: mentioned ? split.slice(2) : split.slice(1),
+      args: mentioned ? split.slice(2) : split.slice(1),
       mentioned,
     };
   }

@@ -11,9 +11,11 @@ export default class StringMap extends Map {
    * @throws {TypeError} Thrown if any of the keys are not strings.
    */
   constructor(iterable) {
-    for (const [key] of iterable) {
-      if (!isString(key)) {
-        throw new TypeError('Expected keys to be strings.');
+    if (iterable) {
+      for (const [key] of iterable) {
+        if (!isString(key)) {
+          throw new TypeError('Expected keys to be strings.');
+        }
       }
     }
 
