@@ -12,11 +12,11 @@ import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
 /**
  * An object containing data that was parsed out of a parameter definition string.
  * @typedef {Object} ParsedParameter
- * @property {!string} name - The name of the parameter.
- * @property {!boolean} optional - True if the parameter is optional, else false.
+ * @property {string} name - The name of the parameter.
+ * @property {boolean} optional - True if the parameter is optional, else false.
  * @property {?string} description - A description of the parameter.
- * @property {!string} type - The expected type of the parameter.
- * @property {!boolean} repeatable - True if the parameter accepts a variable
+ * @property {string} type - The expected type of the parameter.
+ * @property {boolean} repeatable - True if the parameter accepts a variable
  *   number of input arguments, else false.
  * @property {?(ParameterType|Array.<ParameterType>)} defaultValue - The default
  *   value of the parameter. This is non-null only if the parameter is optional.
