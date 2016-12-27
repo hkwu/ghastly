@@ -18,6 +18,8 @@ import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
  * @property {string} type - The expected type of the parameter.
  * @property {boolean} repeatable - True if the parameter accepts a variable
  *   number of input arguments, else false.
+ * @property {boolean} literal - True if the parameter is a literal string, i.e.
+ *   takes the value of the input as given. Can only be applied to string parameters.
  * @property {?(ParameterType|Array.<ParameterType>)} defaultValue - The default
  *   value of the parameter. This is non-null only if the parameter is optional.
  *   The default value for a repeatable parameter will be an array of values
@@ -31,7 +33,35 @@ import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
  */
 export default class ParameterParser {
   /**
-   * Parses the given command parameter definition and returns an
+   * Parses a set of parameters and returns an array of `ParsedParameter` objects.
+   * @param {...string} parameters - The parameters to parse.
+   * @returns {Array.<ParsedParameter>} The parsed parameters.
+   * @throws {ParameterParserError} Thrown if the parameter definitions are not well-formed.
+   */
+  static parse(...parameters) {
+    const parsedParameters = parameters.map(ParameterParser.parseParameter);
+    let repeatable = false;
+    let optional = false;
+
+    for (const parameter of parsedParameters) {
+      if (parameter.literal && parsedParameters.length > 1) {
+        throw new ParameterParserError('Literal parameters must be the only parameter in a command.');
+      } else if (repeatable) {
+        throw new ParameterParserError('Repeatable parameters must be the last parameter in a command.');
+      } else if (optional && !parameter.optional) {
+        throw new ParameterParserError('Cannot have required parameters after optional parameters in a command.');
+      }
+
+      repeatable = repeatable || parameter.repeatable;
+      optional = optional || parameter.optional;
+    }
+
+    return parsedParameters;
+  }
+
+  /**
+   * Parses the given command parameter definition and returns an object
+   *   containing data on it.
    * @param {String} parameter - The command parameter definition.
    * @returns {ParsedParameter} Object containing data on the command parameter.
    * @throws {ParameterParserError} Thrown if the parameter definition is not well-formed.
@@ -39,7 +69,7 @@ export default class ParameterParser {
    * @example
    * ParameterParser.parse('-(int) num* : A parameter.');
    */
-  static parse(parameter) {
+  static parseParameter(parameter) {
     if (!isString(parameter)) {
       throw new TypeError('Expected parameter to be a string.');
     }
@@ -78,6 +108,7 @@ export default class ParameterParser {
       optional: false,
       type: TYPES.STRING,
       repeatable: false,
+      literal: false,
       defaultValue: null,
     };
 
@@ -106,14 +137,21 @@ export default class ParameterParser {
       temp = matched[2];
     }
 
-    // name, repeatable, default value?
-    matched = temp.match(/(\w+\s*?\*?)\s*=\s*(.+)/);
+    // name, repeatable, literal, default value?
+    matched = temp.match(/(\w+\s*?[*+]?)\s*=\s*(.+)/);
     const name = matched ? matched[1] : temp;
 
     if (name.endsWith('*')) {
       parsed.name = trimEnd(name, '* ');
       parsed.repeatable = true;
       parsed.defaultValue = [];
+    } else if (name.endsWith('+')) {
+      if (parsed.type !== TYPES.STRING) {
+        throw new ParameterParserError(`Literals can only be used with string parameters: '${definition}'.`);
+      }
+
+      parsed.name = trimEnd(name, '+ ');
+      parsed.literal = true;
     } else if (name.includes(' ')) {
       throw new ParameterParserError(`Parameter name must not contain spaces: '${definition}'.`);
     } else {

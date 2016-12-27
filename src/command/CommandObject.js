@@ -49,7 +49,7 @@ export default class CommandObject extends EventEmitter {
        * An array of parsed parameter definitions for the command.
        * @type {Array.<ParsedParameter>}
        */
-      this.parameters = parameters.map(ParameterParser.parse);
+      this.parameters = ParameterParser.parse(...parameters);
 
       /**
        * The description for the command.

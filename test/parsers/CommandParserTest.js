@@ -14,8 +14,10 @@ describe('CommandParser', function() {
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
+        raw: '!cmd pro',
+        trimmed: '!cmd pro',
         identifier: '!cmd',
-        arguments: ['pro'],
+        args: ['pro'],
         mentioned: false,
       });
 
@@ -29,8 +31,10 @@ describe('CommandParser', function() {
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
+        raw: '!cmd',
+        trimmed: '!cmd',
         identifier: '!cmd',
-        arguments: [],
+        args: [],
         mentioned: false,
       });
     });
@@ -46,8 +50,10 @@ describe('CommandParser', function() {
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
+        raw: '<@123456789> !cmd pro pro',
+        trimmed: '!cmd pro pro',
         identifier: '!cmd',
-        arguments: ['pro', 'pro'],
+        args: ['pro', 'pro'],
         mentioned: true,
       });
 
@@ -61,8 +67,10 @@ describe('CommandParser', function() {
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
+        raw: '<@123456789> !cmd pro pro',
+        trimmed: '<@123456789> !cmd pro pro',
         identifier: '<@123456789>',
-        arguments: ['!cmd', 'pro', 'pro'],
+        args: ['!cmd', 'pro', 'pro'],
         mentioned: false,
       });
 
@@ -76,8 +84,10 @@ describe('CommandParser', function() {
       };
 
       expect(CommandParser.parse(message)).to.deep.equal({
+        raw: '!cmd pro <@123456789> pro',
+        trimmed: '!cmd pro <@123456789> pro',
         identifier: '!cmd',
-        arguments: ['pro', '<@123456789>', 'pro'],
+        args: ['pro', '<@123456789>', 'pro'],
         mentioned: false,
       });
     });

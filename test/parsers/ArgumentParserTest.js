@@ -8,11 +8,7 @@ import { TYPES } from '../../src/parsers/Constants';
 describe('ArgumentParser', function() {
   describe('#parse()', function() {
     it('parses basic arguments', function() {
-      const rules = [
-        'pool',
-        'hello',
-        'poor=house',
-      ].map(ParameterParser.parse);
+      const rules = ParameterParser.parse('pool', 'hello', 'poor=house');
 
       expect(ArgumentParser.parse(rules, stringArgv('bored boo'))).to.deep.equal({
         pool: 'bored',
@@ -22,12 +18,12 @@ describe('ArgumentParser', function() {
     });
 
     it('parses single arguments', function() {
-      const rules = [
+      const rules = ParameterParser.parse(
         '(num) foo',
         'bar',
         '-baz',
         '(int) qux = 123',
-      ].map(ParameterParser.parse);
+      );
 
       expect(ArgumentParser.parse(rules, stringArgv('-0 "mark my words"'))).to.deep.equal({
         foo: -0,
@@ -45,31 +41,21 @@ describe('ArgumentParser', function() {
     });
 
     it('parses variable length arguments', function() {
-      let rules = [
-        'foo',
-        'bar*',
-      ].map(ParameterParser.parse);
+      let rules = ParameterParser.parse('foo', 'bar*');
 
       expect(ArgumentParser.parse(rules, stringArgv('foo bar baz qux'))).to.deep.equal({
         foo: 'foo',
         bar: ['bar', 'baz', 'qux'],
       });
 
-      rules = [
-        'foo',
-        '-bar*',
-      ].map(ParameterParser.parse);
+      rules = ParameterParser.parse('foo', '-bar*');
 
       expect(ArgumentParser.parse(rules, stringArgv('foo'))).to.deep.equal({
         foo: 'foo',
         bar: [],
       });
 
-      rules = [
-        'foo',
-        'bar = true',
-        '-baz*',
-      ].map(ParameterParser.parse);
+      rules = ParameterParser.parse('foo', 'bar = true', '-baz*');
 
       expect(ArgumentParser.parse(rules, stringArgv('foo bar bazzy'))).to.deep.equal({
         foo: 'foo',
@@ -79,11 +65,11 @@ describe('ArgumentParser', function() {
     });
 
     it('parses default arguments', function() {
-      const rules = [
+      const rules = ParameterParser.parse(
         'foo = 123',
         '(bool) bar = false',
         '(int) baz* = 0 1 2 3',
-      ].map(ParameterParser.parse);
+      );
 
       expect(ArgumentParser.parse(rules, stringArgv(''))).to.deep.equal({
         foo: '123',
@@ -105,10 +91,7 @@ describe('ArgumentParser', function() {
     });
 
     it('disallows missing required arguments', function() {
-      let rules = [
-        'foo',
-        'bar',
-      ].map(ParameterParser.parse);
+      let rules = ParameterParser.parse('foo', 'bar');
 
       expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
         ArgumentParserError,
@@ -117,10 +100,7 @@ describe('ArgumentParser', function() {
 
       expect(() => ArgumentParser.parse(rules, stringArgv('foo bar'))).to.not.throw(ArgumentParserError);
 
-      rules = [
-        'foo',
-        'bar*',
-      ].map(ParameterParser.parse);
+      rules = ParameterParser.parse('foo', 'bar*');
 
       expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
         ArgumentParserError,
@@ -129,18 +109,14 @@ describe('ArgumentParser', function() {
     });
 
     it('disallows invalid argument types', function() {
-      let rules = [
-        '(int) foo',
-      ].map(ParameterParser.parse);
+      let rules = ParameterParser.parse('(int) foo');
 
       expect(() => ArgumentParser.parse(rules, stringArgv('hello'))).to.throw(
         ArgumentParserError,
         'Expected argument \'hello\' to be of type \'INTEGER\'.',
       );
 
-      rules = [
-        '(bool) foo*',
-      ].map(ParameterParser.parse);
+      rules = ParameterParser.parse('(bool) foo*');
 
       expect(() => ArgumentParser.parse(rules, stringArgv('true false t'))).to.throw(
         ArgumentParserError,
