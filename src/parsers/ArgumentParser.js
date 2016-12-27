@@ -23,7 +23,7 @@ export default class ArgumentParser {
 
       if (!rule.optional && isUndefined(args[i])) {
         throw new ArgumentParserError(`Missing a value for required argument: '${rule.name}'.`);
-      } else if (rule.repeatable) {
+      } else if (rule.repeatable || rule.literal) {
         if (isUndefined(args[i])) {
           // put the default value in and return since there's no other args
           parsed[rule.name] = rule.defaultValue;
@@ -31,12 +31,14 @@ export default class ArgumentParser {
           return parsed;
         }
 
-        parsed[rule.name] = [];
+        const rest = [];
 
         // get the rest of the arguments
         for (let j = i; j < args.length; ++j) {
-          parsed[rule.name].push(ArgumentParser.normalizeArgumentType(rule.type, args[j]));
+          rest.push(ArgumentParser.normalizeArgumentType(rule.type, args[j]));
         }
+
+        parsed[rule.name] = rule.literal ? rest.join(' ') : rest;
 
         return parsed;
       }
