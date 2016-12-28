@@ -4,12 +4,22 @@
  * @returns {middlewareLayer} The prefix middleware layer.
  */
 export default prefix => async (next, context) => {
-  if (!context.parsedCommand.raw.startsWith(prefix)) {
-    return false;
-  }
+  let { identifier, args } = context.parsedCommand;
 
-  const trimmedPrefix = context.parsedCommand.raw.replace(prefix, '');
-  const [identifier, ...args] = trimmedPrefix.split(' ');
+  switch (prefix) {
+    case '@self':
+      if (!context.parsedCommand.mentioned) {
+        return false;
+      }
+
+      break;
+    default:
+      if (!context.parsedCommand.raw.startsWith(prefix)) {
+        return false;
+      }
+
+      [identifier, ...args] = context.parsedCommand.raw.replace(prefix, '').split(' ');
+  }
 
   return next({
     ...context,

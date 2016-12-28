@@ -65,7 +65,7 @@ async function dispatch(message, newMessage) {
 
   // set up command context
   try {
-    commandContext.args = ArgumentParser.parse(command.parameters, args);
+    commandContext.args = ArgumentParser.parse(command.parameters, args.join(' '));
   } catch (error) {
     return false;
   }

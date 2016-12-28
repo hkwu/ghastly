@@ -1,4 +1,3 @@
-import stringArgv from 'string-argv';
 import { expect } from 'chai';
 import ArgumentParser from '../../src/parsers/ArgumentParser';
 import ArgumentParserError from '../../src/errors/ArgumentParserError';
@@ -10,7 +9,7 @@ describe('ArgumentParser', function() {
     it('parses basic arguments', function() {
       const rules = ParameterParser.parse('pool', 'hello', 'poor=house');
 
-      expect(ArgumentParser.parse(rules, stringArgv('bored boo'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, 'bored boo')).to.deep.equal({
         pool: 'bored',
         hello: 'boo',
         poor: 'house',
@@ -25,14 +24,14 @@ describe('ArgumentParser', function() {
         '(int) qux = 123',
       );
 
-      expect(ArgumentParser.parse(rules, stringArgv('-0 "mark my words"'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, '-0 "mark my words"')).to.deep.equal({
         foo: -0,
         bar: 'mark my words',
         baz: null,
         qux: 123,
       });
 
-      expect(ArgumentParser.parse(rules, stringArgv('-123.533 "mark my words" "incorrect"'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, '-123.533 "mark my words" "incorrect"')).to.deep.equal({
         foo: -123.533,
         bar: 'mark my words',
         baz: 'incorrect',
@@ -40,24 +39,24 @@ describe('ArgumentParser', function() {
       });
     });
 
-    it('parses variable length arguments', function() {
+    it('parses repeatable arguments', function() {
       let rules = ParameterParser.parse('foo', 'bar*');
 
-      expect(ArgumentParser.parse(rules, stringArgv('foo bar baz qux'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, 'foo bar baz qux')).to.deep.equal({
         foo: 'foo',
         bar: ['bar', 'baz', 'qux'],
       });
 
       rules = ParameterParser.parse('foo', '-bar*');
 
-      expect(ArgumentParser.parse(rules, stringArgv('foo'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, 'foo')).to.deep.equal({
         foo: 'foo',
         bar: [],
       });
 
       rules = ParameterParser.parse('foo', 'bar = true', '-baz*');
 
-      expect(ArgumentParser.parse(rules, stringArgv('foo bar bazzy'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, 'foo bar bazzy')).to.deep.equal({
         foo: 'foo',
         bar: 'bar',
         baz: ['bazzy'],
@@ -71,38 +70,46 @@ describe('ArgumentParser', function() {
         '(int) baz* = 0 1 2 3',
       );
 
-      expect(ArgumentParser.parse(rules, stringArgv(''))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, '')).to.deep.equal({
         foo: '123',
         bar: false,
         baz: [0, 1, 2, 3],
       });
 
-      expect(ArgumentParser.parse(rules, stringArgv('treble'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, 'treble')).to.deep.equal({
         foo: 'treble',
         bar: false,
         baz: [0, 1, 2, 3],
       });
 
-      expect(ArgumentParser.parse(rules, stringArgv('"treble trouble" false 0'))).to.deep.equal({
+      expect(ArgumentParser.parse(rules, '"treble trouble" false 0')).to.deep.equal({
         foo: 'treble trouble',
         bar: false,
         baz: [0],
       });
     });
 
+    it('parses literal arguments', function() {
+      let rules = ParameterParser.parse('+(str) literal+');
+
+      expect(ArgumentParser.parse(rules, 'hello familia\'s reggi"o parmesian`no     ;;;')).to.deep.equal({
+        literal: 'hello familia\'s reggi"o parmesian`no     ;;;',
+      });
+    });
+
     it('disallows missing required arguments', function() {
       let rules = ParameterParser.parse('foo', 'bar');
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
+      expect(() => ArgumentParser.parse(rules, 'foo')).to.throw(
         ArgumentParserError,
         'required argument: \'bar\'.',
       );
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('foo bar'))).to.not.throw(ArgumentParserError);
+      expect(() => ArgumentParser.parse(rules, 'foo bar')).to.not.throw(ArgumentParserError);
 
       rules = ParameterParser.parse('foo', 'bar*');
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('foo'))).to.throw(
+      expect(() => ArgumentParser.parse(rules, 'foo')).to.throw(
         ArgumentParserError,
         'required argument: \'bar\'.',
       );
@@ -111,19 +118,19 @@ describe('ArgumentParser', function() {
     it('disallows invalid argument types', function() {
       let rules = ParameterParser.parse('(int) foo');
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('hello'))).to.throw(
+      expect(() => ArgumentParser.parse(rules, 'hello')).to.throw(
         ArgumentParserError,
         'Expected argument \'hello\' to be of type \'INTEGER\'.',
       );
 
       rules = ParameterParser.parse('(bool) foo*');
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('true false t'))).to.throw(
+      expect(() => ArgumentParser.parse(rules, 'true false t')).to.throw(
         ArgumentParserError,
         'Expected argument \'t\' to be of type \'BOOLEAN\'.',
       );
 
-      expect(() => ArgumentParser.parse(rules, stringArgv('false false true'))).to.not.throw(ArgumentParserError);
+      expect(() => ArgumentParser.parse(rules, 'false false true')).to.not.throw(ArgumentParserError);
     });
   });
 

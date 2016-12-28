@@ -28,11 +28,14 @@ export default class CommandParser {
       return false;
     }
 
+    const trimmed = split.slice(mentioned ? 1 : 0).join(' ').trim();
+    const [identifier, ...args] = trimmed.split(' ');
+
     return {
       raw: message.content,
-      trimmed: split.slice(mentioned ? 1 : 0).join(' '),
-      identifier: mentioned ? split[1].trim() : split[0],
-      args: split.slice(mentioned ? 2 : 1),
+      trimmed,
+      identifier,
+      args,
       mentioned,
     };
   }
