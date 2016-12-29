@@ -17,44 +17,49 @@ import StringMap from '../util/StringMap';
  * @returns {middlewareLayer} The middleware which injects the services.
  */
 export default (source, target) => {
+  if (!source) {
+    // inject all services, excluding name conflicts
+    return async (next, context) => {
+      const services = {};
+
+      for (const [name, service] of context.provider) {
+        // can't be sure what's been overwritten in the context
+        if (!Object.prototype.hasOwnProperty.call(context, name)) {
+          services[name] = service;
+        }
+      }
+
+      return next({ ...context, ...services });
+    };
+  }
+
   const names = new StringMap();
 
-  if (source && !target) {
-    if (isString(source)) {
-      // inject under the service name
-      names.set(source, source);
-    } else if (isArray(source)) {
-      // inject each service under its name
-      source.forEach((name) => {
-        names.set(name, name);
-      });
-    } else if (isPlainObject(source)) {
-      // inject each service under the specified name
-      for (const [key, val] of source) {
-        names.set(key, val);
-      }
-    }
-  } else if (source && target) {
+  if (target) {
     // inject under a new name
     names.set(source, target);
+  } else if (isString(source)) {
+    // inject under the service name
+    names.set(source, source);
+  } else if (isArray(source)) {
+    // inject each service under its name
+    source.forEach((name) => {
+      names.set(name, name);
+    });
+  } else if (isPlainObject(source)) {
+    // inject each service under the specified name
+    for (const [key, val] of Object.entries(source)) {
+      names.set(key, val);
+    }
   }
 
   return async (next, context) => {
     const services = {};
 
-    if (!source) {
-      // inject all services, excluding name conflicts
-      for (const [name, service] of context.provider) {
-        if (!context.hasOwnProperty(name)) {
-          services[name] = service;
-        }
-      }
-    } else {
-      // inject services based on the name mapping constructed earlier
-      for (const [serviceName, contextName] of names) {
-        if (context.provider.has(serviceName)) {
-          services[contextName] = context.provider.get(serviceName);
-        }
+    // inject services based on the name mapping constructed earlier
+    for (const [serviceName, contextName] of names) {
+      if (context.provider.has(serviceName)) {
+        services[contextName] = context.provider.get(serviceName);
       }
     }
 
