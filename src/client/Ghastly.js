@@ -32,7 +32,9 @@ async function dispatchMiddlewareCore(context) {
  * @this Ghastly
  */
 async function dispatch(message, newMessage) {
-  if (newMessage && message.content === newMessage.content) {
+  if (message.author.id === this.user.id) {
+    return false;
+  } else if (newMessage && message.content === newMessage.content) {
     return false;
   }
 
