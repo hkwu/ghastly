@@ -1,13 +1,12 @@
-import EventEmitter from 'events';
 import { isPlainObject } from 'lodash/lang';
 import CommandObjectResolver from '../resolvers/CommandObjectResolver';
 import ParameterParser from '../parsers/ParameterParser';
+import apply from '../core/apply';
 
 /**
  * @classdesc Class which wraps a command handler with additional useful data.
- * @extends EventEmitter
  */
-export default class CommandObject extends EventEmitter {
+export default class CommandObject {
   /**
    * Constructor.
    * @param {(Function|CommandObject)} source - The command handler function, or
@@ -16,8 +15,6 @@ export default class CommandObject extends EventEmitter {
    *   a `CommandObject` instance.
    */
   constructor(source) {
-    super();
-
     if (isPlainObject(source)) {
       const resolver = new CommandObjectResolver();
       const {
@@ -25,13 +22,14 @@ export default class CommandObject extends EventEmitter {
         triggers: [trigger, ...aliases],
         parameters,
         description,
+        middleware,
       } = resolver.resolve(source);
 
       /**
-       * The command handler function.
+       * The command handler function, with middleware applied to it.
        * @type {Function}
        */
-      this.handler = handler;
+      this.handler = apply(...middleware)(handler);
 
       /**
        * The main trigger of the command, also acting as its name.
@@ -56,12 +54,28 @@ export default class CommandObject extends EventEmitter {
        * @type {?string}
        */
       this.description = description;
+
+      /**
+       * The command handler function.
+       * @type {commandHandler}
+       * @private
+       */
+      this.coreHandler = handler;
+
+      /**
+       * The middleware applied to the handler function.
+       * @type {Array.<middlewareLayer>}
+       * @private
+       */
+      this.middleware = middleware;
     } else if (source instanceof CommandObject) {
       this.handler = source.handler;
       this.trigger = source.trigger;
       this.aliases = [...source.aliases];
       this.parameters = [...source.parameters];
       this.description = source.description;
+      this.coreHandler = source.coreHandler;
+      this.middleware = [...source.middleware];
     } else {
       throw new TypeError('Expected constructor argument to be a function or a CommandObject instance.');
     }

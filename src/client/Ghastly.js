@@ -1,11 +1,12 @@
 import Discord from 'discord.js';
 import { isArray, isFunction, isString } from 'lodash/lang';
 import ArgumentParser from '../parsers/ArgumentParser';
+import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
 import StringMap from '../util/StringMap';
 import apply from '../core/apply';
-import create from '../core/create';
+import generate from '../core/generate';
 
 /**
  * The default middleware layer for dispatch(). Simply returns the given context.
@@ -153,9 +154,8 @@ export default class Ghastly extends Discord.Client {
    * @returns {Ghastly} The instance this method was called on.
    */
   loadCommands(...commands) {
-    const generatorApi = { apply, create, config: {} };
-    commands.map(command => command(generatorApi)).forEach((command) => {
-      this.registry.load(command);
+    commands.map(generate).forEach((commandConfig) => {
+      this.registry.load(new CommandObject(commandConfig));
     });
 
     return this;
