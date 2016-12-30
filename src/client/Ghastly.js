@@ -9,6 +9,14 @@ import apply from '../core/apply';
 import generate from '../core/generate';
 
 /**
+ * A function which is passed a reference to a ServiceRegistry and registers
+ *   some service(s) under that registry.
+ * @callback serviceProvider
+ * @param {Object} context - Object containing data for the service provider.
+ * @param {ServiceRegistry} context.registry - The ServiceRegistry.
+ */
+
+/**
  * The default middleware layer for dispatch(). Simply returns the given context.
  * @param {Object} context - The dispatch context.
  * @returns {Promise.<Object>} Resolves to the given context.
