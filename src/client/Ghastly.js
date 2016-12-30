@@ -4,7 +4,7 @@ import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
-import StringMap from '../util/StringMap';
+import ServiceRegistry from './ServiceRegistry';
 import apply from '../core/apply';
 import generate from '../core/generate';
 
@@ -47,7 +47,7 @@ async function dispatch(message, newMessage) {
 
   const dispatchContext = {
     message: commandMessage,
-    provider: this.provider,
+    services: this.services,
     parsedCommand,
   };
 
@@ -60,7 +60,7 @@ async function dispatch(message, newMessage) {
 
   const { parsedCommand: { identifier, args }, ...commandContext } = returnedContext;
   // find the command
-  const command = this.registry.get(identifier);
+  const command = this.commands.get(identifier);
 
   if (!command) {
     return false;
@@ -120,16 +120,14 @@ export default class Ghastly extends Discord.Client {
     /**
      * The command registry for the client.
      * @type {CommandRegistry}
-     * @private
      */
-    this.registry = new CommandRegistry();
+    this.commands = new CommandRegistry();
 
     /**
      * The service provider for the client.
-     * @type {StringMap.<*>}
-     * @private
+     * @type {ServiceRegistry}
      */
-    this.provider = new StringMap();
+    this.services = new ServiceRegistry();
 
     /**
      * The client middleware stack.
@@ -157,7 +155,7 @@ export default class Ghastly extends Discord.Client {
    */
   loadCommands(...commands) {
     commands.map(generate).forEach((commandConfig) => {
-      this.registry.load(new CommandObject(commandConfig));
+      this.commands.load(new CommandObject(commandConfig));
     });
 
     return this;
@@ -170,31 +168,34 @@ export default class Ghastly extends Discord.Client {
    */
   unloadCommands(...names) {
     names.forEach((name) => {
-      this.registry.unload(name);
+      this.commands.unload(name);
     });
 
     return this;
   }
 
   /**
-   * Adds a service to the provider.
-   * @param {string} name - The name of the service.
-   * @param {*} service - The service to add.
+   * Binds services to the service registry.
+   * @param {...serviceProvider} providers - The service providers.
    * @returns {Ghastly} The instance this method was called on.
    */
-  loadService(name, service) {
-    this.provider.set(name, service);
+  loadServices(...providers) {
+    providers.forEach((provider) => {
+      provider({ registry: this.services });
+    });
 
     return this;
   }
 
   /**
-   * Removes a service from the provider.
-   * @param {string} name - The name of the service to remove.
+   * Unbinds services from the registry.
+   * @param {...string} names - The names of the services to remove.
    * @returns {Ghastly} The instance this method was called on.
    */
-  unloadService(name) {
-    this.provider.delete(name);
+  unloadServices(...names) {
+    names.forEach((name) => {
+      this.services.unbind(name);
+    });
 
     return this;
   }

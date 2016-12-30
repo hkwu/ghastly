@@ -22,10 +22,10 @@ export default (source, target) => {
     return async (next, context) => {
       const services = {};
 
-      for (const [name, service] of context.provider) {
+      for (const name of context.services.mainBindings) {
         // can't be sure what's been overwritten in the context
         if (!Object.prototype.hasOwnProperty.call(context, name)) {
-          services[name] = service;
+          services[name] = context.services.fetch(name);
         }
       }
 
@@ -58,8 +58,8 @@ export default (source, target) => {
 
     // inject services based on the name mapping constructed earlier
     for (const [serviceName, contextName] of names) {
-      if (context.provider.has(serviceName)) {
-        services[contextName] = context.provider.get(serviceName);
+      if (context.services.has(serviceName)) {
+        services[contextName] = context.services.fetch(serviceName);
       }
     }
 
