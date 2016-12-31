@@ -20,8 +20,8 @@ export default class ServiceRegistryEntry {
 
     /**
      * The aliases bound to this entry's identifier.
-     * @type {Set.<string>}
+     * @type {Array.<string>}
      */
-    this.aliases = new Set(aliases);
+    this.aliases = aliases;
   }
 }
