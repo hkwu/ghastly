@@ -1,4 +1,5 @@
 import { RichEmbed } from 'discord.js';
+import { sample } from 'lodash/collection';
 import { isArray, isFunction, isString } from 'lodash/lang';
 import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
@@ -241,7 +242,7 @@ export default class Dispatcher {
       case 'string':
         return contentMessage.channel.sendMessage(indicator);
       case 'array': {
-        const choice = indicator[Math.floor(Math.random() * indicator.length)];
+        const choice = sample(indicator);
 
         if (!isString(choice)) {
           throw new TypeError('Expected message response to be a string.');
