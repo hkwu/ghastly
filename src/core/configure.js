@@ -52,7 +52,7 @@ export default (configurator = {}) => {
         ...command,
         triggers: configTriggers || commandTriggers,
         description: configDescription || commandDescription,
-        middleware: [...middleware, ...commandMiddleware],
+        middleware: middleware || commandMiddleware,
       };
     };
   };
