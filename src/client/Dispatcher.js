@@ -4,19 +4,36 @@ import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
-import Dispatcher from './Dispatcher';
+import ServiceRegistry from './ServiceRegistry';
 import generate from '../core/generate';
 
 /**
- * @extends Dispatcher
+ * A function which is passed a reference to a `ServiceRegistry` and registers
+ *   some service(s) under that registry.
+ * @callback serviceProvider
+ * @param {Object} context - Object containing data for the service provider.
+ * @param {ServiceRegistry} context.registry - The `ServiceRegistry`.
  */
-export default class PrefixDispatcher extends Dispatcher {
-  constructor(options = {}) {
-    const {
-      prefix,
-    } = options;
 
-    super();
+/**
+ * @classdesc Receives and dispatches messages.
+ */
+export default class Dispatcher {
+  /**
+   * Constructor.
+   */
+  constructor({ prefix }) {
+    /**
+     * The client this dispatcher is attached to.
+     * @type {?Ghastly}
+     */
+    this.client = null;
+
+    /**
+     * The service provider for the dispatcher.
+     * @type {ServiceRegistry}
+     */
+    this.services = new ServiceRegistry();
 
     /**
      * The command registry for the dispatcher.
@@ -51,6 +68,60 @@ export default class PrefixDispatcher extends Dispatcher {
      * @private
      */
     this.dispatchMiddleware = this.constructor.dispatchMiddlewareCore;
+  }
+
+  /**
+   * Binds a service to the service registry.
+   * @param {string} name - The service name.
+   * @param {*} service - The service to bind.
+   * @returns {Dispatcher} The instance this method was called on.
+   */
+  bindService(name, service) {
+    this.services.bind(name, service);
+
+    return this;
+  }
+
+  /**
+   * Binds services to the service registry via service providers.
+   * @param {...serviceProvider} providers - The service providers.
+   * @returns {Dispatcher} The instance this method was called on.
+   */
+  bindProviders(...providers) {
+    providers.forEach((provider) => {
+      provider({ registry: this.services });
+    });
+
+    return this;
+  }
+
+  /**
+   * Unbinds services from the registry.
+   * @param {...string} names - The names of the services to remove.
+   * @returns {Dispatcher} The instance this method was called on.
+   */
+  unbindServices(...names) {
+    names.forEach((name) => {
+      this.services.unbind(name);
+    });
+
+    return this;
+  }
+
+  /**
+   * Registers a client with this dispatcher.
+   * @param {Ghastly} client - The client.
+   */
+  register(client) {
+    const dispatchHandler = this.dispatch.bind(this);
+
+    this.client = client;
+
+    client.on('message', dispatchHandler);
+    client.on('messageUpdate', dispatchHandler);
+
+    this.prefix = this.regexifyPrefix(this.rawPrefix);
+    this.dispatcherDidAttach(client);
   }
 
   /**
@@ -187,10 +258,6 @@ export default class PrefixDispatcher extends Dispatcher {
     }
   }
 
-  onClientAttach() {
-    this.prefix = this.regexifyPrefix(this.rawPrefix);
-  }
-
   /**
    * Transforms a prefix string to the RegEx equivalent.
    * @param {string} prefix - The prefix.
@@ -225,4 +292,11 @@ export default class PrefixDispatcher extends Dispatcher {
 
     return !this.prefix.test(content);
   }
+
+  /**
+   * Called after a client has been registered with the dispatcher.
+   * @param {Ghastly} client - The client that was registered with the dispatcher.
+   * @private
+   */
+  dispatcherDidAttach(client) {}
 }
