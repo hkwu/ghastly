@@ -47,7 +47,7 @@ const compose = (...functions) => {
  *   returns a new handler function with the given middleware applied to it.
  * @throws {TypeError} Thrown if any of the given middleware is not a function.
  */
-export default (...middleware) => {
+export default function apply(...middleware) {
   middleware.forEach((layer) => {
     if (!isFunction(layer)) {
       throw new TypeError('Expected all provided middleware to be functions.');
@@ -61,4 +61,4 @@ export default (...middleware) => {
 
     return compose(...middleware, handler);
   };
-};
+}

@@ -16,7 +16,7 @@ import StringMap from '../util/StringMap';
  *   new name. Represents the new name of the service inside the context.
  * @returns {middlewareLayer} The middleware which injects the services.
  */
-export default (source, target) => {
+export default function provide(source, target) {
   if (!source) {
     // inject all services, excluding name conflicts
     return async (next, context) => {
@@ -65,4 +65,4 @@ export default (source, target) => {
 
     return next({ ...context, ...services });
   };
-};
+}

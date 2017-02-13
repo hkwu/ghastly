@@ -15,7 +15,7 @@ import { isFunction, isPlainObject } from 'lodash/lang';
  *   with the provided config applied to it.
  * @throws {TypeError} Thrown if the given config argument is not a plain object.
  */
-export default (configurator = {}) => {
+export default function configure(configurator = {}) {
   if (!(isPlainObject(configurator) || isFunction(configurator))) {
     throw new TypeError('Expected given config to be a plain object or function.');
   }
@@ -56,4 +56,4 @@ export default (configurator = {}) => {
       };
     };
   };
-};
+}
