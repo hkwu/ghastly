@@ -58,10 +58,32 @@ export default class PrefixDispatcher extends Dispatcher {
    *   given context.
    * @param {Object} context - The dispatch context.
    * @returns {Promise.<Object>} Resolves to the given context.
+   * @static
    * @private
    */
   static async dispatchMiddlewareCore(context) {
     return context;
+  }
+
+  /**
+   * Resolves a given indicator value to a type.
+   * @param {*} indicator - The indicator to resolve.
+   * @returns {?string} The type of the indicator, or `null` if not recognized.
+   * @static
+   * @private
+   */
+  static resolveIndicatorType(indicator) {
+    if (isString(indicator)) {
+      return 'string';
+    } else if (isArray(indicator)) {
+      return 'array';
+    } else if (isFunction(indicator)) {
+      return 'function';
+    } else if (indicator instanceof RichEmbed) {
+      return 'embed';
+    }
+
+    return null;
   }
 
   /**
@@ -115,35 +137,27 @@ export default class PrefixDispatcher extends Dispatcher {
       return false;
     }
 
-    const dispatchContext = {
-      message: contentMessage,
-      services: this.services,
-      parsedCommand,
-    };
-
-    // run our context through client middleware
-    const returnedContext = await this.dispatchMiddleware(dispatchContext);
-
-    if (!returnedContext) {
-      return false;
-    }
-
-    const { parsedCommand: { identifier, args }, ...commandContext } = returnedContext;
-    // find the command
-    const command = this.commands.get(identifier);
+    const command = this.commands.get(parsedCommand.identifier);
 
     if (!command) {
       return false;
     }
 
-    // set up command context
+    const commandContext = await this.dispatchMiddleware({
+      message: contentMessage,
+      services: this.services,
+    });
+
+    if (!commandContext) {
+      return false;
+    }
+
     try {
-      commandContext.args = ArgumentParser.parse(command.parameters, args.join(' '));
+      commandContext.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
     } catch (error) {
       return false;
     }
 
-    // execute command handler
     let indicator;
 
     try {
@@ -152,25 +166,25 @@ export default class PrefixDispatcher extends Dispatcher {
       return false;
     }
 
-    if (!indicator) {
-      return false;
-    } else if (isString(indicator)) {
-      return contentMessage.channel.sendMessage(indicator);
-    } else if (isArray(indicator)) {
-      const choice = indicator[Math.floor(Math.random() * indicator.length)];
+    switch (this.constructor.resolveIndicatorType(indicator)) {
+      case 'string':
+        return contentMessage.channel.sendMessage(indicator);
+      case 'array': {
+        const choice = indicator[Math.floor(Math.random() * indicator.length)];
 
-      if (!isString(choice)) {
-        throw new TypeError('Expected message response to be a string.');
+        if (!isString(choice)) {
+          throw new TypeError('Expected message response to be a string.');
+        }
+
+        return contentMessage.channel.sendMessage(choice);
       }
-
-      return contentMessage.channel.sendMessage(choice);
-    } else if (isFunction(indicator)) {
-      return indicator();
-    } else if (indicator instanceof RichEmbed) {
-      return contentMessage.channel.sendEmbed(indicator);
+      case 'function':
+        return indicator();
+      case 'embed':
+        return contentMessage.channel.sendEmbed(indicator);
+      default:
+        throw new TypeError('Returned value from command handler is not a recognized type.');
     }
-
-    throw new TypeError('Returned value from command handler is not a string, array or function.');
   }
 
   onClientAttach() {
