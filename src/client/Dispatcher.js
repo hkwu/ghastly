@@ -217,7 +217,9 @@ export default class Dispatcher {
 
     const commandContext = await this.dispatchMiddleware({
       message: contentMessage,
+      client: this.client,
       services: this.services,
+      commands: this.commands,
     });
 
     if (!commandContext) {
