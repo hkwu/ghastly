@@ -86,7 +86,7 @@ export default class CommandRegistry {
 
     const name = this.getMainName(identifier);
 
-    return this.commands.get(name) || null;
+    return name ? this.commands.get(name) : null;
   }
 
   /**
