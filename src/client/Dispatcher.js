@@ -161,7 +161,7 @@ export default class Dispatcher {
   /**
    * Adds the given commands to the registry.
    * @param {...Function} commands - The command generators.
-   * @returns {PrefixDispatcher} The instance this method was called on.
+   * @returns {Dispatcher} The instance this method was called on.
    */
   loadCommands(...commands) {
     commands.map(generate).forEach((commandConfig) => {
@@ -174,7 +174,7 @@ export default class Dispatcher {
   /**
    * Removes the given commands from the registry.
    * @param {...string} names - The identifiers of commands to unload.
-   * @returns {PrefixDispatcher} The instance this method was called on.
+   * @returns {Dispatcher} The instance this method was called on.
    */
   unloadCommands(...names) {
     names.forEach((name) => {
@@ -301,5 +301,5 @@ export default class Dispatcher {
    * @param {Ghastly} client - The client that was registered with the dispatcher.
    * @private
    */
-  dispatcherDidAttach(client) {}
+  dispatcherDidAttach(client) {} // eslint-disable-line class-methods-use-this, no-unused-vars
 }
