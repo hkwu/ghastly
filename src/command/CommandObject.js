@@ -88,4 +88,47 @@ export default class CommandObject {
   get name() {
     return this.trigger;
   }
+
+  /**
+   * The usage string for the command.
+   * @type {string}
+   */
+  get usage() {
+    const aliases = this.aliases.length ? ` (${this.aliases.join(', ')})` : '';
+    const parameters = this.parameters.length
+      ? `\n${this.parameters.map((parameter) => {
+        const {
+          name,
+          optional,
+          description,
+          type,
+          repeatable,
+          literal,
+          defaultValue,
+        } = parameter;
+
+        let parameterName = `**${name}**`;
+
+        if ((repeatable && defaultValue.length) || (!repeatable && defaultValue)) {
+          parameterName = `${parameterName}=${defaultValue}`;
+        }
+
+        if (optional) {
+          parameterName = `[${parameterName}]`;
+        }
+
+        let repeatableOrLiteral = '';
+
+        if (repeatable) {
+          repeatableOrLiteral = '🔁 ';
+        } else if (literal) {
+          repeatableOrLiteral = '💬 ';
+        }
+
+        return `  ${repeatableOrLiteral}(${type}) ${parameterName} : ${description}`;
+      }).join('\n')}`
+      : '';
+
+    return `**${this.name}**${aliases} - ${this.description}${parameters}`;
+  }
 }
