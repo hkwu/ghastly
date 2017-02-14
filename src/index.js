@@ -3,7 +3,7 @@ import configure from './core/configure';
 import provide from './middleware/provide';
 
 export {
-  Ghastly,
+  Ghastly as Client,
   configure,
   provide,
 };
