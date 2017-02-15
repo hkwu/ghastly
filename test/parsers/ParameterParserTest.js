@@ -2,7 +2,7 @@ import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 import ParameterParser from '../../src/parsers/ParameterParser';
 import ParameterParserError from '../../src/errors/ParameterParserError';
-import { TYPES } from '../../src/parsers/Constants';
+import * as Types from '../../src/parsers/Types';
 
 describe('ParameterParser', function() {
   before(function() {
@@ -34,7 +34,7 @@ describe('ParameterParser', function() {
         name: 'foo',
         optional: false,
         description: null,
-        type: TYPES.STRING,
+        type: Types.STRING,
         repeatable: false,
         literal: false,
         defaultValue: null,
@@ -44,7 +44,7 @@ describe('ParameterParser', function() {
         name: 'param',
         optional: true,
         description: 'some description',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
         repeatable: false,
         literal: false,
         defaultValue: 123.5,
@@ -54,7 +54,7 @@ describe('ParameterParser', function() {
         name: 'name',
         optional: false,
         description: 'description',
-        type: TYPES.STRING,
+        type: Types.STRING,
         repeatable: false,
         literal: false,
         defaultValue: null,
@@ -64,7 +64,7 @@ describe('ParameterParser', function() {
         name: 'argument',
         optional: true,
         description: 'optional',
-        type: TYPES.STRING,
+        type: Types.STRING,
         repeatable: false,
         literal: false,
         defaultValue: null,
@@ -74,7 +74,7 @@ describe('ParameterParser', function() {
         name: 'array',
         optional: false,
         description: 'description',
-        type: TYPES.STRING,
+        type: Types.STRING,
         repeatable: true,
         literal: false,
         defaultValue: [],
@@ -123,7 +123,7 @@ describe('ParameterParser', function() {
         name: 'white',
         optional: true,
         description: 'man  the',
-        type: TYPES.STRING,
+        type: Types.STRING,
         repeatable: true,
         literal: false,
         defaultValue: ['space'],
@@ -139,7 +139,7 @@ describe('ParameterParser', function() {
     it('parses basic arguments', function() {
       expect(ParameterParser.parseDefinition('basic')).to.deep.equal({
         name: 'basic',
-        type: TYPES.STRING,
+        type: Types.STRING,
         optional: false,
         repeatable: false,
         literal: false,
@@ -199,47 +199,47 @@ describe('ParameterParser', function() {
     it('parses parameter types', function() {
       expect(ParameterParser.parseDefinition('(bool)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.BOOLEAN,
+        type: Types.BOOLEAN,
       });
 
       expect(ParameterParser.parseDefinition('(boolean)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.BOOLEAN,
+        type: Types.BOOLEAN,
       });
 
       expect(ParameterParser.parseDefinition('(integer)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.INTEGER,
+        type: Types.INTEGER,
       });
 
       expect(ParameterParser.parseDefinition('(int)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.INTEGER,
+        type: Types.INTEGER,
       });
 
       expect(ParameterParser.parseDefinition('(number)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
       });
 
       expect(ParameterParser.parseDefinition('(num)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
       });
 
       expect(ParameterParser.parseDefinition('(string)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.STRING,
+        type: Types.STRING,
       });
 
       expect(ParameterParser.parseDefinition('(str)variable')).to.containSubset({
         name: 'variable',
-        type: TYPES.STRING,
+        type: Types.STRING,
       });
 
       expect(ParameterParser.parseDefinition('(num)variable*')).to.containSubset({
         name: 'variable',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
         repeatable: true,
       });
     });
@@ -247,49 +247,49 @@ describe('ParameterParser', function() {
     it('parses typed default values', function() {
       expect(ParameterParser.parseDefinition('(bool)name=true')).to.containSubset({
         name: 'name',
-        type: TYPES.BOOLEAN,
+        type: Types.BOOLEAN,
         defaultValue: true,
       });
 
       expect(ParameterParser.parseDefinition('(bool)name=false')).to.containSubset({
         name: 'name',
-        type: TYPES.BOOLEAN,
+        type: Types.BOOLEAN,
         defaultValue: false,
       });
 
       expect(ParameterParser.parseDefinition('(int)name=123')).to.containSubset({
         name: 'name',
-        type: TYPES.INTEGER,
+        type: Types.INTEGER,
         defaultValue: 123,
       });
 
       expect(ParameterParser.parseDefinition('(int)name=123.555')).to.containSubset({
         name: 'name',
-        type: TYPES.INTEGER,
+        type: Types.INTEGER,
         defaultValue: 123,
       });
 
       expect(ParameterParser.parseDefinition('(num)name=123.555')).to.containSubset({
         name: 'name',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
         defaultValue: 123.555,
       });
 
       expect(ParameterParser.parseDefinition('(str)name=false')).to.containSubset({
         name: 'name',
-        type: TYPES.STRING,
+        type: Types.STRING,
         defaultValue: 'false',
       });
 
       expect(ParameterParser.parseDefinition('(bool)name*=true false "true" false')).to.containSubset({
         name: 'name',
-        type: TYPES.BOOLEAN,
+        type: Types.BOOLEAN,
         defaultValue: [true, false, true, false],
       });
 
       expect(ParameterParser.parseDefinition('(number)name*=123 -233 -100.5 0 23.4')).to.containSubset({
         name: 'name',
-        type: TYPES.NUMBER,
+        type: Types.NUMBER,
         defaultValue: [123, -233, -100.5, 0, 23.4],
       });
     });

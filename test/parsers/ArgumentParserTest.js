@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import ArgumentParser from '../../src/parsers/ArgumentParser';
 import ArgumentParserError from '../../src/errors/ArgumentParserError';
 import ParameterParser from '../../src/parsers/ParameterParser';
-import { TYPES } from '../../src/parsers/Constants';
+import * as Types from '../../src/parsers/Types';
 
 describe('ArgumentParser', function() {
   describe('#parse()', function() {
@@ -120,14 +120,14 @@ describe('ArgumentParser', function() {
 
       expect(() => ArgumentParser.parse(rules, 'hello')).to.throw(
         ArgumentParserError,
-        'Expected argument \'hello\' to be of type \'INTEGER\'.',
+        'Expected argument \'hello\' to be of type \'integer\'.',
       );
 
       rules = ParameterParser.parse('(bool) foo*');
 
       expect(() => ArgumentParser.parse(rules, 'true false t')).to.throw(
         ArgumentParserError,
-        'Expected argument \'t\' to be of type \'BOOLEAN\'.',
+        'Expected argument \'t\' to be of type \'boolean\'.',
       );
 
       expect(() => ArgumentParser.parse(rules, 'false false true')).to.not.throw(ArgumentParserError);
@@ -136,39 +136,39 @@ describe('ArgumentParser', function() {
 
   describe('#normalizeArgumentType()', function() {
     it('does nothing to string arguments', function() {
-      expect(ArgumentParser.normalizeArgumentType(TYPES.STRING, 'hallelujah')).to.equal('hallelujah');
+      expect(ArgumentParser.normalizeArgumentType(Types.STRING, 'hallelujah')).to.equal('hallelujah');
     });
 
     it('converts boolean, number and integer argument types', function() {
-      expect(ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'true')).to.be.true;
-      expect(ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'false')).to.be.false;
+      expect(ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'true')).to.be.true;
+      expect(ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'false')).to.be.false;
 
-      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '10')).to.equal(10);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '10.5')).to.equal(10);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '-10')).to.equal(-10);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.INTEGER, '-10.5')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(Types.INTEGER, '10')).to.equal(10);
+      expect(ArgumentParser.normalizeArgumentType(Types.INTEGER, '10.5')).to.equal(10);
+      expect(ArgumentParser.normalizeArgumentType(Types.INTEGER, '-10')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(Types.INTEGER, '-10.5')).to.equal(-10);
 
-      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '123.4')).to.equal(123.4);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '0')).to.equal(0);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '+0')).to.equal(+0);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '-0')).to.equal(-0);
-      expect(ArgumentParser.normalizeArgumentType(TYPES.NUMBER, '-10')).to.equal(-10);
+      expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '123.4')).to.equal(123.4);
+      expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '0')).to.equal(0);
+      expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '+0')).to.equal(+0);
+      expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '-0')).to.equal(-0);
+      expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '-10')).to.equal(-10);
     });
 
     it('disallows invalid argument types', function() {
-      expect(() => ArgumentParser.normalizeArgumentType(TYPES.BOOLEAN, 'h')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'h')).to.throw(
         ArgumentParserError,
-        'Expected argument \'h\' to be of type \'BOOLEAN\'.',
+        'Expected argument \'h\' to be of type \'boolean\'.',
       );
 
-      expect(() => ArgumentParser.normalizeArgumentType(TYPES.NUMBER, 'h')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(Types.NUMBER, 'h')).to.throw(
         ArgumentParserError,
-        'Expected argument \'h\' to be of type \'NUMBER\'.',
+        'Expected argument \'h\' to be of type \'number\'.',
       );
 
-      expect(() => ArgumentParser.normalizeArgumentType(TYPES.INTEGER, 'NaN')).to.throw(
+      expect(() => ArgumentParser.normalizeArgumentType(Types.INTEGER, 'NaN')).to.throw(
         ArgumentParserError,
-        'Expected argument \'NaN\' to be of type \'INTEGER\'.',
+        'Expected argument \'NaN\' to be of type \'integer\'.',
       );
     });
   });

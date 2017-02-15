@@ -1,7 +1,7 @@
 import stringArgv from 'string-argv';
 import { isUndefined } from 'lodash/lang';
 import ArgumentParserError from '../errors/ArgumentParserError';
-import { TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
+import { convert, isType } from './Types';
 
 /**
  * @classdesc Handles parsing of commands given by users.
@@ -73,13 +73,10 @@ export default class ArgumentParser {
    *   the specified type.
    */
   static normalizeArgumentType(type, argument) {
-    const checker = TYPE_CHECKERS[type];
-    const converter = TYPE_CONVERTERS[type];
-
-    if (!checker(argument)) {
+    if (!isType(argument, type)) {
       throw new ArgumentParserError(`Expected argument '${argument}' to be of type '${type}'.`);
     }
 
-    return converter(argument);
+    return convert(argument, type);
   }
 }

@@ -2,7 +2,7 @@ import stringArgv from 'string-argv';
 import { isString } from 'lodash/lang';
 import { trimEnd, trimStart } from 'lodash/string';
 import ParameterParserError from '../errors/ParameterParserError';
-import { TYPES, TYPE_CHECKERS, TYPE_CONVERTERS } from './Constants';
+import * as Types from './Types';
 
 /**
  * One of the types that a command parameter is allowed to take.
@@ -106,7 +106,7 @@ export default class ParameterParser {
     const parsed = {
       name: null,
       optional: false,
-      type: TYPES.STRING,
+      type: Types.STRING,
       repeatable: false,
       literal: false,
       defaultValue: null,
@@ -127,7 +127,7 @@ export default class ParameterParser {
 
     if (matched) {
       const declaredType = matched[1];
-      const actualType = TYPES[declaredType.toUpperCase()];
+      const actualType = Types.resolve(declaredType);
 
       if (!actualType) {
         throw new ParameterParserError(`Unrecognized parameter type declaration: '${definition}'.`);
@@ -146,7 +146,7 @@ export default class ParameterParser {
       parsed.repeatable = true;
       parsed.defaultValue = [];
     } else if (name.endsWith('+')) {
-      if (parsed.type !== TYPES.STRING) {
+      if (parsed.type !== Types.STRING) {
         throw new ParameterParserError(`Literals can only be used with string parameters: '${definition}'.`);
       }
 
@@ -168,14 +168,11 @@ export default class ParameterParser {
       }
 
       const typedDefaults = defaults.map((value) => {
-        const checker = TYPE_CHECKERS[parsed.type];
-        const converter = TYPE_CONVERTERS[parsed.type];
-
-        if (!checker(value)) {
+        if (!Types.isType(value, parsed.type)) {
           throw new ParameterParserError(`Given default value '${value}' is not of the correct type: '${definition}'.`);
         }
 
-        return converter(value);
+        return Types.convert(value, parsed.type);
       });
 
       parsed.defaultValue = parsed.repeatable ? typedDefaults : typedDefaults[0];
