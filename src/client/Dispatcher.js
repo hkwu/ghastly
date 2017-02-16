@@ -5,6 +5,7 @@ import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
+import Response from '../command/Response';
 import ServiceRegistry from './ServiceRegistry';
 import generate from '../core/generate';
 
@@ -153,6 +154,8 @@ export default class Dispatcher {
       return 'function';
     } else if (indicator instanceof RichEmbed) {
       return 'embed';
+    } else if (indicator instanceof Response) {
+      return 'customResponse';
     }
 
     return null;
@@ -215,19 +218,19 @@ export default class Dispatcher {
       return false;
     }
 
-    const commandContext = await this.dispatchMiddleware({
+    const context = await this.dispatchMiddleware({
       message: contentMessage,
       client: this.client,
       services: this.services,
       commands: this.commands,
     });
 
-    if (!commandContext) {
+    if (!context) {
       return false;
     }
 
     try {
-      commandContext.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
+      context.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
     } catch (error) {
       return false;
     }
@@ -235,7 +238,7 @@ export default class Dispatcher {
     let indicator;
 
     try {
-      indicator = await command.handler(commandContext);
+      indicator = await command.handler(context);
     } catch (error) {
       return false;
     }
@@ -253,9 +256,11 @@ export default class Dispatcher {
         return contentMessage.channel.sendMessage(choice);
       }
       case 'function':
-        return indicator();
+        return indicator(context);
       case 'embed':
         return contentMessage.channel.sendEmbed(indicator);
+      case 'customResponse':
+        return indicator.respond(context);
       default:
         throw new TypeError('Returned value from command handler is not a recognized type.');
     }
