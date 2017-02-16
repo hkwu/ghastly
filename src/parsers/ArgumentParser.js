@@ -1,7 +1,7 @@
 import stringArgv from 'string-argv';
 import { isUndefined } from 'lodash/lang';
 import ArgumentParserError from '../errors/ArgumentParserError';
-import { convert, isType } from './Types';
+import { convertType, isType } from './Types';
 
 /**
  * @classdesc Handles parsing of commands given by users.
@@ -67,7 +67,7 @@ export default class ArgumentParser {
   /**
    * Converts an argument to the given type, ignoring string arguments.
    * @param {string} type - The type the argument should be converted to.
-   * @param {string} argument - The argument to convert.
+   * @param {string} argument - The argument to convertType.
    * @returns {ParameterType} The converted argument.
    * @throws {ArgumentParserError} Thrown if the argument is not convertable to
    *   the specified type.
@@ -77,6 +77,6 @@ export default class ArgumentParser {
       throw new ArgumentParserError(`Expected argument '${argument}' to be of type '${type}'.`);
     }
 
-    return convert(argument, type);
+    return convertType(argument, type);
   }
 }

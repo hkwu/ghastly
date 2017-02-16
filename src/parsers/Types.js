@@ -8,7 +8,7 @@ import { isNumber, isString, toInteger, toNumber } from 'lodash/lang';
 export const BOOLEAN = 'boolean';
 
 /**
- * Boolean type, short form.
+ * Alias for Boolean type.
  * @type {string}
  * @const
  */
@@ -22,7 +22,7 @@ export const BOOL = 'bool';
 export const INTEGER = 'integer';
 
 /**
- * Integer type, short form.
+ * Alias for Integer type.
  * @type {string}
  * @const
  */
@@ -36,7 +36,7 @@ export const INT = 'int';
 export const NUMBER = 'number';
 
 /**
- * Number type, short form.
+ * Alias for Number type.
  * @type {string}
  * @const
  */
@@ -50,7 +50,7 @@ export const NUM = 'num';
 export const STRING = 'string';
 
 /**
- * String type, short form.
+ * Alias for String type.
  * @type {string}
  * @const
  */
@@ -61,7 +61,7 @@ export const STR = 'str';
  * @param {string} value - The string.
  * @returns {?string} The resolved value type, or `null` if it could not be resolved.
  */
-export const resolve = (value) => {
+export const resolveType = (value) => {
   if (!isString(value)) {
     throw new TypeError('Expected value to be a string.');
   }
@@ -95,7 +95,7 @@ export const isType = (value, expectedType) => {
     throw new TypeError('Expected value to be a string.');
   }
 
-  switch (resolve(expectedType)) {
+  switch (resolveType(expectedType)) {
     case BOOLEAN: {
       const lower = value.toLowerCase();
 
@@ -115,16 +115,16 @@ export const isType = (value, expectedType) => {
 /**
  * Converts a string value to a given type.
  * @param {string} value - The string.
- * @param {string} type - The type to convert to.
+ * @param {string} type - The type to convertType to.
  * @returns {*} The converted type, or the given string if it couldn't be converted
  *   to the given type.
  */
-export const convert = (value, type) => {
+export const convertType = (value, type) => {
   if (!isString(value)) {
     throw new TypeError('Expected value to be a string.');
   }
 
-  switch (resolve(type)) {
+  switch (resolveType(type)) {
     case BOOLEAN:
       return value.toLowerCase() === 'true';
     case INTEGER:

@@ -127,7 +127,7 @@ export default class ParameterParser {
 
     if (matched) {
       const declaredType = matched[1];
-      const actualType = Types.resolve(declaredType);
+      const actualType = Types.resolveType(declaredType);
 
       if (!actualType) {
         throw new ParameterParserError(`Unrecognized parameter type declaration: '${definition}'.`);
@@ -172,7 +172,7 @@ export default class ParameterParser {
           throw new ParameterParserError(`Given default value '${value}' is not of the correct type: '${definition}'.`);
         }
 
-        return Types.convert(value, parsed.type);
+        return Types.convertType(value, parsed.type);
       });
 
       parsed.defaultValue = parsed.repeatable ? typedDefaults : typedDefaults[0];
