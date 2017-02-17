@@ -240,10 +240,12 @@ export default class Dispatcher {
       throw new DispatchError('Message did not pass the content filter.');
     }
 
-    const parsedCommand = CommandParser.parse(contentMessage);
+    let parsedCommand;
 
-    if (!parsedCommand) {
-      throw new DispatchError('Message could not be parsed as a command.');
+    try {
+      parsedCommand = CommandParser.parse(contentMessage);
+    } catch (error) {
+      throw new DispatchError(`Encountered an error while parsing message for a command: ${error.message}.`);
     }
 
     const command = this.commands.get(parsedCommand.identifier);
