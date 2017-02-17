@@ -15,13 +15,14 @@ export default class ParameterParser {
    * @returns {ParsedParameter[]} The parsed parameters.
    * @throws {ParameterParserError} Thrown if the parameter definitions are not
    *   well-formed.
+   * @static
    */
   static parse(...parameters) {
     const parsedParameters = parameters.map(ParameterParser.parseParameter);
     let repeatable = false;
     let optional = false;
 
-    for (const parameter of parsedParameters) {
+    parsedParameters.forEach((parameter) => {
       if (parameter.literal && parsedParameters.length > 1) {
         throw new ParameterParserError('Literal parameters must be the only parameter in a command.');
       } else if (repeatable) {
@@ -32,7 +33,7 @@ export default class ParameterParser {
 
       repeatable = repeatable || parameter.repeatable;
       optional = optional || parameter.optional;
-    }
+    });
 
     return parsedParameters;
   }
@@ -45,6 +46,7 @@ export default class ParameterParser {
    * @throws {ParameterParserError} Thrown if the parameter definition is not
    *   well-formed.
    * @throws {TypeError} Thrown if the parameter definition is not a string.
+   * @static
    */
   static parseParameter(parameter) {
     if (!isString(parameter)) {
@@ -78,6 +80,7 @@ export default class ParameterParser {
    *   definition.
    * @throws {ParameterParserError} Thrown if the parameter definition is not
    *   well-formed.
+   * @static
    */
   static parseDefinition(definition) {
     const parsed = {
