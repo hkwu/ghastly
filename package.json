@@ -25,11 +25,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "mocha --require babel-register --recursive",
-    "prepublish": "npm run build && yarn test",
-    "docs:prepare": "gitbook install",
-    "docs:watch": "npm run docs:prepare && gitbook serve",
-    "docs:build": "npm run docs:prepare && rm -rf _book && gitbook build",
-    "docs:publish": "npm run docs:build && cd _book && echo 'ghastly.js.org' > CNAME && git init && git commit --allow-empty -m 'Update docs.' && git checkout -b gh-pages && git add . && git commit -am 'Update docs.' && git push git@github.com:hkwu/ghastly gh-pages --force"
+    "prepublish": "npm run build && yarn test"
   },
   "dependencies": {
     "discord.js": "^11.0.0",
@@ -49,7 +45,6 @@
     "eslint": "^3.1.1",
     "eslint-config-airbnb-base": "^11.0.0",
     "eslint-plugin-import": "^2.2.0",
-    "gitbook-cli": "^2.3.0",
     "mocha": "^3.0.2"
   },
   "engines": {
