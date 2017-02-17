@@ -33,6 +33,16 @@ const INDICATOR_TYPES = {
  */
 
 /**
+ * Emitted when a message response could not be dispatched.
+ * @event Ghastly#dispatchError
+ * @param {DispatchError} error - The error thrown by the dispatcher function.
+ * @param {Message} message - The Discord.js `Message` object which triggered
+ *   the dispatch action.
+ * @param {Message} [newMessage] - The updated Discord.js `Message` object which
+ *   triggered the dispatch action. Only given when the event was a message update.
+ */
+
+/**
  * @classdesc Receives and dispatches messages.
  */
 export default class Dispatcher {
@@ -165,14 +175,20 @@ export default class Dispatcher {
    * @param {Ghastly} client - The client.
    */
   register(client) {
-    const dispatchHandler = this.dispatch.bind(this);
+    const dispatchHandler = async (...args) => {
+      try {
+        await this.dispatch(...args);
+      } catch (error) {
+        this.client.emit('dispatchError', error, ...args);
+      }
+    };
 
     this.client = client;
+    this.prefix = this.regexifyPrefix(this.rawPrefix);
 
     client.on('message', dispatchHandler);
     client.on('messageUpdate', dispatchHandler);
 
-    this.prefix = this.regexifyPrefix(this.rawPrefix);
     this.dispatcherDidAttach(client);
   }
 
@@ -205,15 +221,15 @@ export default class Dispatcher {
   /**
    * Receives message update events and dispatches commands found in the messages.
    * @param {Message} message - A Discord.js `Message` object.
-   * @param {Message} [newMessage=null] - A Discord.js `Message` object. Should
-   *   be received only when the message event was an update.
+   * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
+   *   received only when the message event was an update.
    * @returns {Promise.<(boolean|Message|*), DispatchError>} A promise resolving to
    *   a Discord.js `Message` representing the response that was dispatched if the
    *   command was handled successfully, or whatever value is returned by the command
    *   handler's indicator, if it is a function.
    *   The promise rejects with a `DispatchError` if a response could not be made.
    */
-  async dispatch(message, newMessage = null) {
+  async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {
       throw new DispatchError('Message event did not pass the filter.');
     }
