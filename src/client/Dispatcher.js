@@ -84,7 +84,7 @@ export default class Dispatcher {
 
     /**
      * The dispatcher middleware stack.
-     * @type {Array.<middlewareLayer>}
+     * @type {middlewareLayer[]}
      * @private
      */
     this.middleware = [];

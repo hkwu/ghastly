@@ -39,13 +39,13 @@ export default class CommandObject {
 
       /**
        * An array of aliases for the command.
-       * @type {Array.<string>}
+       * @type {string[]}
        */
       this.aliases = aliases;
 
       /**
        * An array of parsed parameter definitions for the command.
-       * @type {Array.<ParsedParameter>}
+       * @type {ParsedParameter[]}
        */
       this.parameters = ParameterParser.parse(...parameters);
 
@@ -64,7 +64,7 @@ export default class CommandObject {
 
       /**
        * The middleware applied to the handler function.
-       * @type {Array.<middlewareLayer>}
+       * @type {middlewareLayer[]}
        * @private
        */
       this.middleware = middleware;

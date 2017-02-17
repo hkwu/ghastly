@@ -50,7 +50,7 @@ export default class ServiceRegistry {
 
   /**
    * Binds a service to the registry.
-   * @param {(string|Array.<string>)} identifier - The identifier(s) for this service.
+   * @param {(string|string[])} identifier - The identifier(s) for this service.
    * @param {*} service - The service to provide. If given a function, the function
    *   is executed and the resulting service returned each time the service is
    *   fetched. Otherwise, the service is treated as a singleton and the same

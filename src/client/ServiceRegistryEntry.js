@@ -20,7 +20,7 @@ export default class ServiceRegistryEntry {
 
     /**
      * The aliases bound to this entry's identifier.
-     * @type {Array.<string>}
+     * @type {string[]}
      */
     this.aliases = aliases;
   }

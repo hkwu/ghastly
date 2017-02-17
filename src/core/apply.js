@@ -7,8 +7,7 @@ import { isFunction } from 'lodash/lang';
  * @param {Object} context - An object containing data passed down to the handler.
  *   Includes things such as the received Discord.js Message object and arguments
  *   parsed in the message.
- * @returns {(string|Array.<string>|Function)} A value indicating how to respond
- *   to the received message.
+ * @returns {*} A value indicating how to respond to the received message.
  */
 
 /**
