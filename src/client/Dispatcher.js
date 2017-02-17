@@ -88,6 +88,41 @@ export default class Dispatcher {
   }
 
   /**
+   * The default middleware layer for the dispatch handler. Simply returns the
+   *   given context.
+   * @param {Object} context - The dispatch context.
+   * @returns {Promise.<Object>} Resolves to the given context.
+   * @static
+   * @private
+   */
+  static async dispatchMiddlewareCore(context) {
+    return context;
+  }
+
+  /**
+   * Resolves a given indicator value to a type.
+   * @param {*} indicator - The indicator to resolve.
+   * @returns {?string} The type of the indicator, or `null` if not recognized.
+   * @static
+   * @private
+   */
+  static resolveIndicatorType(indicator) {
+    if (isString(indicator)) {
+      return INDICATOR_TYPES.STRING;
+    } else if (isArray(indicator)) {
+      return INDICATOR_TYPES.ARRAY;
+    } else if (indicator instanceof RichEmbed) {
+      return INDICATOR_TYPES.EMBED;
+    } else if (isFunction(indicator)) {
+      return INDICATOR_TYPES.FUNCTION;
+    } else if (indicator instanceof Response) {
+      return INDICATOR_TYPES.CUSTOM_RESPONSE;
+    }
+
+    return null;
+  }
+
+  /**
    * Binds a service to the service registry.
    * @param {string} name - The service name.
    * @param {*} service - The service to bind.
@@ -139,41 +174,6 @@ export default class Dispatcher {
 
     this.prefix = this.regexifyPrefix(this.rawPrefix);
     this.dispatcherDidAttach(client);
-  }
-
-  /**
-   * The default middleware layer for the dispatch handler. Simply returns the
-   *   given context.
-   * @param {Object} context - The dispatch context.
-   * @returns {Promise.<Object>} Resolves to the given context.
-   * @static
-   * @private
-   */
-  static async dispatchMiddlewareCore(context) {
-    return context;
-  }
-
-  /**
-   * Resolves a given indicator value to a type.
-   * @param {*} indicator - The indicator to resolve.
-   * @returns {?string} The type of the indicator, or `null` if not recognized.
-   * @static
-   * @private
-   */
-  static resolveIndicatorType(indicator) {
-    if (isString(indicator)) {
-      return INDICATOR_TYPES.STRING;
-    } else if (isArray(indicator)) {
-      return INDICATOR_TYPES.ARRAY;
-    } else if (indicator instanceof RichEmbed) {
-      return INDICATOR_TYPES.EMBED;
-    } else if (isFunction(indicator)) {
-      return INDICATOR_TYPES.FUNCTION;
-    } else if (indicator instanceof Response) {
-      return INDICATOR_TYPES.CUSTOM_RESPONSE;
-    }
-
-    return null;
   }
 
   /**
