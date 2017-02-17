@@ -5,9 +5,24 @@ import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
+import DispatchError from '../errors/DispatchError';
 import Response from '../command/Response';
 import ServiceRegistry from './ServiceRegistry';
 import generate from '../core/generate';
+
+/**
+ * Indicator type strings.
+ * @type {Object}
+ * @const
+ * @private
+ */
+const INDICATOR_TYPES = {
+  STRING: 'STRING',
+  ARRAY: 'ARRAY',
+  EMBED: 'EMBED',
+  FUNCTION: 'FUNCTION',
+  CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
+};
 
 /**
  * A function which is passed a reference to a `ServiceRegistry` and registers
@@ -147,15 +162,15 @@ export default class Dispatcher {
    */
   static resolveIndicatorType(indicator) {
     if (isString(indicator)) {
-      return 'string';
+      return INDICATOR_TYPES.STRING;
     } else if (isArray(indicator)) {
-      return 'array';
-    } else if (isFunction(indicator)) {
-      return 'function';
+      return INDICATOR_TYPES.ARRAY;
     } else if (indicator instanceof RichEmbed) {
-      return 'embed';
+      return INDICATOR_TYPES.EMBED;
+    } else if (isFunction(indicator)) {
+      return INDICATOR_TYPES.FUNCTION;
     } else if (indicator instanceof Response) {
-      return 'customResponse';
+      return INDICATOR_TYPES.CUSTOM_RESPONSE;
     }
 
     return null;
@@ -192,30 +207,28 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage=null] - A Discord.js `Message` object. Should
    *   be received only when the message event was an update.
-   * @returns {Promise.<(boolean|Message|*), TypeError>} A Promise resolving to
+   * @returns {Promise.<(boolean|Message|*), DispatchError>} A promise resolving to
    *   a Discord.js `Message` representing the response that was dispatched if the
-   *   command was handled successfully, or `false` if the command could not be
-   *   dispatched, or whatever value is returned by the command handler's indicator,
-   *   if it is a function.
-   *   The Promise rejects with a `TypeError` if the command handler's returned
-   *   indicator is not of a valid type.
+   *   command was handled successfully, or whatever value is returned by the command
+   *   handler's indicator, if it is a function.
+   *   The promise rejects with a `DispatchError` if a response could not be made.
    */
   async dispatch(message, newMessage = null) {
     if (this.shouldFilterEvent(message, newMessage)) {
-      return false;
+      throw new DispatchError('Message event did not pass the filter.');
     }
 
     const contentMessage = newMessage || message;
     const parsedCommand = CommandParser.parse(contentMessage);
 
     if (!parsedCommand) {
-      return false;
+      throw new DispatchError('Message could not be parsed as a command.');
     }
 
     const command = this.commands.get(parsedCommand.identifier);
 
     if (!command) {
-      return false;
+      throw new DispatchError('Parsed command could not be found.');
     }
 
     const context = await this.dispatchMiddleware({
@@ -226,13 +239,13 @@ export default class Dispatcher {
     });
 
     if (!context) {
-      return false;
+      throw new DispatchError('Dispatch middleware did not return a context object.');
     }
 
     try {
       context.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
     } catch (error) {
-      return false;
+      throw new DispatchError(`Encountered an error while parsing command arguments: ${error.message}.`);
     }
 
     let indicator;
@@ -240,29 +253,29 @@ export default class Dispatcher {
     try {
       indicator = await command.handler(context);
     } catch (error) {
-      return false;
+      throw new DispatchError(`Command handler threw an error: ${error.message}.`);
     }
 
     switch (this.constructor.resolveIndicatorType(indicator)) {
-      case 'string':
+      case INDICATOR_TYPES.STRING:
         return contentMessage.channel.sendMessage(indicator);
-      case 'array': {
+      case INDICATOR_TYPES.ARRAY: {
         const choice = sample(indicator);
 
         if (!isString(choice)) {
-          throw new TypeError('Expected message response to be a string.');
+          throw new DispatchError('Expected array message responses to be strings.');
         }
 
         return contentMessage.channel.sendMessage(choice);
       }
-      case 'function':
-        return indicator(context);
-      case 'embed':
+      case INDICATOR_TYPES.EMBED:
         return contentMessage.channel.sendEmbed(indicator);
-      case 'customResponse':
+      case INDICATOR_TYPES.FUNCTION:
+        return indicator(context);
+      case INDICATOR_TYPES.CUSTOM_RESPONSE:
         return indicator.respond(context);
       default:
-        throw new TypeError('Returned value from command handler is not a recognized type.');
+        throw new DispatchError('Returned value from command handler is not of a recognized type.');
     }
   }
 
