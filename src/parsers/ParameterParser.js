@@ -2,31 +2,8 @@ import stringArgv from 'string-argv';
 import { isString } from 'lodash/lang';
 import { trimEnd, trimStart } from 'lodash/string';
 import ParameterParserError from '../errors/ParameterParserError';
+import ParsedParameter from './ParsedParameter';
 import * as Types from './Types';
-
-/**
- * One of the types that a command parameter is allowed to take.
- * @typedef {(boolean|number|string)} ParameterType
- */
-
-/**
- * An object containing data that was parsed out of a parameter definition string.
- * @typedef {Object} ParsedParameter
- * @property {string} name - The name of the parameter.
- * @property {boolean} optional - True if the parameter is optional, else false.
- * @property {?string} description - A description of the parameter.
- * @property {string} type - The expected type of the parameter.
- * @property {boolean} repeatable - True if the parameter accepts a variable
- *   number of input arguments, else false.
- * @property {boolean} literal - True if the parameter is a literal string, i.e.
- *   takes the value of the input as given. Can only be applied to string parameters.
- * @property {?(ParameterType|Array.<ParameterType>)} defaultValue - The default
- *   value of the parameter. This is non-null only if the parameter is optional.
- *   The default value for a repeatable parameter will be an array of values
- *   while non-repeatable parameters store a single primitive as a default value.
- *   The types of these values are determined by the parameters's type declaration
- *   defaulting to strings.
- */
 
 /**
  * @classdesc Parses a command parameter definition string.
@@ -35,8 +12,9 @@ export default class ParameterParser {
   /**
    * Parses a set of parameters and returns an array of `ParsedParameter` objects.
    * @param {...string} parameters - The parameters to parse.
-   * @returns {Array.<ParsedParameter>} The parsed parameters.
-   * @throws {ParameterParserError} Thrown if the parameter definitions are not well-formed.
+   * @returns {ParsedParameter[]} The parsed parameters.
+   * @throws {ParameterParserError} Thrown if the parameter definitions are not
+   *   well-formed.
    */
   static parse(...parameters) {
     const parsedParameters = parameters.map(ParameterParser.parseParameter);
@@ -64,10 +42,9 @@ export default class ParameterParser {
    *   containing data on it.
    * @param {String} parameter - The command parameter definition.
    * @returns {ParsedParameter} Object containing data on the command parameter.
-   * @throws {ParameterParserError} Thrown if the parameter definition is not well-formed.
+   * @throws {ParameterParserError} Thrown if the parameter definition is not
+   *   well-formed.
    * @throws {TypeError} Thrown if the parameter definition is not a string.
-   * @example
-   * ParameterParser.parse('-(int) num* : A parameter.');
    */
   static parseParameter(parameter) {
     if (!isString(parameter)) {
@@ -97,10 +74,10 @@ export default class ParameterParser {
   /**
    * Parses the definition portion of a parameter string.
    * @param {string} definition - The definition portion of a parameter string.
-   * @returns {Object} An object containing data on the parsed parameter definition.
-   * @throws {ParameterParserError} Thrown if the parameter definition is not well-formed.
-   * @example
-   * ParameterParser.parseDefinition('-(int) num*');
+   * @returns {ParsedParameter} An object containing data on the parsed parameter
+   *   definition.
+   * @throws {ParameterParserError} Thrown if the parameter definition is not
+   *   well-formed.
    */
   static parseDefinition(definition) {
     const parsed = {
@@ -109,7 +86,6 @@ export default class ParameterParser {
       type: Types.STRING,
       repeatable: false,
       literal: false,
-      defaultValue: null,
     };
 
     let temp = definition;
@@ -178,6 +154,6 @@ export default class ParameterParser {
       parsed.defaultValue = parsed.repeatable ? typedDefaults : typedDefaults[0];
     }
 
-    return parsed;
+    return new ParsedParameter(parsed);
   }
 }

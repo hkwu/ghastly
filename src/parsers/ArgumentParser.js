@@ -9,8 +9,8 @@ import { convertType, isType } from './Types';
 export default class ArgumentParser {
   /**
    * Parses an array of arguments for a command call.
-   * @param {Array.<ParsedParameter>} rules - An array of rules for the command
-   *   being evaluated whose order matches that of the arguments.
+   * @param {ParsedParameter[]} rules - An array of rules for the command being
+   *   evaluated whose order matches that of the arguments.
    * @param {string} args - A string containing the arguments for this command.
    * @returns {Object} The parsed arguments given in a mapping between argument
    *   names and values.
