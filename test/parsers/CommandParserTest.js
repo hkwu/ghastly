@@ -18,7 +18,6 @@ describe('CommandParser', function() {
         trimmed: '!cmd pro',
         identifier: '!cmd',
         args: ['pro'],
-        mentioned: false,
       });
 
       message = {
@@ -35,7 +34,6 @@ describe('CommandParser', function() {
         trimmed: '!cmd',
         identifier: '!cmd',
         args: [],
-        mentioned: false,
       });
     });
 
@@ -54,7 +52,6 @@ describe('CommandParser', function() {
         trimmed: '!cmd pro pro',
         identifier: '!cmd',
         args: ['pro', 'pro'],
-        mentioned: true,
       });
 
       message = {
@@ -71,7 +68,6 @@ describe('CommandParser', function() {
         trimmed: '<@123456789> !cmd pro pro',
         identifier: '<@123456789>',
         args: ['!cmd', 'pro', 'pro'],
-        mentioned: false,
       });
 
       message = {
@@ -88,7 +84,6 @@ describe('CommandParser', function() {
         trimmed: '!cmd pro <@123456789> pro',
         identifier: '!cmd',
         args: ['pro', '<@123456789>', 'pro'],
-        mentioned: false,
       });
     });
 
@@ -102,7 +97,7 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.equal(false);
+      expect(() => CommandParser.parse(message)).to.throw(Error);
     });
   });
 });

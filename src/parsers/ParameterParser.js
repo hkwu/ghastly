@@ -67,17 +67,16 @@ export default class ParameterParser {
       parsed.description = matched[2];
     }
 
-    return {
+    return new ParsedParameter({
       ...parsed,
       ...ParameterParser.parseDefinition(matched ? matched[1] : trimmed),
-    };
+    });
   }
 
   /**
    * Parses the definition portion of a parameter string.
    * @param {string} definition - The definition portion of a parameter string.
-   * @returns {ParsedParameter} An object containing data on the parsed parameter
-   *   definition.
+   * @returns {Object} An object containing data on the parsed parameter definition.
    * @throws {ParameterParserError} Thrown if the parameter definition is not
    *   well-formed.
    * @static
@@ -157,6 +156,6 @@ export default class ParameterParser {
       parsed.defaultValue = parsed.repeatable ? typedDefaults : typedDefaults[0];
     }
 
-    return new ParsedParameter(parsed);
+    return parsed;
   }
 }

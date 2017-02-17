@@ -143,7 +143,6 @@ describe('ParameterParser', function() {
         optional: false,
         repeatable: false,
         literal: false,
-        defaultValue: null,
       });
     });
 
@@ -160,7 +159,6 @@ describe('ParameterParser', function() {
         name: 'optional',
         optional: true,
         repeatable: false,
-        defaultValue: null,
       });
     });
 
