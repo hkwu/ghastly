@@ -231,10 +231,15 @@ export default class Dispatcher {
    */
   async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {
-      throw new DispatchError('Message event did not pass the filter.');
+      throw new DispatchError('Message did not pass the event filter.');
     }
 
     const contentMessage = newMessage || message;
+
+    if (this.shouldFilterContent(contentMessage.content)) {
+      throw new DispatchError('Message did not pass the content filter.');
+    }
+
     const parsedCommand = CommandParser.parse(contentMessage);
 
     if (!parsedCommand) {
@@ -313,20 +318,28 @@ export default class Dispatcher {
   /**
    * Determines if a message event should be filtered from the handler.
    * @param {Message} message - A Discord.js `Message` object.
-   * @param {Message} [newMessage=null] - A Discord.js `Message` object. Should
-   *   be non-null only when the message event was an update.
+   * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
+   *   received only when the message event was an update.
    * @returns {boolean} `true` if the message should be filtered, else `false`.
    * @private
    */
-  shouldFilterEvent(message, newMessage = null) {
+  shouldFilterEvent(message, newMessage) {
     if (message.author.id === this.client.user.id) {
       return true;
     } else if (newMessage && message.content === newMessage.content) {
       return true;
     }
 
-    const content = newMessage ? newMessage.content : message.content;
+    return false;
+  }
 
+  /**
+   * Determines if a message should be filtered from the handler based on its content.
+   * @param {string} content - The message contents.
+   * @returns {boolean} `true` if the message should be filtered, else `false`.
+   * @private
+   */
+  shouldFilterContent(content) {
     return !this.prefix.test(content);
   }
 
