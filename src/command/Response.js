@@ -6,12 +6,12 @@ import { isFunction } from 'lodash/lang';
 export default class Response {
   /**
    * Constructor.
-   * @param {Function} handler - The function which will handle the message response.
+   * @param {Function} executor - The function which will handle the message response.
    * @throws {TypeError} Thrown if the given handler is not a function.
    */
-  constructor(handler) {
-    if (!isFunction(handler)) {
-      throw new TypeError('Expected handler to be a function.');
+  constructor(executor) {
+    if (!isFunction(executor)) {
+      throw new TypeError('Expected executor to be a function.');
     }
 
     /**
@@ -19,7 +19,7 @@ export default class Response {
      * @type {Function}
      * @private
      */
-    this.handler = handler;
+    this.executor = executor;
   }
 
   /**
@@ -28,6 +28,6 @@ export default class Response {
    * @returns {*} The returned value from the handler.
    */
   respond(context) {
-    return this.handler(context);
+    return this.executor(context);
   }
 }
