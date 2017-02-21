@@ -245,7 +245,7 @@ export default class Dispatcher {
     try {
       parsedCommand = CommandParser.parse(contentMessage, this.prefix);
     } catch (error) {
-      throw new DispatchError(`Encountered an error while parsing message for a command: ${error.message}.`);
+      throw new DispatchError(error.message);
     }
 
     const command = this.commands.get(parsedCommand.identifier);
@@ -268,7 +268,7 @@ export default class Dispatcher {
     try {
       context.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
     } catch (error) {
-      throw new DispatchError(`Encountered an error while parsing command arguments: ${error.message}.`);
+      throw new DispatchError(error.message);
     }
 
     let indicator;
@@ -276,7 +276,7 @@ export default class Dispatcher {
     try {
       indicator = await command.handler(context);
     } catch (error) {
-      throw new DispatchError(`Command handler threw an error: ${error.message}.`);
+      throw new DispatchError(error.message);
     }
 
     switch (this.constructor.resolveIndicatorType(indicator)) {
