@@ -223,11 +223,13 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
    *   received only when the message event was an update.
-   * @returns {Promise.<(boolean|Message|*), DispatchError>} A promise resolving to
-   *   a Discord.js `Message` representing the response that was dispatched if the
-   *   command was handled successfully, or whatever value is returned by the command
-   *   handler's indicator, if it is a function.
-   *   The promise rejects with a `DispatchError` if a response could not be made.
+   * @returns {Promise.<(boolean|Message|*), Error>} A promise resolving to a
+   *   Discord.js `Message` representing the response that was dispatched if the
+   *   command was handled successfully, or whatever value is returned by the
+   *   command handler's indicator, if it is a function.
+   * Errors encountered during dispatching will bubble up. If the error comes
+   *   from the dispatch function itself, the promise will specifically reject
+   *   with a `DispatchError`.
    */
   async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {
@@ -240,14 +242,7 @@ export default class Dispatcher {
       throw new DispatchError('Message did not pass the content filter.');
     }
 
-    let parsedCommand;
-
-    try {
-      parsedCommand = CommandParser.parse(contentMessage, this.prefix);
-    } catch (error) {
-      throw new DispatchError(error.message);
-    }
-
+    const parsedCommand = CommandParser.parse(contentMessage, this.prefix);
     const command = this.commands.get(parsedCommand.identifier);
 
     if (!command) {
@@ -265,19 +260,8 @@ export default class Dispatcher {
       throw new DispatchError('Dispatch middleware did not return a context object.');
     }
 
-    try {
-      context.args = ArgumentParser.parse(command.parameters, parsedCommand.args.join(' '));
-    } catch (error) {
-      throw new DispatchError(error.message);
-    }
-
-    let indicator;
-
-    try {
-      indicator = await command.handler(context);
-    } catch (error) {
-      throw new DispatchError(error.message);
-    }
+    const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
+    const indicator = await command.handler({ ...context, args });
 
     switch (this.constructor.resolveIndicatorType(indicator)) {
       case INDICATOR_TYPES.STRING:
