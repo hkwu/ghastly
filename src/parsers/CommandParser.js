@@ -7,20 +7,20 @@ export default class CommandParser {
   /**
    * Parses the given message for a command.
    * @param {Message} message - The Discord.js `Message` object.
+   * @param {RegExp} prefix - The prefix RegEx.
    * @returns {ParsedCommand} Data parsed from the message content.
    * @throws {Error} Thrown if the given message could not be parsed as a command.
    * @static
    */
-  static parse(message) {
-    const split = message.content.split(' ');
-    const mentioned = !!split[0].match(`<@!?${message.client.user.id}>`);
+  static parse(message, prefix) {
+    const trimmed = message.content.replace(prefix, '');
+    const split = trimmed.split(' ');
 
-    if (mentioned && split.length < 2) {
+    if (!split.length) {
       throw new Error('Message does not contain enough words to specify a command.');
     }
 
-    const trimmed = split.slice(mentioned ? 1 : 0).join(' ').trim();
-    const [identifier, ...args] = trimmed.split(' ');
+    const [identifier, ...args] = split;
 
     return new ParsedCommand({
       raw: message.content,

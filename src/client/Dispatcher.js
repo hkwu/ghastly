@@ -243,7 +243,7 @@ export default class Dispatcher {
     let parsedCommand;
 
     try {
-      parsedCommand = CommandParser.parse(contentMessage);
+      parsedCommand = CommandParser.parse(contentMessage, this.prefix);
     } catch (error) {
       throw new DispatchError(`Encountered an error while parsing message for a command: ${error.message}.`);
     }
