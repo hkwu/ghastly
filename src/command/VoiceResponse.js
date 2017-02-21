@@ -1,12 +1,18 @@
 import Response from './Response';
 
 /**
+ * The type of method to use when sending audio responses. One of `'convertedStream'`,
+ *   `'file'`, or `'stream'`.
+ * @typedef {string} StreamType
+ */
+
+/**
  * @classdesc Wrapper for voice channel audio responses.
  */
 export default class VoiceResponse extends Response {
   /**
    * Constructor.
-   * @param {string} streamType - The type of stream to use.
+   * @param {StreamType} streamType - The type of stream to use.
    * @param {(ReadableStream|string)} stream - The stream to play, or a string
    *   containing the path to a file.
    * @param {StreamOptions} [options={}] - The options for playing the stream.

@@ -4,13 +4,13 @@ import StringMap from '../util/StringMap';
 /**
  * Middleware which injects services from the client's provider into the context.
  *   Can be initialized in various ways.
- *   Pass no arguments to inject all available services into the context without
+ * Pass no arguments to inject all available services into the context without
  *   overriding existing values.
- *   Pass a string to inject the service under that name.
- *   Pass an array of strings to inject those services under their names.
- *   Pass an object with string keys (service name) and values (context name) to
+ * Pass a string to inject the service under that name.
+ * Pass an array of strings to inject those services under their names.
+ * Pass an object with string keys (service name) and values (context name) to
  *   inject those services under new names.
- *   Pass two strings to inject the given service under the second string.
+ * Pass two strings to inject the given service under the second string.
  * @param {(string|Array|Object)} source - The service name source.
  * @param {string} [target] - Given only if injecting a single service under a
  *   new name. Represents the new name of the service inside the context.
