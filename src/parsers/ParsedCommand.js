@@ -6,8 +6,8 @@ export default class ParsedCommand {
    * Constructor.
    * @param {Object} values - The parsed data.
    * @param {string} values.raw - The raw message content.
-   * @param {string} values.trimmed - The raw message content with the client
-   *   user's mention trimmed from the start, if one exists.
+   * @param {string} values.trimmed - The raw message content with any command
+   *   prefix trimmed from the start.
    * @param {string} values.identifier - The name of the command being invoked.
    * @param {string[]} values.args - A space-delimited array of arguments that
    *   were given as part of the command.
@@ -27,8 +27,7 @@ export default class ParsedCommand {
     this.raw = raw;
 
     /**
-     * The raw message content with the client user's mentioned trimmed from the
-     *   start, if one exists.
+     * The raw message content with any command prefix trimmed from the start.
      * @type {string}
      */
     this.trimmed = trimmed;
