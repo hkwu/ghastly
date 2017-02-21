@@ -27,6 +27,7 @@ export default class CommandParser {
       trimmed,
       identifier,
       args,
+      rawArgs: args.join(' '),
     });
   }
 }

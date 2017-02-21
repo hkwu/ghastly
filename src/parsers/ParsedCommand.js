@@ -11,6 +11,8 @@ export default class ParsedCommand {
    * @param {string} values.identifier - The name of the command being invoked.
    * @param {string[]} values.args - A space-delimited array of arguments that
    *   were given as part of the command.
+   * @param {string} values.rawArgs - The delimited arguments joined together as
+   *   a string.
    */
   constructor(values) {
     const {
@@ -18,6 +20,7 @@ export default class ParsedCommand {
       trimmed,
       identifier,
       args,
+      rawArgs,
     } = values;
 
     /**
@@ -43,5 +46,11 @@ export default class ParsedCommand {
      * @type {string[]}
      */
     this.args = args;
+
+    /**
+     * The delimited arguments joined together as a string.
+     * @type {string}
+     */
+    this.rawArgs = rawArgs;
   }
 }
