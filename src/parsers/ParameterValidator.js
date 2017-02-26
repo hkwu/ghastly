@@ -11,6 +11,8 @@ import ParameterResolver from '../resolvers/ParameterResolver';
  *   of values instead of an atomic value.
  * @property {boolean} literal - Whether or not this parameter gets the value of
  *   the entire input string.
+ * @property {*} defaultValue - The default value of the parameter, or an array of
+ *   default values if the parameter is repeatable.
  */
 
 /**
