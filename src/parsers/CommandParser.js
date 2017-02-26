@@ -13,7 +13,7 @@ export default class CommandParser {
    * @static
    */
   static parse(message, prefix) {
-    const trimmed = message.content.replace(prefix, '');
+    const trimmed = message.content.replace(prefix, '').trim();
     const split = trimmed.split(' ');
 
     if (!split.length) {
