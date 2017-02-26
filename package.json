@@ -28,7 +28,8 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "mocha --require babel-register --recursive",
-    "prepublish": "npm run build && yarn test"
+    "docs:dev": "docute docs",
+    "prepublishOnly": "npm run build && yarn test"
   },
   "dependencies": {
     "discord.js": "^11.0.0",
@@ -51,6 +52,6 @@
     "mocha": "^3.0.2"
   },
   "engines": {
-    "node": ">=7.0.0"
+    "node": ">=7"
   }
 }
