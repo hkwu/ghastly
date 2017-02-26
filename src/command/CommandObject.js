@@ -1,6 +1,6 @@
 import { isPlainObject } from 'lodash/lang';
 import CommandObjectResolver from '../resolvers/CommandObjectResolver';
-import ParameterValidator from '../parsers/ParameterValidator';
+import ParameterParser from '../parsers/ParameterParser';
 import apply from '../core/apply';
 
 /**
@@ -47,7 +47,7 @@ export default class CommandObject {
        * An array of parameter definitions for the command.
        * @type {ParameterDefinition[]}
        */
-      this.parameters = ParameterValidator.validate(...parameters);
+      this.parameters = ParameterParser.validate(...parameters);
 
       /**
        * The description for the command.

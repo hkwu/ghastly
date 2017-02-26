@@ -9,28 +9,28 @@ describe('ParameterParser', function() {
     chai.use(chaiSubset);
   });
 
-  describe('#parse()', function() {
+  describe('#validate()', function() {
     it('allows repeatable parameters only as the last parameter', function() {
-      expect(() => ParameterParser.parse('paramName', 'paramName2*')).to.not.throw(ParameterParserError);
-      expect(() => ParameterParser.parse('paramName*', 'paramName2')).to.throw(ParameterParserError, 'must be the last parameter');
+      expect(() => ParameterParser.validate('paramName', 'paramName2*')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.validate('paramName*', 'paramName2')).to.throw(ParameterParserError, 'must be the last parameter');
     });
 
     it('allows literal parameters as the only parameter', function() {
-      expect(() => ParameterParser.parse('+(str) literal+ : This is a literal')).to.not.throw(ParameterParserError);
-      expect(() => ParameterParser.parse('+(str) literal+ : This is a literal', 'notallowed')).to.throw(ParameterParserError, 'must be the only parameter');
-      expect(() => ParameterParser.parse('notallowed', '+(str) literal+ : This is a literal')).to.throw(ParameterParserError, 'must be the only parameter');
+      expect(() => ParameterParser.validate('+(str) literal+ : This is a literal')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.validate('+(str) literal+ : This is a literal', 'notallowed')).to.throw(ParameterParserError, 'must be the only parameter');
+      expect(() => ParameterParser.validate('notallowed', '+(str) literal+ : This is a literal')).to.throw(ParameterParserError, 'must be the only parameter');
     });
 
     it('disallows required parameters after optional parameters', function() {
-      expect(() => ParameterParser.parse('+ required', '- optional')).to.not.throw(ParameterParserError);
-      expect(() => ParameterParser.parse('- optional', '+ required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
-      expect(() => ParameterParser.parse('- optional', 'required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
+      expect(() => ParameterParser.validate('+ required', '- optional')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.validate('- optional', '+ required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
+      expect(() => ParameterParser.validate('- optional', 'required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
     });
   });
 
   describe('#parseParameter()', function() {
     it('parses basic parameters', function() {
-      expect(ParameterParser.parseParameter('+foo')).to.deep.equal({
+      expect(ParameterParser.parseParameter('+foo')).to.containSubset({
         name: 'foo',
         optional: false,
         description: null,
@@ -40,7 +40,7 @@ describe('ParameterParser', function() {
         defaultValue: null,
       });
 
-      expect(ParameterParser.parseParameter('-(num) param = 123.5 : some description')).to.deep.equal({
+      expect(ParameterParser.parseParameter('-(num) param = 123.5 : some description')).to.containSubset({
         name: 'param',
         optional: true,
         description: 'some description',
@@ -50,7 +50,7 @@ describe('ParameterParser', function() {
         defaultValue: 123.5,
       });
 
-      expect(ParameterParser.parseParameter('name:description')).to.deep.equal({
+      expect(ParameterParser.parseParameter('name:description')).to.containSubset({
         name: 'name',
         optional: false,
         description: 'description',
@@ -60,7 +60,7 @@ describe('ParameterParser', function() {
         defaultValue: null,
       });
 
-      expect(ParameterParser.parseParameter('-argument:optional')).to.deep.equal({
+      expect(ParameterParser.parseParameter('-argument:optional')).to.containSubset({
         name: 'argument',
         optional: true,
         description: 'optional',
@@ -70,7 +70,7 @@ describe('ParameterParser', function() {
         defaultValue: null,
       });
 
-      expect(ParameterParser.parseParameter('array*:description')).to.deep.equal({
+      expect(ParameterParser.parseParameter('array*:description')).to.containSubset({
         name: 'array',
         optional: false,
         description: 'description',
@@ -119,7 +119,7 @@ describe('ParameterParser', function() {
     });
 
     it('strips whitespace in parameter definitions', function() {
-      expect(ParameterParser.parseParameter('    -   (   str   )   white  *    =   space   :   man  the    ')).to.deep.equal({
+      expect(ParameterParser.parseParameter('    -   (   str   )   white  *    =   space   :   man  the    ')).to.containSubset({
         name: 'white',
         optional: true,
         description: 'man  the',
@@ -137,7 +137,7 @@ describe('ParameterParser', function() {
 
   describe('#parseDefinition()', function() {
     it('parses basic arguments', function() {
-      expect(ParameterParser.parseDefinition('basic')).to.deep.equal({
+      expect(ParameterParser.parseDefinition('basic')).to.containSubset({
         name: 'basic',
         type: Types.STRING,
         optional: false,
