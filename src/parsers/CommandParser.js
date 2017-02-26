@@ -14,7 +14,7 @@ export default class CommandParser {
    */
   static parse(message, prefix) {
     const trimmed = message.content.replace(prefix, '').trim();
-    const split = trimmed.split(' ');
+    const split = trimmed.split(' ').filter(word => word);
 
     if (!split.length) {
       throw new Error('Message does not contain enough words to specify a command.');

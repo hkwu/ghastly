@@ -1,7 +1,12 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
 import CommandParser from '../../src/parsers/CommandParser';
 
 describe('CommandParser', function() {
+  before(function() {
+    chai.use(chaiSubset);
+  });
+
   describe('#parse()', function() {
     it('parses basic commands', function() {
       let message = {
@@ -13,10 +18,10 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.deep.equal({
+      expect(CommandParser.parse(message, /!/)).to.containSubset({
         raw: '!cmd pro',
-        trimmed: '!cmd pro',
-        identifier: '!cmd',
+        trimmed: 'cmd pro',
+        identifier: 'cmd',
         args: ['pro'],
       });
 
@@ -29,17 +34,17 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.deep.equal({
+      expect(CommandParser.parse(message, /!/)).to.containSubset({
         raw: '!cmd',
-        trimmed: '!cmd',
-        identifier: '!cmd',
+        trimmed: 'cmd',
+        identifier: 'cmd',
         args: [],
       });
     });
 
     it('parses commands with mentions', function() {
       let message = {
-        content: '<@123456789> !cmd pro pro',
+        content: '<@123456789> cmd pro pro',
         client: {
           user: {
             id: '123456789',
@@ -47,15 +52,15 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.deep.equal({
-        raw: '<@123456789> !cmd pro pro',
-        trimmed: '!cmd pro pro',
-        identifier: '!cmd',
+      expect(CommandParser.parse(message, /<@123456789>/)).to.containSubset({
+        raw: '<@123456789> cmd pro pro',
+        trimmed: 'cmd pro pro',
+        identifier: 'cmd',
         args: ['pro', 'pro'],
       });
 
       message = {
-        content: '<@123456789> !cmd pro pro',
+        content: '<@123456789> cmd pro pro',
         client: {
           user: {
             id: '0',
@@ -63,11 +68,11 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.deep.equal({
-        raw: '<@123456789> !cmd pro pro',
-        trimmed: '<@123456789> !cmd pro pro',
+      expect(CommandParser.parse(message, /<@0>/)).to.containSubset({
+        raw: '<@123456789> cmd pro pro',
+        trimmed: '<@123456789> cmd pro pro',
         identifier: '<@123456789>',
-        args: ['!cmd', 'pro', 'pro'],
+        args: ['cmd', 'pro', 'pro'],
       });
 
       message = {
@@ -79,10 +84,10 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(CommandParser.parse(message)).to.deep.equal({
+      expect(CommandParser.parse(message, /!/)).to.containSubset({
         raw: '!cmd pro <@123456789> pro',
-        trimmed: '!cmd pro <@123456789> pro',
-        identifier: '!cmd',
+        trimmed: 'cmd pro <@123456789> pro',
+        identifier: 'cmd',
         args: ['pro', '<@123456789>', 'pro'],
       });
     });
@@ -97,7 +102,7 @@ describe('CommandParser', function() {
         },
       };
 
-      expect(() => CommandParser.parse(message)).to.throw(Error);
+      expect(() => CommandParser.parse(message, /<@123456789>/)).to.throw(Error);
     });
   });
 });
