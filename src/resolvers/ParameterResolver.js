@@ -22,6 +22,7 @@ export default class ParameterResolver extends BaseResolver {
         defaultValue: options => (options.repeatable ? [] : null),
       })
       .setAllowedTypes('name', 'string')
+      .setAllowedTypes('description', ['string', 'null'])
       .setAllowedTypes('optional', 'boolean')
       .setAllowedTypes('type', 'string')
       .setAllowedTypes('repeatable', 'boolean')
