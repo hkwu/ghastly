@@ -1,5 +1,4 @@
 self.$config = {
-  home: 'https://raw.githubusercontent.com/hkwu/ghastly/master/README.md',
   repo: 'hkwu/ghastly',
   url: 'https://ghastly.js.org',
   'edit-link': 'https://github.com/hkwu/ghastly/blob/master/docs',
@@ -9,8 +8,8 @@ self.$config = {
       path: '/',
     },
     {
-      title: 'Introduction',
-      path: '/introduction',
+      title: 'The Ghoulish Guide',
+      path: '/guide',
     },
   ],
 };

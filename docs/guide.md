@@ -1,7 +1,10 @@
-# Introduction
+# The Ghoulish Guide
+This is a simple walkthrough guide which touches upon most of the library features.
+
+## Part I: Introduction
 Let's make a simple Ghastly bot.
 
-## Setting up
+### Setting up
 Time to do the boilerplate. First, our imports. Grab the `Client` and `Dispatcher` classes.
 
 ```js
@@ -18,7 +21,7 @@ The `Dispatcher` constructor takes an object with a `prefix` configuration optio
 
 The `Client` class extends the regular Discord.js client, so all the methods available to it are also available in the Ghastly client. The bulk of the setup revolves around the dispatcher, though, so we'll just leave it there for now.
 
-## Making commands
+### Making commands
 In Ghastly, commands are defined as functions. This is what they look like:
 
 ```js
@@ -59,7 +62,7 @@ Back to the `triggers` array. A command can have multiple triggers, but the firs
 
 With that, our command function should be good.
 
-## Registering commands
+### Registering commands
 Let's load our command into the dispatcher.
 
 ```js
@@ -69,10 +72,10 @@ dispatcher.loadCommands(ping);
 That's literally it.
 
 <p class="tip">
-  As its name suggests, `loadCommands()` can take any number of commands as arguments.
+  As its name suggests, `loadCommands()` can actually take any number of commands as arguments.
 </p>
 
-## Linking the dispatcher
+### Linking the dispatcher
 As the final step, we need to register the dispatcher with the client so that it intercepts and handles incoming message events.
 
 First, create the client.
@@ -87,7 +90,7 @@ The Ghastly client takes the same options as the regular Discord.js client const
 client.use(dispatcher).login('token');
 ```
 
-## Code snippet
+### Code snippet
 Here is the complete code snippet for this section:
 
 ```js
