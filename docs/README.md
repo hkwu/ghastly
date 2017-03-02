@@ -34,7 +34,7 @@ You may use whichever syntax you prefer, however examples in the documentation w
 ### Commands
 The main purpose of Ghastly is to ease the design and management of client commands. This allows you to avoid the boilerplate and/or spaghetti code that inevitably results when defining inline commands with the native Discord.js events system.
 
-#### Defining Commands
+#### Configurators
 Unlike other command frameworks, Ghastly doesn't export any base `Command` class. Commands are defined as functions. This is meant to encourage stateless commands, which will help keep your code focused and easy to reason about.
 
 ```js
@@ -52,10 +52,13 @@ function ping() {
 }
 ```
 
-These functions must return a configuration object which describes the behaviour of the command.
+These functions must return a configuration object which describes the behaviour of the command. To keep things simple, we'll label these functions as command configurators, or **configurators** for short.
 
-#### Handling Responses
-The `handler` property of the configuration object is what gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client.
+##### The Configuration Object
+Let's examine what the configuration object should actually contain.
+
+###### Handler
+The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client.
 
 ```js
 function handler() {
@@ -64,12 +67,110 @@ function handler() {
 }
 ```
 
-The return value of the handler determines how the dispatcher responds to a command. For instance, a string indicates that a message should be sent back to the origin channel. There are other values the handler can return as well. Those are covered in the section on indicator values.
+###### Triggers
+`triggers` is a non-empty array of strings. The first string is treated as the command's main name while any additional values are used as aliases for the command.
 
-#### Response Context
+```js
+return {
+  triggers: [
+    'mainTrigger',
+    'firstAlias',
+    'secondAlias',
+  ],
+};
+```
+
+###### Parameters
+Your command may accept any number of parameters of various types. `parameters` is an array of parameter definitions. There are actually two different ways to define parameters, but both will yield the same end result.
+
+```js
+return {
+  parameters: [
+    'parameter : This is a parameter definition.',
+    {
+      name: 'parameterCopy',
+      description: 'This is also a parameter definition.',
+    },
+  ],
+};
+```
+
+###### Description
+The `description` is an optional string which describes the command's function and is only stored for your own use (useful if you're making a `help` command, for instance).
+
+###### Middleware
+You can also define middleware for your commands. Middleware are simply functions which wrap the command handler. They provide an easy, modular way to extend command handler functionality.
+
+The `middleware` array is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
+
+```js
+import first from './first';
+import second from './second';
+
+return {
+  middleware: [
+    first(),
+    second(),
+  ],
+};
+```
+
+#### Defining a Handler
+It's time to dive deeper into actually building a command handler. There are two main ideas here:
+* Responses are values.
+* Context is injected.
+
+##### Response Types
+Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
+
+<p class="tip">
+  Unless otherwise stated, responses will be sent to the channel from which the triggering message originated.
+</p>
+
+###### String
+Return a string to trigger a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
+
+```js
+function handler() {
+  return 'I will get sent back where I came from!';
+}
+```
+
+###### Array
+Return an array to have Ghastly randomly select one of the array elements as the response to send.
+
+```js
+function handler() {
+  return [
+    'Will it be me?',
+    'Or me?',
+    'No, me!',
+  ];
+}
+```
+
+###### Embed
+Return a Discord.js `RichEmbed` object to send an embed.
+
+```js
+import { RichEmbed } from 'discord.js';
+
+function handler() {
+  const embed = new RichEmbed();
+
+  embed.setTitle('My Embed')
+    .setDescription('Just a small test.')
+    .setTimestamp()
+    .setFooter('Tiny footer text.');
+
+  return embed;
+}
+```
+
+##### Context
 The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
 
-##### `context.message`
+###### `context.message`
 The Discord.js `Message` object representing the message which triggered the command.
 
 ```js
@@ -78,16 +179,16 @@ function handler(context) {
 }
 ```
 
-##### `context.args`
+###### `context.args`
 The parsed command arguments. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
 
-##### `context.client`
+###### `context.client`
 A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
 
-##### `context.commands`
+###### `context.commands`
 The dispatcher's command registry.
 
-##### `context.services`
+###### `context.services`
 The dispatcher's service registry.
 
 <p class="tip">
