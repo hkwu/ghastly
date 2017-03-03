@@ -22,6 +22,7 @@ const INDICATOR_TYPES = {
   EMBED: 'EMBED',
   FUNCTION: 'FUNCTION',
   CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
+  NO_RESPONSE: 'NO_RESPONSE',
 };
 
 /**
@@ -117,7 +118,9 @@ export default class Dispatcher {
    * @private
    */
   static resolveIndicatorType(indicator) {
-    if (isString(indicator)) {
+    if (!indicator) {
+      return INDICATOR_TYPES.NO_RESPONSE;
+    } else if (isString(indicator)) {
       return INDICATOR_TYPES.STRING;
     } else if (isArray(indicator)) {
       return INDICATOR_TYPES.ARRAY;
@@ -223,10 +226,10 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
    *   received only when the message event was an update.
-   * @returns {Promise.<(boolean|Message|*), Error>} A promise resolving to a
-   *   Discord.js `Message` representing the response that was dispatched if the
-   *   command was handled successfully, or whatever value is returned by the
-   *   command handler's indicator, if it is a function.
+   * @returns {Promise.<(Message|*), Error>} A promise resolving to a Discord.js
+   *   `Message` representing the response that was dispatched if the command
+   *   was handled successfully, or whatever value is returned by the command
+   *   handler's indicator, if it is a function.
    * Errors encountered during dispatching will bubble up. If the error comes
    *   from the dispatch function itself, the promise will specifically reject
    *   with a `DispatchError`.
@@ -281,6 +284,8 @@ export default class Dispatcher {
         return indicator(context);
       case INDICATOR_TYPES.CUSTOM_RESPONSE:
         return indicator.respond(context);
+      case INDICATOR_TYPES.NO_RESPONSE:
+        return null;
       default:
         throw new DispatchError('Returned value from command handler is not of a recognized type.');
     }
