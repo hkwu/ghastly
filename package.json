@@ -28,7 +28,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "mocha --require babel-register --recursive",
-    "docs:dev": "docute docs",
+    "docs:dev": "docute docs --watch",
     "prepublishOnly": "npm run build && yarn test"
   },
   "dependencies": {
