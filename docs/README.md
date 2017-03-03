@@ -124,10 +124,14 @@ It's time to dive deeper into actually building a command handler. There are two
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
 
 <p class="tip">
+  Although all the examples below use a synchronous handler function, you can also define handlers as `async` functions as desired.
+</p>
+
+<p class="tip">
   Unless otherwise stated, responses will be sent to the channel from which the triggering message originated.
 </p>
 
-###### String
+###### Strings
 Return a string to trigger a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
 
 ```js
@@ -136,7 +140,7 @@ function handler() {
 }
 ```
 
-###### Array
+###### Arrays
 Return an array to have Ghastly randomly select one of the array elements as the response to send.
 
 ```js
@@ -149,7 +153,7 @@ function handler() {
 }
 ```
 
-###### Embed
+###### Embeds
 Return a Discord.js `RichEmbed` object to send an embed.
 
 ```js
@@ -166,6 +170,23 @@ function handler() {
   return embed;
 }
 ```
+
+###### Custom Responses
+In case the above response types don't adequately cover your requirements, you can always elect to manually send responses.
+
+```js
+function handler({ message }) {
+  message.channel.sendMessage('My message!');
+}
+```
+
+Notice that returning a falsey value will cause Ghastly to take no response action.
+
+<p class="tip">
+  This example takes advantage of the `context` object that's passed to the handler during execution. The concept of handler context is covered in the next section.
+</p>
+
+Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
 
 ##### Context
 The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
@@ -248,4 +269,59 @@ import { Client } from 'ghastly';
 const client = new Client();
 
 client.use(dispatcher).login('token');
+```
+
+## Advanced
+### Complex Response Types
+In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler.
+
+```js
+import { CustomResponse } from 'ghastly';
+
+function handler() {
+  const reverseResponse = new CustomResponse(({ message }) => message.content.split('').reverse().join(''));
+
+  return reverseResponse;
+}
+```
+
+Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers. Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
+
+#### Code Blocks
+You can send a multi-line code block using `CodeResponse`.
+
+```js
+import { CodeResponse } from 'ghastly';
+
+function handler() {
+  const response = new CodeResponse('js', `console.log('Hello, world');
+console.log(2 + 2);`);
+  
+  return response;
+}
+```
+
+#### Voice Responses
+You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
+
+```js
+import ytdl from 'ytdl-core';
+import { VoiceResponse } from 'ghastly';
+
+function handler() {
+  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
+
+  // must be connected to voice channel at this point
+  return new VoiceResponse('stream', stream);
+}
+```
+
+The `VoiceResponse` constructor is designed to resemble the Discord.js `VoiceConnection` stream play methods.
+
+```js
+// play a file
+const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
+
+// send in StreamOptions
+const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
 ```
