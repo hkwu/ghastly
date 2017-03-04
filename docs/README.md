@@ -115,7 +115,7 @@ return {
 };
 ```
 
-If you're not familiar with the concept of middleware, it's useful to just think of them as opaque tools that you can plug in and forget. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
+If you're not familiar with the concept of middleware, it's useful to think of them as layers stacked on top of the command handler. Each layer can intercept and potentially alter what gets sent into the next layer. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
 
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are two main ideas here:
@@ -271,21 +271,35 @@ client.use(dispatcher).login('token');
 
 ## Advanced
 ### Complex Response Types
-In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler.
+In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
+
+#### Using `CustomResponse`
+The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned. The executor may be `async`, and must handle all of the response logic.
+
+In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
 
 ```js
 import { CustomResponse } from 'ghastly';
 
-function handler() {
-  const reverseResponse = new CustomResponse(({ message }) => message.content.split('').reverse().join(''));
+class ReversedResponse extends CustomResponse {
+  constructor() {
+    super(({ message }) => {
+      const reversed = message.content.split('').reverse().join('');
 
-  return reverseResponse;
+      return message.channel.sendMessage(reversed);
+    });
+  }
+}
+
+function handler() {
+  return new ReversedResponse();
 }
 ```
 
-Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers. Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
+#### Builtin Responses
+Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
 
-#### Code Blocks
+##### Code Blocks
 You can send a multi-line code block using `CodeResponse`.
 
 ```js
@@ -299,7 +313,7 @@ console.log(2 + 2);`);
 }
 ```
 
-#### Voice Responses
+##### Voice Responses
 You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
 
 ```js
@@ -340,7 +354,7 @@ return {
 
 Notice how we use `myMiddleware()` instead of `myMiddleware`. As a matter of convention, middleware are not used directly; they are always wrapped and created by higher order functions. This allows us to configure the middleware prior to attaching it to a command.
 
-#### Creating Middleware
+#### Defining Middleware
 In order to define your own custom middleware, simply create a higher order function which returns the middleware function. We will call this function a middleware layer, or **layer** for short.
 
 Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed.
