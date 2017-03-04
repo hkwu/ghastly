@@ -115,6 +115,8 @@ return {
 };
 ```
 
+If you're not familiar with the concept of middleware, it's useful to just think of them as opaque tools that you can plug in and forget. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
+
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are two main ideas here:
 * Responses are values.
@@ -195,8 +197,8 @@ The handler receives a `context` object as its only argument. The context contai
 The Discord.js `Message` object representing the message which triggered the command.
 
 ```js
-function handler(context) {
-  console.log(context.message.content);
+function handler({ message }) {
+  console.log(message.content);
 }
 ```
 
@@ -211,10 +213,6 @@ The dispatcher's command registry.
 
 ###### `context.services`
 The dispatcher's service registry.
-
-<p class="tip">
-  [Object destructuring](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment) can make your life much easier when working with the context object (or any object, for that matter).
-</p>
 
 ### The Dispatcher
 In order to filter and route messages, Ghastly provides the `Dispatcher` class. The dispatcher listens to message events on the client and triggers any commands it detects in the messages.
@@ -325,3 +323,107 @@ const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
 // send in StreamOptions
 const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
 ```
+
+### Middleware
+Ghastly provides a middleware system that allows additional logic to be wrapped around command handlers.
+
+#### Usage
+You can add middleware to a command by providing an array of middleware functions in your configurator object.
+
+```js
+return {
+  middleware: [
+    myMiddleware(),
+  ],
+};
+```
+
+Notice how we use `myMiddleware()` instead of `myMiddleware`. As a matter of convention, middleware are not used directly; they are always wrapped and created by higher order functions. This allows us to configure the middleware prior to attaching it to a command.
+
+#### Creating Middleware
+In order to define your own custom middleware, simply create a higher order function which returns the middleware function. We will call this function a middleware layer, or **layer** for short.
+
+Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed.
+
+<p class="warning">
+  Layers can be defined as synchronous or `async` functions, but it's prudent to be aware of the fact that the next layer could return a synchronous value or a promise. However, by using `async` functions you can easily `await` the return value of the next layer and not worry about whether or not it's synchronous.
+</p>
+
+```js
+import util from 'util';
+
+function loggingMiddleware() {
+  return (next, context) => {
+    console.log('Current context:');
+    console.log(util.inspect(context));
+
+    return next(context);
+  };
+}
+```
+
+When you're ready to use `loggingMiddleware`, just call it to create the layer.
+
+```js
+return {
+  middleware: [
+    loggingMiddleware(),
+  ],
+};
+```
+
+##### Working with Context
+Since layers have direct access to the context object, they are able to read, write and even completely obliterate the context (though that's a stupid idea).
+
+There are just a few points to keep in mind when working with the context. When modifying the context, always *clone* a new context object using `Object.assign()` before mutating it. This ensures that the context objects for each layer are isolated from each other as much as possible.
+
+```js
+function bad() {
+  return (next, context) => {
+    context.someImportantProperty = null;
+
+    return next(context);
+  };
+}
+
+function good() {
+  return (next, context) => next(Object.assign({}, context, {
+    someImportantProperty: null,
+  }));
+}
+```
+
+<p class="tip">
+  It can be quite a handful to use `Object.assign()`, but until the [object rest/spread](https://github.com/sebmarkbage/ecmascript-rest-spread) proposal becomes a standard, this is the next best thing. Feel free to use [Babel](https://babeljs.io/) or another transpiler to take advantage of it, though!
+</p>
+
+Of course, there's no need to clone the context if you're just reading from it. Needless to say, you should also refrain from deleting properties from the context. This could potentially cause other layers which depend on those properties to fail.
+
+##### Before and After
+You can make your layer execute before or after other layers depending on when you delegate to the `next` layer. For instance, the following middleware will execute some logic then delegate to the next layer in the chain.
+
+```js
+function before() {
+  return (next, context) => {
+    doSomething(context);
+
+    return next(context);
+  };
+}
+```
+
+Whereas this middleware will delegate and wait for the return value of the next layer before executing its own logic.
+
+```js
+function after() {
+  return (next, context) => {
+    const returned = next(context);
+
+    doSomething(returned);
+
+    return returned;
+  };
+}
+```
+
+The returned value depends on the layer that's immediately after the current layer. If there are no other layers left, the returned value is that of the command's handler function.
