@@ -1,9 +1,12 @@
 # Ghastly
+[![npm](https://img.shields.io/npm/v/ghastly.svg?style=flat-square)](https://www.npmjs.com/package/ghastly)
+[![npm](https://img.shields.io/npm/l/ghastly.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
 Ghastly is a modular command-based framework for Discord.js. It provides a maintainable way to process and respond to user input while remaining simple in its API.
 
 ## Getting Started
 ### Installation
-Ghastly is available through npm.
+Ghastly is available through [npm](https://www.npmjs.com/package/ghastly).
 
 ```bash
 npm install --save ghastly
