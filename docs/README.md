@@ -107,9 +107,6 @@ You can also define middleware for your commands. Middleware are simply function
 The `middleware` array is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
 
 ```js
-import first from './first';
-import second from './second';
-
 return {
   middleware: [
     first(),
