@@ -1,6 +1,7 @@
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
 import { isArray, isFunction, isString } from 'lodash/lang';
+import { escapeRegExp } from 'lodash/string';
 import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../parsers/CommandParser';
@@ -74,7 +75,7 @@ export default class Dispatcher {
      * @type {string}
      * @private
      */
-    this.rawPrefix = prefix;
+    this.rawPrefix = escapeRegExp(prefix);
 
     /**
      * The prefix after being parsed and transformed into an equivalent RegEx.
