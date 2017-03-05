@@ -1,6 +1,6 @@
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
-import { isArray, isFunction, isString } from 'lodash/lang';
+import { isArray, isString } from 'lodash/lang';
 import { escapeRegExp } from 'lodash/string';
 import ArgumentParser from '../parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
@@ -21,7 +21,6 @@ const INDICATOR_TYPES = {
   STRING: 'STRING',
   ARRAY: 'ARRAY',
   EMBED: 'EMBED',
-  FUNCTION: 'FUNCTION',
   CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
   NO_RESPONSE: 'NO_RESPONSE',
 };
@@ -127,8 +126,6 @@ export default class Dispatcher {
       return INDICATOR_TYPES.ARRAY;
     } else if (indicator instanceof RichEmbed) {
       return INDICATOR_TYPES.EMBED;
-    } else if (isFunction(indicator)) {
-      return INDICATOR_TYPES.FUNCTION;
     } else if (indicator instanceof Response) {
       return INDICATOR_TYPES.CUSTOM_RESPONSE;
     }
@@ -281,8 +278,6 @@ export default class Dispatcher {
       }
       case INDICATOR_TYPES.EMBED:
         return contentMessage.channel.sendEmbed(indicator);
-      case INDICATOR_TYPES.FUNCTION:
-        return indicator(context);
       case INDICATOR_TYPES.CUSTOM_RESPONSE:
         return indicator.respond(context);
       case INDICATOR_TYPES.NO_RESPONSE:
