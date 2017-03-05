@@ -7,9 +7,5 @@ self.$config = {
       title: 'Home',
       path: '/',
     },
-    {
-      title: 'The Ghoulish Guide',
-      path: '/guide',
-    },
   ],
 };
