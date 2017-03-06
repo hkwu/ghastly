@@ -22,7 +22,6 @@ yarn add ghastly
 ### Commands
 The main purpose of Ghastly is to ease the design and management of client commands. This allows you to avoid the boilerplate and/or spaghetti code that inevitably results when defining inline commands with the native Discord.js events system.
 
-#### Configurators
 Unlike other command frameworks, Ghastly doesn't export any base `Command` class. Commands are defined as functions. This is meant to encourage stateless commands, which will help keep your code focused and easy to reason about.
 
 ```js
@@ -42,10 +41,10 @@ function ping() {
 
 These functions must return a configuration object which describes the behaviour of the command. To keep things simple, we'll label these functions as command configurators, or **configurators** for short.
 
-##### The Configuration Object
+#### Configuration
 Let's examine what the configuration object should actually contain.
 
-###### Handler
+##### Handler
 The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client.
 
 ```js
@@ -55,7 +54,7 @@ function handler() {
 }
 ```
 
-###### Triggers
+##### Triggers
 `triggers` is a non-empty array of strings. The first string is treated as the command's main name while any additional values are used as aliases for the command.
 
 ```js
@@ -68,7 +67,7 @@ return {
 };
 ```
 
-###### Parameters
+##### Parameters
 Your command may accept any number of parameters of various types. `parameters` is an array of parameter definitions. There are actually two different ways to define parameters, but both will yield the same end result.
 
 ```js
@@ -83,10 +82,10 @@ return {
 };
 ```
 
-###### Description
+##### Description
 The `description` is an optional string which describes the command's function and is only stored for your own use (useful if you're making a `help` command, for instance).
 
-###### Middleware
+##### Middleware
 You can also define middleware for your commands. Middleware are simply functions which wrap the command handler. They provide an easy, modular way to extend command handler functionality.
 
 The `middleware` array is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
@@ -103,9 +102,7 @@ return {
 If you're not familiar with the concept of middleware, it's useful to think of them as layers stacked on top of the command handler. Each layer can intercept and potentially alter what gets sent into the next layer. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
 
 #### Defining a Handler
-It's time to dive deeper into actually building a command handler. There are two main ideas here:
-* Responses are values.
-* Context is injected.
+It's time to dive deeper into actually building a command handler. Keep in mind two things: **responses are values** and **context is injected**.
 
 ##### Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
@@ -293,7 +290,7 @@ const { CodeResponse } = require('ghastly');
 function handler() {
   const response = new CodeResponse('js', `console.log('Hello, world');
 console.log(2 + 2);`);
-  
+
   return response;
 }
 ```
