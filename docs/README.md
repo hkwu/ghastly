@@ -18,21 +18,6 @@ or
 yarn add ghastly
 ```
 
-### Usage
-All library exports are named in order to be consistent between Node's module system and the ES2015 module specification.
-
-Node:
-```js
-const { Client } = require('ghastly');
-```
-
-ES2015:
-```js
-import { Client } from 'ghastly';
-```
-
-You may use whichever syntax you prefer, however examples in the documentation will utilize the ES2015 syntax.
-
 ## Core Concepts
 ### Commands
 The main purpose of Ghastly is to ease the design and management of client commands. This allows you to avoid the boilerplate and/or spaghetti code that inevitably results when defining inline commands with the native Discord.js events system.
@@ -159,7 +144,7 @@ function handler() {
 Return a Discord.js `RichEmbed` object to send an embed.
 
 ```js
-import { RichEmbed } from 'discord.js';
+const { RichEmbed } = require('discord.js');
 
 function handler() {
   const embed = new RichEmbed();
@@ -221,7 +206,7 @@ In order to filter and route messages, Ghastly provides the `Dispatcher` class. 
 The dispatcher takes care of filtering messages based on a prefix. You should specify the prefix you want to use when constructing the dispatcher.
 
 ```js
-import { Dispatcher } from 'ghastly';
+const { Dispatcher } = require('ghastly');
 
 const dispatcher = new Dispatcher({ prefix: '!' });
 ```
@@ -262,7 +247,7 @@ dispatcher.loadCommands(foo, bar, baz);
 The dispatcher must register itself with the client in order to intercept message events and dispatch responses.
 
 ```js
-import { Client } from 'ghastly';
+const { Client } = require('ghastly');
 
 const client = new Client();
 
@@ -279,7 +264,7 @@ The `CustomResponse` constructor takes a single **executor** function. The execu
 In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
 
 ```js
-import { CustomResponse } from 'ghastly';
+const { CustomResponse } = require('ghastly');
 
 class ReversedResponse extends CustomResponse {
   constructor() {
@@ -303,7 +288,7 @@ Of course, it's a pain to have to define your own response logic for simple thin
 You can send a multi-line code block using `CodeResponse`.
 
 ```js
-import { CodeResponse } from 'ghastly';
+const { CodeResponse } = require('ghastly');
 
 function handler() {
   const response = new CodeResponse('js', `console.log('Hello, world');
@@ -317,8 +302,8 @@ console.log(2 + 2);`);
 You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
 
 ```js
-import ytdl from 'ytdl-core';
-import { VoiceResponse } from 'ghastly';
+const ytdl = require('ytdl-core');
+const { VoiceResponse } = require('ghastly');
 
 function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
@@ -364,7 +349,7 @@ Layers receive two arguments: the `next` layer in the middleware chain, and the 
 </p>
 
 ```js
-import util from 'util';
+const util = require('util');
 
 function loggingMiddleware() {
   return (next, context) => {
