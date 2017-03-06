@@ -101,8 +101,50 @@ return {
 
 If you're not familiar with the concept of middleware, it's useful to think of them as layers stacked on top of the command handler. Each layer can intercept and potentially alter what gets sent into the next layer. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
 
+#### Defining Parameters
+The parameter system in Ghastly allows you to specify user inputs for your commands. All parameters are defined within the `parameters` array in your configuration options.
+
+##### Options
+There are various options with which you can describe a parameter and change how it interprets its input value.
+
+###### Name
+Parameters must be named in order to be passed into your command handler. You can set the name for a parameter by providing a `name` string. This is actually the only required option for parameter definitions.
+
+```js
+{
+  // injected into command handler as `args.param`
+  name: 'param',
+}
+```
+
+###### 
+
 #### Defining a Handler
-It's time to dive deeper into actually building a command handler. Keep in mind two things: **responses are values** and **context is injected**.
+It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
+
+##### Context
+The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
+
+###### `context.message`
+The Discord.js `Message` object representing the message which triggered the command.
+
+```js
+function handler({ message }) {
+  console.log(message.content);
+}
+```
+
+###### `context.args`
+The parsed command arguments as specified in the command's `parameters` configuration option. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
+
+###### `context.client`
+A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
+
+###### `context.commands`
+The dispatcher's command registry.
+
+###### `context.services`
+The dispatcher's service registry.
 
 ##### Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
@@ -164,37 +206,7 @@ function handler({ message }) {
 }
 ```
 
-Notice that returning a falsey value will cause Ghastly to take no response action.
-
-<p class="tip">
-  This example takes advantage of the `context` object that's passed to the handler during execution. The concept of handler context is covered in the next section.
-</p>
-
-Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
-
-##### Context
-The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
-
-###### `context.message`
-The Discord.js `Message` object representing the message which triggered the command.
-
-```js
-function handler({ message }) {
-  console.log(message.content);
-}
-```
-
-###### `context.args`
-The parsed command arguments. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
-
-###### `context.client`
-A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
-
-###### `context.commands`
-The dispatcher's command registry.
-
-###### `context.services`
-The dispatcher's service registry.
+Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
 
 ### The Dispatcher
 In order to filter and route messages, Ghastly provides the `Dispatcher` class. The dispatcher listens to message events on the client and triggers any commands it detects in the messages.
