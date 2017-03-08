@@ -101,23 +101,86 @@ return {
 
 If you're not familiar with the concept of middleware, it's useful to think of them as layers stacked on top of the command handler. Each layer can intercept and potentially alter what gets sent into the next layer. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
 
-#### Defining Parameters
+#### Command Parameters
 The parameter system in Ghastly allows you to specify user inputs for your commands. All parameters are defined within the `parameters` array in your configuration options.
 
-##### Options
-There are various options with which you can describe a parameter and change how it interprets its input value.
+There are two different ways to define parameters: as strings or as object literals. Object literals have more flexibility and power, but strings are more fluent and easier to read.
 
-###### Name
-Parameters must be named in order to be passed into your command handler. You can set the name for a parameter by providing a `name` string. This is actually the only required option for parameter definitions.
+##### Defining Parameters as Strings
+The most basic parameters require only a name. The parameter name is used as a key when passing arguments to the command handler.
 
 ```js
-{
-  // injected into command handler as `args.param`
-  name: 'param',
-}
+return {
+  parameters: [
+    // defines a parameter called 'myParam'
+    // the corresponding input will be passed to the command handler as `args.myParam`
+    'myParam',
+  ],
+};
 ```
 
-###### 
+###### Description
+Similarly to commands, you can add a description to your parameter.
+
+```js
+myParam : This is a parameter description.
+```
+
+###### Optional Parameters
+Optional parameters are identified by a leading `-` character.
+
+```js
+- myOptionalParam : This is an optional parameter.
+```
+
+###### Default Values
+Default values may be specified for optional parameters by placing the value after the parameter name followed by a `=` character.
+
+```js
+- myOptionalParamWithDefault = default : This is a parameter with a default value.
+```
+
+Parameters with defaults are automatically turned into optional parameters.
+
+```js
+myParam = default : This is also an optional parameter.
+```
+
+<p class="warning">
+  If a default is not provided, all optional parameters default to `null`.
+</p>
+
+###### Repeatable Values
+You can define a parameter which takes multiple values by appending a `*` to the parameter name.
+
+```js
+myRepeatableParam* : This parameter can take multiple values as input.
+```
+
+When the user calls this command, they can specify multiple values for this parameter as such:
+
+```js
+@client echo one two three "four five"
+```
+
+The inputs will be passed in as an array: `['one', 'two', 'three', 'four five']`. Defaults can also be specified for repeatable parameters.
+
+```js
+myRepeatableParam* = one "two three" : This repeatable parameter has defaults.
+```
+
+The given values will be parsed into an array: `['one', 'two three']`.
+
+<p class="danger">
+  Repeatable parameters must not be followed by any other parameter, i.e. they must be the last parameter.
+</p>
+
+###### Literal Values
+Literal parameters will take the value of the input verbatim. You can define literals by appending a `+` to the parameter name.
+
+```js
+myLiteralParam+ : I am a literal.
+```
 
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
