@@ -112,9 +112,9 @@ The most basic parameters require only a name. The parameter name is used as a k
 ```js
 return {
   parameters: [
-    // defines a parameter called 'myParam'
-    // the corresponding input will be passed to the command handler as `args.myParam`
-    'myParam',
+    // defines a parameter called 'param'
+    // the corresponding input will be passed to the command handler as `args.param`
+    'param',
   ],
 };
 ```
@@ -123,14 +123,14 @@ return {
 Similarly to commands, you can add a description to your parameter.
 
 ```
-myParam : This is a parameter description.
+param : This is a parameter description.
 ```
 
 ###### Optional Parameters
 Optional parameters are identified by a leading `-` character.
 
 ```
-- myOptionalParam : This is an optional parameter.
+- optionalParam : This is an optional parameter.
 ```
 
 ###### Parameter Types
@@ -153,13 +153,13 @@ The following are the available parameter types:
 Default values may be specified for optional parameters by placing the value after the parameter name followed by a `=` character.
 
 ```
-- myOptionalParamWithDefault = default : This is a parameter with a default value.
+- optionalParamWithDefault = default : This is a parameter with a default value.
 ```
 
 Parameters with defaults are automatically turned into optional parameters.
 
 ```
-myParam = default : This is also an optional parameter.
+param = default : This is also an optional parameter.
 ```
 
 <p class="warning">
@@ -170,7 +170,7 @@ myParam = default : This is also an optional parameter.
 You can define a parameter which takes multiple values by appending a `*` to the parameter name.
 
 ```
-myRepeatableParam* : This parameter can take multiple values as input.
+repeatableParam* : This parameter can take multiple values as input.
 ```
 
 When the user calls this command, they can specify multiple values for this parameter as such:
@@ -182,7 +182,7 @@ When the user calls this command, they can specify multiple values for this para
 The inputs will be passed in as an array: `['one', 'two', 'three', 'four five']`. Defaults can also be specified for repeatable parameters.
 
 ```
-myRepeatableParam* = one "two three" : This repeatable parameter has defaults.
+repeatableParam* = one "two three" : This repeatable parameter has defaults.
 ```
 
 The given values will be parsed into an array: `['one', 'two three']`.
@@ -195,7 +195,7 @@ The given values will be parsed into an array: `['one', 'two three']`.
 Literal parameters will take the value of the input verbatim. You can define literals by appending an ellipsis (`...`) to the parameter name.
 
 ```
-myLiteralParam... : I am a literal.
+literalParam... : I am a literal.
 ```
 
 When the user calls this command, the literal argument takes the value of everything after the command name. For instance,
