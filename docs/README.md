@@ -182,6 +182,14 @@ Literal parameters will take the value of the input verbatim. You can define lit
 myLiteralParam+ : I am a literal.
 ```
 
+When the user calls this command, the literal argument takes the value of everything after the command name. For instance,
+
+```
+@client echo one two three
+```
+
+will generate a single argument: `'one two three'`.
+
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
 
