@@ -133,6 +133,22 @@ Optional parameters are identified by a leading `-` character.
 - myOptionalParam : This is an optional parameter.
 ```
 
+###### Parameter Types
+It's possible to specify the expected type of a parameter's value by prefacing the parameter name with a type declaration.
+
+```
+(int) integerParam : This parameter's value will be interpreted as an integer.
+```
+
+Ghastly will attempt to coerce the raw value of the parameter into the specified type. If the raw value cannot be coerced, the input is rejected.
+
+The following are the available parameter types:
+
+* `boolean`, `bool`: either `'true'` or `'false'`, ignoring case.
+* `integer`, `int`: an integer.
+* `number`, `num`: any valid `Number`.
+* `string`, `str`: a string. This is the default type.
+
 ###### Default Values
 Default values may be specified for optional parameters by placing the value after the parameter name followed by a `=` character.
 
