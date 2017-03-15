@@ -122,27 +122,27 @@ return {
 ###### Description
 Similarly to commands, you can add a description to your parameter.
 
-```js
+```
 myParam : This is a parameter description.
 ```
 
 ###### Optional Parameters
 Optional parameters are identified by a leading `-` character.
 
-```js
+```
 - myOptionalParam : This is an optional parameter.
 ```
 
 ###### Default Values
 Default values may be specified for optional parameters by placing the value after the parameter name followed by a `=` character.
 
-```js
+```
 - myOptionalParamWithDefault = default : This is a parameter with a default value.
 ```
 
 Parameters with defaults are automatically turned into optional parameters.
 
-```js
+```
 myParam = default : This is also an optional parameter.
 ```
 
@@ -153,19 +153,19 @@ myParam = default : This is also an optional parameter.
 ###### Repeatable Values
 You can define a parameter which takes multiple values by appending a `*` to the parameter name.
 
-```js
+```
 myRepeatableParam* : This parameter can take multiple values as input.
 ```
 
 When the user calls this command, they can specify multiple values for this parameter as such:
 
-```js
+```
 @client echo one two three "four five"
 ```
 
 The inputs will be passed in as an array: `['one', 'two', 'three', 'four five']`. Defaults can also be specified for repeatable parameters.
 
-```js
+```
 myRepeatableParam* = one "two three" : This repeatable parameter has defaults.
 ```
 
@@ -178,7 +178,7 @@ The given values will be parsed into an array: `['one', 'two three']`.
 ###### Literal Values
 Literal parameters will take the value of the input verbatim. You can define literals by appending a `+` to the parameter name.
 
-```js
+```
 myLiteralParam+ : I am a literal.
 ```
 
