@@ -90,7 +90,7 @@ describe('ArgumentParser', function() {
     });
 
     it('parses literal arguments', function() {
-      let rules = ParameterParser.validate('+(str) literal+');
+      let rules = ParameterParser.validate('+(str) literal...');
 
       expect(ArgumentParser.parse(rules, 'hello familia\'s reggi"o parmesian`no     ;;;')).to.deep.equal({
         literal: 'hello familia\'s reggi"o parmesian`no     ;;;',

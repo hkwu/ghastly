@@ -159,12 +159,12 @@ export default class ParameterParser {
       parsed.name = trimEnd(name, '* ');
       parsed.repeatable = true;
       parsed.defaultValue = [];
-    } else if (name.endsWith('+')) {
+    } else if (name.endsWith('...')) {
       if (parsed.type !== STRING) {
         throw new ParameterParserError(`Literals can only be used with string parameters: '${definition}'.`);
       }
 
-      parsed.name = trimEnd(name, '+ ');
+      parsed.name = trimEnd(name, '. ');
       parsed.literal = true;
     } else if (name.includes(' ')) {
       throw new ParameterParserError(`Parameter name must not contain spaces: '${definition}'.`);

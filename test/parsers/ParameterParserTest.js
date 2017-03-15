@@ -16,9 +16,9 @@ describe('ParameterParser', function() {
     });
 
     it('allows literal parameters as the only parameter', function() {
-      expect(() => ParameterParser.validate('+(str) literal+ : This is a literal')).to.not.throw(ParameterParserError);
-      expect(() => ParameterParser.validate('+(str) literal+ : This is a literal', 'notallowed')).to.throw(ParameterParserError, 'must be the only parameter');
-      expect(() => ParameterParser.validate('notallowed', '+(str) literal+ : This is a literal')).to.throw(ParameterParserError, 'must be the only parameter');
+      expect(() => ParameterParser.validate('+(str) literal... : This is a literal')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.validate('+(str) literal... : This is a literal', 'notallowed')).to.throw(ParameterParserError, 'must be the only parameter');
+      expect(() => ParameterParser.validate('notallowed', '+(str) literal... : This is a literal')).to.throw(ParameterParserError, 'must be the only parameter');
     });
 
     it('disallows required parameters after optional parameters', function() {
@@ -371,9 +371,9 @@ describe('ParameterParser', function() {
     });
 
     it('disallows non-string literal parameters', function() {
-      expect(() => ParameterParser.parseDefinition('(int) literal+')).to.throw(ParameterParserError, 'Literals can only be used with string parameters');
-      expect(() => ParameterParser.parseDefinition('(str) literal+')).to.not.throw(ParameterParserError);
-      expect(() => ParameterParser.parseDefinition('(string) literal+')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.parseDefinition('(int) literal...')).to.throw(ParameterParserError, 'Literals can only be used with string parameters');
+      expect(() => ParameterParser.parseDefinition('(str) literal...')).to.not.throw(ParameterParserError);
+      expect(() => ParameterParser.parseDefinition('(string) literal...')).to.not.throw(ParameterParserError);
     });
   });
 });
