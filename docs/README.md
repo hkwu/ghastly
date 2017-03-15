@@ -226,6 +226,8 @@ Object literal definitions are essentially a superset of string definitions. The
 }
 ```
 
+String and object literal definitions can be freely mixed together, so you might opt to use object literals only as required.
+
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
 
