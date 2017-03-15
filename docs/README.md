@@ -194,6 +194,22 @@ will generate a single argument: `'one two three'`.
   Literal parameters may only be used when they are the only parameter in a command.
 </p>
 
+##### Defining Parameters as Objects
+Object literal definitions are essentially a superset of string definitions. They share the same options though you must specify them as key/value pairs.
+
+```js
+{
+  name: 'param',
+  description: 'An object literal parameter definition.',
+  optional: true,
+  type: 'int',
+  // provide an array of values for repeatable parameters
+  defaultValue: 0,
+  repeatable: false,
+  literal: false,
+}
+```
+
 #### Defining a Handler
 It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
 
