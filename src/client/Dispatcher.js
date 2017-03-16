@@ -335,11 +335,7 @@ export default class Dispatcher {
       case INDICATOR_TYPES.ARRAY: {
         const choice = sample(response);
 
-        if (!isString(choice)) {
-          throw new DispatchError('Expected array message responses to be strings.');
-        }
-
-        return message.channel.sendMessage(choice);
+        return this.dispatchResponse(command, context, choice);
       }
       case INDICATOR_TYPES.EMBED:
         return message.channel.sendEmbed(response);
