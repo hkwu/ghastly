@@ -262,29 +262,10 @@ export default class Dispatcher {
     }
 
     const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
-    const indicator = await command.handler({ ...context, args });
+    const contextWithArgs = { ...context, args };
+    const indicator = await command.handler(contextWithArgs);
 
-    switch (this.constructor.resolveIndicatorType(indicator)) {
-      case INDICATOR_TYPES.STRING:
-        return contentMessage.channel.sendMessage(indicator);
-      case INDICATOR_TYPES.ARRAY: {
-        const choice = sample(indicator);
-
-        if (!isString(choice)) {
-          throw new DispatchError('Expected array message responses to be strings.');
-        }
-
-        return contentMessage.channel.sendMessage(choice);
-      }
-      case INDICATOR_TYPES.EMBED:
-        return contentMessage.channel.sendEmbed(indicator);
-      case INDICATOR_TYPES.CUSTOM_RESPONSE:
-        return indicator.respond(context);
-      case INDICATOR_TYPES.NO_RESPONSE:
-        return null;
-      default:
-        throw new DispatchError('Returned value from command handler is not of a recognized type.');
-    }
+    return this.dispatchResponse(command, contextWithArgs, indicator);
   }
 
   /**
@@ -336,4 +317,41 @@ export default class Dispatcher {
    * @private
    */
   dispatcherDidAttach(client) {} // eslint-disable-line class-methods-use-this, no-unused-vars
+
+  /**
+   * Dispatches the given response value.
+   * @param {CommandObject} command - The command being dispatched.
+   * @param {Object} context - The current command execution context.
+   * @param {*} response - The response value.
+   * @returns {*}
+   * @private
+   */
+  dispatchResponse(command, context, response) {
+    const { message } = context;
+
+    switch (this.constructor.resolveIndicatorType(response)) {
+      case INDICATOR_TYPES.STRING:
+        return message.channel.sendMessage(response);
+      case INDICATOR_TYPES.ARRAY: {
+        const choice = sample(response);
+
+        if (!isString(choice)) {
+          throw new DispatchError('Expected array message responses to be strings.');
+        }
+
+        return message.channel.sendMessage(choice);
+      }
+      case INDICATOR_TYPES.EMBED:
+        return message.channel.sendEmbed(response);
+      case INDICATOR_TYPES.CUSTOM_RESPONSE: {
+        const composed = command.layers(response.respond.bind(response));
+
+        return composed(context);
+      }
+      case INDICATOR_TYPES.NO_RESPONSE:
+        return null;
+      default:
+        throw new DispatchError('Returned value from command handler is not of a recognized type.');
+    }
+  }
 }

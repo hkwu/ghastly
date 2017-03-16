@@ -24,12 +24,13 @@ export default class CommandObject {
         description,
         middleware,
       } = resolver.resolve(source);
+      const layers = apply(...middleware);
 
       /**
        * The command handler function, with middleware applied to it.
        * @type {Function}
        */
-      this.handler = apply(...middleware)(handler);
+      this.handler = layers(handler);
 
       /**
        * The main trigger of the command, also acting as its name.
@@ -54,6 +55,12 @@ export default class CommandObject {
        * @type {?string}
        */
       this.description = description;
+
+      /**
+       * The command's middleware layers combined into an applicator function.
+       * @type {Function}
+       */
+      this.layers = layers;
 
       /**
        * The command handler function.
