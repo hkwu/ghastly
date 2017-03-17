@@ -224,13 +224,12 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
    *   received only when the message event was an update.
-   * @returns {Promise.<(Message|*), Error>} A promise resolving to a Discord.js
-   *   `Message` representing the response that was dispatched if the command
-   *   was handled successfully, or whatever value is returned by the command
-   *   handler's indicator, if it is a function.
-   * Errors encountered during dispatching will bubble up. If the error comes
-   *   from the dispatch function itself, the promise will specifically reject
-   *   with a `DispatchError`.
+   * @returns {Promise.<(Message|*), Error>} Promise resolving to a Discord.js
+   *   `Message` object if a message was dispatched directly. If a custom response
+   *   is dispatched, resolves to whatever the custom response handler returns.
+   *   Resolves to `null` if no response is dispatched.
+   * Errors bubble up regularly. Rejects with a `DispatchError` specifically when
+   *   the given response type is not recognized.
    */
   async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {
@@ -262,10 +261,9 @@ export default class Dispatcher {
     }
 
     const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
-    const contextWithArgs = { ...context, args };
-    const indicator = await command.handler(contextWithArgs);
+    const { response, $context } = await command.handler({ ...context, args });
 
-    return this.dispatchResponse(command, contextWithArgs, indicator);
+    return this.dispatchResponse(command, $context, response);
   }
 
   /**
@@ -321,12 +319,18 @@ export default class Dispatcher {
   /**
    * Dispatches the given response value.
    * @param {CommandObject} command - The command being dispatched.
-   * @param {Object} context - The current command execution context.
+   * @param {Object} context - The context object which was received by the
+   *   dispatched command's handler.
    * @param {*} response - The response value.
-   * @returns {*}
+   * @returns {Promise.<(Message|*), Error>} Promise resolving to a Discord.js
+   *   `Message` object if a message was dispatched directly. If a custom response
+   *   is dispatched, resolves to whatever the custom response handler returns.
+   *   Resolves to `null` if no response is dispatched.
+   * Errors bubble up regularly. Rejects with a `DispatchError` specifically when
+   *   the given response type is not recognized.
    * @private
    */
-  dispatchResponse(command, context, response) {
+  async dispatchResponse(command, context, response) {
     const { message } = context;
 
     switch (this.constructor.resolveIndicatorType(response)) {
@@ -339,11 +343,8 @@ export default class Dispatcher {
       }
       case INDICATOR_TYPES.EMBED:
         return message.channel.sendEmbed(response);
-      case INDICATOR_TYPES.CUSTOM_RESPONSE: {
-        const composed = command.layers(response.respond.bind(response));
-
-        return composed(context);
-      }
+      case INDICATOR_TYPES.CUSTOM_RESPONSE:
+        return response.respond(context);
       case INDICATOR_TYPES.NO_RESPONSE:
         return null;
       default:
