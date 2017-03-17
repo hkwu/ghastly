@@ -539,4 +539,4 @@ function after() {
 }
 ```
 
-The returned value depends on the layer that's immediately after the current layer. If there are no other layers left, the returned value is that of the command's handler function.
+The returned value depends on the layer that's next in the chain. If there are no other layers left, the returned value is that of the command's handler function.
