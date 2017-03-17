@@ -1,4 +1,4 @@
-self.$config = {
+docute.init({
   repo: 'hkwu/ghastly',
   url: 'https://ghastly.js.org',
   'edit-link': 'https://github.com/hkwu/ghastly/blob/master/docs',
@@ -14,4 +14,4 @@ self.$config = {
       indexName: 'ghastly',
     }),
   ],
-};
+});
