@@ -377,7 +377,7 @@ client.use(dispatcher).login('token');
 In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
 
 #### Using `CustomResponse`
-The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned. The executor may be `async`, and must handle all of the response logic.
+The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic.
 
 In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
 
@@ -398,6 +398,10 @@ function handler() {
   return new ReversedResponse();
 }
 ```
+
+<p class="warning">
+  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
+</p>
 
 #### Builtin Responses
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
