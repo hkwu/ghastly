@@ -464,7 +464,7 @@ Notice how we use `myMiddleware()` instead of `myMiddleware`. As a matter of con
 #### Defining Middleware
 In order to define your own custom middleware, simply create a higher order function which returns the middleware function. We will call this function a middleware layer, or **layer** for short.
 
-Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed.
+Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed. The command handler function lies at the end of the middleware chain.
 
 <p class="warning">
   Layers can be defined as synchronous or `async` functions, but it's prudent to be aware of the fact that the next layer could return a synchronous value or a promise. However, by using `async` functions you can easily `await` the return value of the next layer and not worry about whether or not it's synchronous.
@@ -494,33 +494,25 @@ return {
 ```
 
 ##### Working with Context
-Since layers have direct access to the context object, they are able to read, write and even completely obliterate the context (though that's a stupid idea).
-
-There are just a few points to keep in mind when working with the context. When modifying the context, always *clone* a new context object using `Object.assign()` before mutating it. This ensures that the context objects for each layer are isolated from each other as much as possible.
+Since layers have direct access to the context object, they are able to read, write and even completely obliterate the context (though that's a stupid idea, so don't do it).
 
 ```js
-function bad() {
+function middlewareThatChangesProperties() {
   return (next, context) => {
-    context.someImportantProperty = null;
+    Object.keys(context).forEach((key) => {
+      context[key] = 'I changed this!';
+    });
+
+    context.injectedProperty = 'I added this.';
 
     return next(context);
   };
 }
-
-function good() {
-  return (next, context) => next(Object.assign({}, context, {
-    someImportantProperty: null,
-  }));
-}
 ```
 
-<p class="tip">
-  It can be quite a handful to use `Object.assign()`, but until the [object rest/spread](https://github.com/sebmarkbage/ecmascript-rest-spread) proposal becomes a standard, this is the next best thing. Feel free to use [Babel](https://babeljs.io/) or another transpiler to take advantage of it, though!
-</p>
+One thing to be aware of is that the value returned from the command handler is not passed directly to any waiting layer. Instead, layers receive an object with a `response` property which contains the response value. This is essentially the reverse of the original context flow: the object is propagated from the innermost layer to the outermost layer. Consequently, any intercepting layer has the ability to interact with the response context as they see fit; the dispatcher only cares about the `response` property (in addition to some private properties injected by Ghastly, though you shouldn't be touching these in any case), so any additional properties will only be seen by the layers in the middleware chain.
 
-Of course, there's no need to clone the context if you're just reading from it. Needless to say, you should also refrain from deleting properties from the context. This could potentially cause other layers which depend on those properties to fail.
-
-##### Before and After
+##### Before and After Middleware
 You can make your layer execute before or after other layers depending on when you delegate to the `next` layer. For instance, the following middleware will execute some logic then delegate to the next layer in the chain.
 
 ```js
