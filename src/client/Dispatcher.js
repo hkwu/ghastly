@@ -8,7 +8,6 @@ import CommandParser from '../command/parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
 import DispatchError from '../errors/DispatchError';
 import Response from '../command/responses/Response';
-import ServiceRegistry from './ServiceRegistry';
 import generate from '../core/generate';
 
 /**
@@ -24,14 +23,6 @@ const INDICATOR_TYPES = {
   CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
   NO_RESPONSE: 'NO_RESPONSE',
 };
-
-/**
- * A function which is passed a reference to a `ServiceRegistry` and registers
- *   some service(s) under that registry.
- * @callback serviceProvider
- * @param {Object} context - Object containing data for the service provider.
- * @param {ServiceRegistry} context.registry - The `ServiceRegistry`.
- */
 
 /**
  * Emitted when a message response could not be dispatched.
@@ -64,12 +55,6 @@ export default class Dispatcher {
      * @type {Ghastly}
      */
     this.client = client;
-
-    /**
-     * The service provider for the dispatcher.
-     * @type {ServiceRegistry}
-     */
-    this.services = new ServiceRegistry();
 
     /**
      * The command registry for the dispatcher.
@@ -156,66 +141,6 @@ export default class Dispatcher {
   }
 
   /**
-   * Binds a service to the service registry.
-   * @param {string} name - The service name.
-   * @param {*} service - The service to bind.
-   * @returns {Dispatcher} The instance this method was called on.
-   */
-  bindService(name, service) {
-    this.services.bind(name, service);
-
-    return this;
-  }
-
-  /**
-   * Binds services to the service registry via service providers.
-   * @param {...serviceProvider} providers - The service providers.
-   * @returns {Dispatcher} The instance this method was called on.
-   */
-  bindProviders(...providers) {
-    providers.forEach((provider) => {
-      provider({ registry: this.services });
-    });
-
-    return this;
-  }
-
-  /**
-   * Unbinds services from the registry.
-   * @param {...string} names - The names of the services to remove.
-   * @returns {Dispatcher} The instance this method was called on.
-   */
-  unbindServices(...names) {
-    names.forEach((name) => {
-      this.services.unbind(name);
-    });
-
-    return this;
-  }
-
-  /**
-   * Registers a client with this dispatcher.
-   * @param {Ghastly} client - The client.
-   */
-  register(client) {
-    const dispatchHandler = async (...args) => {
-      try {
-        await this.dispatch(...args);
-      } catch (error) {
-        this.client.emit('dispatchError', error, ...args);
-      }
-    };
-
-    this.client = client;
-    this.prefix = this.regexifyPrefix(this.rawPrefix);
-
-    client.on('message', dispatchHandler);
-    client.on('messageUpdate', dispatchHandler);
-
-    this.dispatcherDidAttach(client);
-  }
-
-  /**
    * Adds the given commands to the registry.
    * @param {...Function} commands - The command generators.
    * @returns {Dispatcher} The instance this method was called on.
@@ -274,7 +199,7 @@ export default class Dispatcher {
     const context = await this.dispatchMiddleware({
       message: contentMessage,
       client: this.client,
-      services: this.services,
+      services: this.client.services,
       commands: this.commands,
     });
 

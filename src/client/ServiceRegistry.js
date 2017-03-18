@@ -63,16 +63,35 @@ export default class ServiceRegistry {
 
     this.services.set(name, new ServiceRegistryEntry({ isSingleton, aliases }));
 
-    // add the service reference
     if (isSingleton) {
       this.singletons.set(name, service);
     } else {
       this.constructed.set(name, service);
     }
 
-    // add the aliases
     aliases.forEach((alias) => {
       this.aliases.set(alias, name);
+    });
+
+    return this;
+  }
+
+  /**
+   * A function which is passed a reference to a `ServiceRegistry` and registers
+   *   some service(s) under that registry.
+   * @callback serviceProvider
+   * @param {Object} context - Object containing data for the service provider.
+   * @param {ServiceRegistry} context.registry - The `ServiceRegistry`.
+   */
+
+  /**
+   * Binds services to the service registry via service providers.
+   * @param {...serviceProvider} providers - The service providers.
+   * @returns {Dispatcher} The instance this method was called on.
+   */
+  bindProviders(...providers) {
+    providers.forEach((provider) => {
+      provider({ registry: this });
     });
 
     return this;
@@ -92,14 +111,12 @@ export default class ServiceRegistry {
 
     const entry = this.services.get(mainBinding);
 
-    // kill the service reference
     if (entry.isSingleton) {
       this.singletons.delete(mainBinding);
     } else {
       this.constructed.delete(mainBinding);
     }
 
-    // kill the aliases
     entry.aliases.forEach((alias) => {
       this.aliases.delete(alias);
     });

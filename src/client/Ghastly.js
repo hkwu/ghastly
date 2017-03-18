@@ -1,5 +1,6 @@
 import { Client } from 'discord.js';
 import Dispatcher from './Dispatcher';
+import ServiceRegistry from './ServiceRegistry';
 
 /**
  * @classdesc The Ghastly client.
@@ -20,5 +21,11 @@ export default class Ghastly extends Client {
      * @type {Dispatcher}
      */
     this.dispatcher = new Dispatcher({ client: this, prefix });
+
+    /**
+     * The client's service registry.
+     * @type {ServiceRegistry}
+     */
+    this.services = new ServiceRegistry();
   }
 }
