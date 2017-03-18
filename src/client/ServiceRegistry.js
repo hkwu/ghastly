@@ -59,7 +59,7 @@ export default class ServiceRegistry {
    */
   bind(identifier, service) {
     const [name, ...aliases] = isArray(identifier) ? [...identifier] : [identifier];
-    const isSingleton = isFunction(service);
+    const isSingleton = !isFunction(service);
 
     this.services.set(name, new ServiceRegistryEntry({ isSingleton, aliases }));
 
