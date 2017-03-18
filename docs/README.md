@@ -23,7 +23,7 @@ yarn add ghastly
 At the core of this library is the Ghastly client. It provides an interface to register commands and services in addition to handling the tasks carried out by the base Discord.js client.
 
 ```js
-const { Client } = require('ghastly');
+import { Client } from 'ghastly';
 
 const client = new Client();
 ```
@@ -352,7 +352,7 @@ function handler() {
 Return a Discord.js `RichEmbed` object to send an embed.
 
 ```js
-const { RichEmbed } = require('discord.js');
+import { RichEmbed } from 'discord.js';
 
 function handler() {
   const embed = new RichEmbed();
@@ -387,7 +387,7 @@ The `CustomResponse` constructor takes a single **executor** function. The execu
 In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
 
 ```js
-const { CustomResponse } = require('ghastly');
+import { CustomResponse } from 'ghastly';
 
 class ReversedResponse extends CustomResponse {
   constructor() {
@@ -415,7 +415,7 @@ Of course, it's a pain to have to define your own response logic for simple thin
 You can send a multi-line code block using `CodeResponse`.
 
 ```js
-const { CodeResponse } = require('ghastly');
+import { CodeResponse } from 'ghastly';
 
 function handler() {
   const response = new CodeResponse('js', `console.log('Hello, world');
@@ -429,8 +429,8 @@ console.log(2 + 2);`);
 You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
 
 ```js
-const ytdl = require('ytdl-core');
-const { VoiceResponse } = require('ghastly');
+import ytdl from 'ytdl-core';
+import { VoiceResponse } from 'ghastly';
 
 function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
@@ -476,7 +476,7 @@ Layers receive two arguments: the `next` layer in the middleware chain, and the 
 </p>
 
 ```js
-const util = require('util');
+import util from 'util';
 
 function loggingMiddleware() {
   return (next, context) => {
