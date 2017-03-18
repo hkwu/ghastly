@@ -219,8 +219,7 @@ Object literal definitions are essentially a superset of string definitions. The
   description: 'An object literal parameter definition.',
   optional: true,
   type: 'int',
-  // provide an array of values for repeatable parameters
-  defaultValue: 0,
+  defaultValue: 0, // provide an array of values for repeatable parameters
   repeatable: false,
   literal: false,
 }
@@ -284,6 +283,25 @@ function handler() {
     'Will it be me?',
     'Or me?',
     'No, me!',
+  ];
+}
+```
+
+Array elements can be any valid response type; the selected response will be recursively dispatched. For instance, you could even have an array of arrays to group responses into random "buckets".
+
+```js
+function handler() {
+  return [
+    [
+      'Cat',
+      'Lion',
+      'Leopard',
+    ],
+    [
+      'Dog',
+      'Wolf',
+      'Fox',
+    ],
   ];
 }
 ```
