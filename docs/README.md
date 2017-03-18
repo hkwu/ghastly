@@ -19,6 +19,48 @@ yarn add ghastly
 ```
 
 ## Core Concepts
+### The Client
+At the core of this library is the Ghastly client. It provides an interface to register commands and services in addition to handling the tasks carried out by the base Discord.js client.
+
+```js
+const { Client } = require('ghastly');
+
+const client = new Client();
+```
+
+The client processes messages using a `Dispatcher`. In order to take advantage of the dispatcher, you need to configure it when you create the client.
+
+#### Prefixes
+The dispatcher filters messages based on a prefix. The prefix can be any string (spaces are valid), with specific exceptions as outlined below.
+
+```js
+const client = new Client({ prefix: '> ' });
+```
+
+<p class="warning">
+  Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
+</p>
+
+##### Mention
+You can use the client's mention as a prefix. This is the recommended prefix as it's inherently unique.
+
+```js
+const client = new Client({ prefix: '@self' });
+```
+
+The dispatcher will only respond to `@client#1234 messages like these`.
+
+#### Registering Commands
+Commands should be registered before logging in with the client. The client's dispatcher (available through `client.dispatcher`) provides the `loadCommands()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
+
+```js
+client.dispatcher.loadCommands(foo, bar, baz);
+```
+
+<p class="danger">
+  `loadCommands()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.loadCommands(...commands)`.
+</p>
+
 ### Commands
 The main purpose of Ghastly is to ease the design and management of client commands. This allows you to avoid the boilerplate and/or spaghetti code that inevitably results when defining inline commands with the native Discord.js events system.
 
@@ -252,7 +294,7 @@ A reference to the Ghastly client. This is just a convenience property, since th
 The dispatcher's command registry.
 
 ###### `context.services`
-The dispatcher's service registry.
+The client's service registry.
 
 ##### Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
@@ -334,61 +376,6 @@ function handler({ message }) {
 ```
 
 Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
-
-### The Dispatcher
-In order to filter and route messages, Ghastly provides the `Dispatcher` class. The dispatcher listens to message events on the client and triggers any commands it detects in the messages.
-
-#### Prefixes
-The dispatcher takes care of filtering messages based on a prefix. You should specify the prefix you want to use when constructing the dispatcher.
-
-```js
-const { Dispatcher } = require('ghastly');
-
-const dispatcher = new Dispatcher({ prefix: '!' });
-```
-
-##### String
-
-The prefix can be any string (spaces are valid), with specific exceptions as outlined further below.
-
-```js
-const dispatcher = new Dispatcher({ prefix: '> ' });
-```
-
-<p class="warning">
-  Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
-</p>
-
-##### Mention
-You can use the client's mention as a prefix. This is the recommended prefix as it's inherently unique.
-
-```js
-const dispatcher = new Dispatcher({ prefix: '@self' });
-```
-
-The dispatcher will only respond to `@client#1234 messages like these`.
-
-#### Registering Commands
-Before attaching the dispatcher to the client, you should register all your commands. The `loadCommands()` method takes a variable number of command functions and registers them with the dispatcher.
-
-```js
-dispatcher.loadCommands(foo, bar, baz);
-```
-
-<p class="danger">
-  `loadCommands()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.loadCommands(...commands)`.
-</p>
-
-#### Registering the Client
-The dispatcher must register itself with the client in order to intercept message events and dispatch responses.
-
-```js
-const { Client } = require('ghastly');
-
-const client = new Client();
-
-client.use(dispatcher).login('token');
-```
 
 ## Advanced
 ### Complex Response Types
