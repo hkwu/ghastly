@@ -1,6 +1,6 @@
 import { isPlainObject } from 'lodash/lang';
 import CommandObjectResolver from '../resolvers/CommandObjectResolver';
-import ParameterParser from '../parsers/ParameterParser';
+import ParameterParser from './parsers/ParameterParser';
 import apply from '../core/apply';
 
 /**

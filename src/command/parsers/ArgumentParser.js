@@ -1,6 +1,6 @@
 import stringArgv from 'string-argv';
 import { isUndefined } from 'lodash/lang';
-import ArgumentParserError from '../errors/ArgumentParserError';
+import ArgumentParserError from '../../errors/ArgumentParserError';
 import { convertType, isType } from './Types';
 
 /**

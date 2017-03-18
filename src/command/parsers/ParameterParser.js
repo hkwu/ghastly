@@ -1,8 +1,8 @@
 import stringArgv from 'string-argv';
 import { isPlainObject, isString } from 'lodash/lang';
 import { trimEnd, trimStart } from 'lodash/string';
-import ParameterParserError from '../errors/ParameterParserError';
-import ParameterResolver from '../resolvers/ParameterResolver';
+import ParameterParserError from '../../errors/ParameterParserError';
+import ParameterResolver from '../../resolvers/ParameterResolver';
 import ParsedParameter from './ParsedParameter';
 import { STRING, convertType, isType, resolveType } from './Types';
 

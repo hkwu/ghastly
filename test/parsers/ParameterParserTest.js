@@ -1,8 +1,8 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import ParameterParser from '../../src/parsers/ParameterParser';
+import ParameterParser from '../../src/command/parsers/ParameterParser';
 import ParameterParserError from '../../src/errors/ParameterParserError';
-import * as Types from '../../src/parsers/Types';
+import * as Types from '../../src/command/parsers/Types';
 
 describe('ParameterParser', function() {
   before(function() {

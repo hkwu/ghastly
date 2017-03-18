@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import ArgumentParser from '../../src/parsers/ArgumentParser';
+import ArgumentParser from '../../src/command/parsers/ArgumentParser';
 import ArgumentParserError from '../../src/errors/ArgumentParserError';
-import ParameterParser from '../../src/parsers/ParameterParser';
-import * as Types from '../../src/parsers/Types';
+import ParameterParser from '../../src/command/parsers/ParameterParser';
+import * as Types from '../../src/command/parsers/Types';
 
 describe('ArgumentParser', function() {
   describe('#parse()', function() {

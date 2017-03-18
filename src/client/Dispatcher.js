@@ -2,12 +2,12 @@ import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
 import { isArray, isString } from 'lodash/lang';
 import { escapeRegExp } from 'lodash/string';
-import ArgumentParser from '../parsers/ArgumentParser';
+import ArgumentParser from '../command/parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
-import CommandParser from '../parsers/CommandParser';
+import CommandParser from '../command/parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
 import DispatchError from '../errors/DispatchError';
-import Response from '../command/Response';
+import Response from '../command/responses/Response';
 import ServiceRegistry from './ServiceRegistry';
 import generate from '../core/generate';
 

@@ -1,5 +1,5 @@
 import BaseResolver from './BaseResolver';
-import { STRING } from '../parsers/Types';
+import { STRING } from '../command/parsers/Types';
 
 /**
  * @classdesc Options resolver for command parameter definitions.

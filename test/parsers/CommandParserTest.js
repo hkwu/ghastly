@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import CommandParser from '../../src/parsers/CommandParser';
+import CommandParser from '../../src/command/parsers/CommandParser';
 
 describe('CommandParser', function() {
   before(function() {
