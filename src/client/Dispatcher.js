@@ -48,14 +48,22 @@ const INDICATOR_TYPES = {
  */
 export default class Dispatcher {
   /**
-   * Constructor.
+   * Options for configuring a dispatcher.
+   * @typedef {Object} DispatcherOptions
+   * @property {Ghastly} client - The client this dispatcher is attached to.
+   * @property {string} prefix - The prefix for this dispatcher.
    */
-  constructor({ prefix }) {
+
+  /**
+   * Constructor.
+   * @param {DispatcherOptions} options - The configuration values for the dispatcher.
+   */
+  constructor({ client, prefix }) {
     /**
      * The client this dispatcher is attached to.
-     * @type {?Ghastly}
+     * @type {Ghastly}
      */
-    this.client = null;
+    this.client = client;
 
     /**
      * The service provider for the dispatcher.
@@ -96,6 +104,20 @@ export default class Dispatcher {
      * @private
      */
     this.dispatchMiddleware = this.constructor.dispatchMiddlewareCore;
+
+    const dispatchHandler = async (...args) => {
+      try {
+        await this.dispatch(...args);
+      } catch (error) {
+        this.client.emit('dispatchError', error, ...args);
+      }
+    };
+
+    client.once('ready', () => {
+      this.prefix = this.regexifyPrefix(this.rawPrefix);
+    });
+    client.on('message', dispatchHandler);
+    client.on('messageUpdate', dispatchHandler);
   }
 
   /**
@@ -308,13 +330,6 @@ export default class Dispatcher {
   shouldFilterContent(content) {
     return !this.prefix.test(content);
   }
-
-  /**
-   * Called after a client has been registered with the dispatcher.
-   * @param {Ghastly} client - The client that was registered with the dispatcher.
-   * @private
-   */
-  dispatcherDidAttach(client) {} // eslint-disable-line class-methods-use-this, no-unused-vars
 
   /**
    * Dispatches the given response value.

@@ -1,4 +1,5 @@
 import { Client } from 'discord.js';
+import Dispatcher from './Dispatcher';
 
 /**
  * @classdesc The Ghastly client.
@@ -6,15 +7,18 @@ import { Client } from 'discord.js';
  */
 export default class Ghastly extends Client {
   /**
-   * Registers a dispatcher with the client.
-   * @param {Dispatcher} dispatcher - The dispatcher.
-   * @returns {Ghastly} The instance this method was called on.
+   * Constructor.
+   * @param {Object} options - The options for the client.
    */
-  use(dispatcher) {
-    return this.once('ready', () => {
-      this.dispatcher = dispatcher;
+  constructor(options) {
+    const { prefix, ...rest } = options;
 
-      dispatcher.register(this);
-    });
+    super(rest);
+
+    /**
+     * The client's dispatcher.
+     * @type {Dispatcher}
+     */
+    this.dispatcher = new Dispatcher({ client: this, prefix });
   }
 }
