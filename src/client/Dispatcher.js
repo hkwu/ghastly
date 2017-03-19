@@ -39,15 +39,10 @@ const INDICATOR_TYPES = {
  */
 export default class Dispatcher {
   /**
-   * Options for configuring a dispatcher.
-   * @typedef {Object} DispatcherOptions
-   * @property {Ghastly} client - The client this dispatcher is attached to.
-   * @property {string} prefix - The prefix for this dispatcher.
-   */
-
-  /**
    * Constructor.
-   * @param {DispatcherOptions} options - The configuration values for the dispatcher.
+   * @param {Object} options - The configuration values for the dispatcher.
+   * @param {Ghastly} options.client - The client this dispatcher is attached to.
+   * @param {string} options.prefix - The prefix for this dispatcher.
    */
   constructor({ client, prefix }) {
     /**
