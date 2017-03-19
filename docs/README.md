@@ -42,7 +42,7 @@ const client = new Client({ prefix: '> ' });
 </p>
 
 ##### Mention
-You can use the client's mention as a prefix. This is the recommended prefix as it's inherently unique.
+You can specify the client's mention as a prefix by using the special value `@self`. This is the recommended prefix as it's inherently unique.
 
 ```js
 const client = new Client({ prefix: '@self' });
@@ -294,7 +294,7 @@ A reference to the Ghastly client. This is just a convenience property, since th
 The dispatcher's command registry.
 
 ###### `context.services`
-The client's service registry.
+The client's [service registry](#services).
 
 ##### Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
@@ -436,18 +436,34 @@ function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // must be connected to voice channel at this point
-  return new VoiceResponse('stream', stream);
+  return new VoiceResponse({ type: 'stream', stream });
 }
 ```
 
-The `VoiceResponse` constructor is designed to resemble the Discord.js `VoiceConnection` stream play methods.
+The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` stream play methods.
 
 ```js
 // play a file
-const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
+const fileResponse = new VoiceResponse({ type: 'file', stream: '/path/to/file.mp3' });
 
 // send in StreamOptions
-const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
+const fileResponseWithOptions = new VoiceResponse({
+  type: 'file',
+  stream: 'path/to/file.mp3',
+  options: { volume: 0.5 },
+});
+```
+
+If you need access to the returned Discord.js `StreamDispatcher`, you can provide a callback as the `receiveDispatcher` property.
+
+```js
+const response = new VoiceResponse({
+  type: 'stream',
+  stream,
+  receiveDispatcher(dispatcher) {
+    dispatcher.on('end', console.log);
+  },
+})
 ```
 
 ### Middleware
