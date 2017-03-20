@@ -1,3 +1,4 @@
+import isGeneratorFunction from 'is-generator-function';
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
 import { isArray, isString } from 'lodash/lang';
@@ -11,15 +12,16 @@ import Response from '../command/responses/Response';
 import generate from '../core/generate';
 
 /**
- * Indicator type strings.
+ * Response type strings.
  * @type {Object}
  * @const
  * @private
  */
-const INDICATOR_TYPES = {
+const RESPONSE_TYPES = {
   STRING: 'STRING',
   ARRAY: 'ARRAY',
   EMBED: 'EMBED',
+  GENERATOR: 'GENERATOR',
   CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
   NO_RESPONSE: 'NO_RESPONSE',
 };
@@ -113,23 +115,25 @@ export default class Dispatcher {
   }
 
   /**
-   * Resolves a given indicator value to a type.
-   * @param {*} indicator - The indicator to resolve.
-   * @returns {?string} The type of the indicator, or `null` if not recognized.
+   * Resolves a given response value to a type.
+   * @param {*} response - The response to resolve.
+   * @returns {?string} The type of the response, or `null` if not recognized.
    * @static
    * @private
    */
-  static resolveIndicatorType(indicator) {
-    if (!indicator) {
-      return INDICATOR_TYPES.NO_RESPONSE;
-    } else if (isString(indicator)) {
-      return INDICATOR_TYPES.STRING;
-    } else if (isArray(indicator)) {
-      return INDICATOR_TYPES.ARRAY;
-    } else if (indicator instanceof RichEmbed) {
-      return INDICATOR_TYPES.EMBED;
-    } else if (indicator instanceof Response) {
-      return INDICATOR_TYPES.CUSTOM_RESPONSE;
+  static resolveResponseType(response) {
+    if (!response) {
+      return RESPONSE_TYPES.NO_RESPONSE;
+    } else if (isString(response)) {
+      return RESPONSE_TYPES.STRING;
+    } else if (isArray(response)) {
+      return RESPONSE_TYPES.ARRAY;
+    } else if (response instanceof RichEmbed) {
+      return RESPONSE_TYPES.EMBED;
+    } else if (isGeneratorFunction(response)) {
+      return RESPONSE_TYPES.GENERATOR;
+    } else if (response instanceof Response) {
+      return RESPONSE_TYPES.CUSTOM_RESPONSE;
     }
 
     return null;
@@ -268,19 +272,42 @@ export default class Dispatcher {
   async dispatchResponse(command, context, response) {
     const { message } = context;
 
-    switch (this.constructor.resolveIndicatorType(response)) {
-      case INDICATOR_TYPES.STRING:
+    switch (this.constructor.resolveResponseType(response)) {
+      case RESPONSE_TYPES.STRING:
         return message.channel.sendMessage(response);
-      case INDICATOR_TYPES.ARRAY: {
+      case RESPONSE_TYPES.ARRAY: {
         const choice = sample(response);
 
         return this.dispatchResponse(command, context, choice);
       }
-      case INDICATOR_TYPES.EMBED:
+      case RESPONSE_TYPES.EMBED:
         return message.channel.sendEmbed(response);
-      case INDICATOR_TYPES.CUSTOM_RESPONSE:
+      case RESPONSE_TYPES.GENERATOR: {
+        const generator = response();
+        let { value, done } = generator.next();
+
+        while (!done) {
+          /* eslint-disable no-await-in-loop */
+
+          const yieldedResponse = await value;
+          let dispatched;
+
+          try {
+            dispatched = await this.dispatchResponse(command, context, yieldedResponse);
+          } catch (error) {
+            // ignore possible type errors for now
+          }
+
+          ({ value, done } = generator.next(dispatched));
+
+          /* eslint-enable no-await-in-loop */
+        }
+
+        return null;
+      }
+      case RESPONSE_TYPES.CUSTOM_RESPONSE:
         return response.respond(context);
-      case INDICATOR_TYPES.NO_RESPONSE:
+      case RESPONSE_TYPES.NO_RESPONSE:
         return null;
       default:
         throw new DispatchError('Returned value from command handler is not of a recognized type.');

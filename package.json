@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "es6-error": "^4.0.0",
+    "is-generator-function": "^1.0.6",
     "lodash": "^4.15.0",
     "string-argv": "0.0.2"
   },
