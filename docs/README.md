@@ -290,6 +290,9 @@ The parsed command arguments as specified in the command's `parameters` configur
 ###### `context.client`
 A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
 
+###### `context.dispatch`
+The dispatch helper function. See [Sending Multiple Responses](#sending-multiple-responses).
+
 ###### `context.commands`
 The dispatcher's command registry.
 
@@ -308,7 +311,7 @@ Handlers don't actually need to interact with the Discord.js `Message` object in
 </p>
 
 ###### Strings
-Return a string to trigger a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
+Return a string to dispatch a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
 
 ```js
 function handler() {
@@ -317,7 +320,7 @@ function handler() {
 ```
 
 ###### Arrays
-Return an array to have Ghastly randomly select one of the array elements as the response to send.
+Return an array to have Ghastly randomly select one of the array elements as the response to dispatch.
 
 ```js
 function handler() {
@@ -349,7 +352,7 @@ function handler() {
 ```
 
 ###### Embeds
-Return a Discord.js `RichEmbed` object to send an embed.
+Return a Discord.js `RichEmbed` object to dispatch an embed.
 
 ```js
 import { RichEmbed } from 'discord.js';
@@ -367,7 +370,7 @@ function handler() {
 ```
 
 ###### Custom Responses
-In case the above response types don't adequately cover your requirements, you can always elect to manually send responses.
+In case the above response types don't adequately cover your requirements, you can always elect to manually dispatch responses.
 
 ```js
 function handler({ message }) {
@@ -376,6 +379,55 @@ function handler({ message }) {
 ```
 
 Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
+
+###### Sending Multiple Responses
+It's often desirable to send more than one response type from the same handler. Unfortunately, this is not possible with the tools we've described up to this point. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
+
+In order to facilitate response flows which dispatch multiple times, Ghastly injects the `dispatch()` helper into your handler's context.
+
+```js
+async function handler({ dispatch }) {
+  await dispatch('Hello, world!');
+
+  return 'H31l0 w0r1d 2.0';
+}
+```
+
+The `dispatch()` helper accepts any valid response type, dispatches it and returns a promise. The promise resolves once the dispatch is complete or rejects if there was an error during the dispatch process.
+
+```js
+async function handler({ dispatch }) {
+  try {
+    await dispatch(new Error('This should fail.'));
+  } catch (error) {
+    console.error(error);
+  }
+}
+```
+
+The value that the promise resolves to depends on the type of response dispatched. For strings and embeds, the promise resolves to a Discord.js `Message`.
+
+```js
+async function handler({ dispatch }) {
+  const message = await dispatch('boo');
+
+  console.log(message.channel.id);
+}
+```
+
+For arrays, the promise resolves to the value of `dispatch(choice)` where `choice` is the randomly chosen value in the array.
+
+```js
+async function handler({ dispatch }) {
+  const message = await dispatch([
+    'boo',
+    'foo',
+    'zoo',
+  ]);
+
+  console.log(message.content);
+}
+```
 
 ## Advanced
 ### Complex Response Types
@@ -401,6 +453,14 @@ class ReversedResponse extends CustomResponse {
 
 function handler() {
   return new ReversedResponse();
+}
+```
+
+When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
+
+```js
+async function handler({ dispatch }) {
+  const message = await dispatch(new ReversedResponse());
 }
 ```
 
