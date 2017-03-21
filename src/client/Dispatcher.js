@@ -1,4 +1,3 @@
-import isGeneratorFunction from 'is-generator-function';
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
 import { isArray, isString } from 'lodash/lang';
@@ -21,7 +20,6 @@ const RESPONSE_TYPES = {
   STRING: 'STRING',
   ARRAY: 'ARRAY',
   EMBED: 'EMBED',
-  GENERATOR: 'GENERATOR',
   CUSTOM_RESPONSE: 'CUSTOM_RESPONSE',
   NO_RESPONSE: 'NO_RESPONSE',
 };
@@ -130,8 +128,6 @@ export default class Dispatcher {
       return RESPONSE_TYPES.ARRAY;
     } else if (response instanceof RichEmbed) {
       return RESPONSE_TYPES.EMBED;
-    } else if (isGeneratorFunction(response)) {
-      return RESPONSE_TYPES.GENERATOR;
     } else if (response instanceof Response) {
       return RESPONSE_TYPES.CUSTOM_RESPONSE;
     }
@@ -206,10 +202,20 @@ export default class Dispatcher {
       throw new DispatchError('Dispatch middleware did not return a context object.');
     }
 
+    const createDispatch = handlerContext => (
+      response => this.dispatchResponse(handlerContext, response)
+    );
     const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
-    const { response, $context } = await command.handler({ ...context, args });
+    const {
+      response,
+      [Symbol.for('ghastly.originalContext')]: handlerContext,
+    } = await command.handler({
+      ...context,
+      args,
+      [Symbol.for('ghastly.createDispatch')]: createDispatch,
+    });
 
-    return this.dispatchResponse(command, $context, response);
+    return this.dispatchResponse(handlerContext, response);
   }
 
   /**
@@ -257,7 +263,6 @@ export default class Dispatcher {
 
   /**
    * Dispatches the given response value.
-   * @param {CommandObject} command - The command being dispatched.
    * @param {Object} context - The context object which was received by the
    *   dispatched command's handler.
    * @param {*} response - The response value.
@@ -269,7 +274,7 @@ export default class Dispatcher {
    *   the given response type is not recognized.
    * @private
    */
-  async dispatchResponse(command, context, response) {
+  async dispatchResponse(context, response) {
     const { message } = context;
 
     switch (this.constructor.resolveResponseType(response)) {
@@ -278,33 +283,10 @@ export default class Dispatcher {
       case RESPONSE_TYPES.ARRAY: {
         const choice = sample(response);
 
-        return this.dispatchResponse(command, context, choice);
+        return this.dispatchResponse(context, choice);
       }
       case RESPONSE_TYPES.EMBED:
         return message.channel.sendEmbed(response);
-      case RESPONSE_TYPES.GENERATOR: {
-        const generator = response();
-        let { value, done } = generator.next();
-
-        while (!done) {
-          /* eslint-disable no-await-in-loop */
-
-          const yieldedResponse = await value;
-          let dispatched;
-
-          try {
-            dispatched = await this.dispatchResponse(command, context, yieldedResponse);
-          } catch (error) {
-            // ignore possible type errors for now
-          }
-
-          ({ value, done } = generator.next(dispatched));
-
-          /* eslint-enable no-await-in-loop */
-        }
-
-        return null;
-      }
       case RESPONSE_TYPES.CUSTOM_RESPONSE:
         return response.respond(context);
       case RESPONSE_TYPES.NO_RESPONSE:

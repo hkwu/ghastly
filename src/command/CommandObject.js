@@ -31,10 +31,12 @@ export default class CommandObject {
        */
       this.handler = apply(...middleware)((context) => {
         const originalContext = { ...context };
+        const createDispatch = context[Symbol.for('ghastly.createDispatch')];
+        const dispatch = createDispatch(originalContext);
 
         return {
-          response: handler(context),
-          $context: originalContext,
+          response: handler({ ...context, dispatch }),
+          [Symbol.for('ghastly.originalContext')]: originalContext,
         };
       });
 
