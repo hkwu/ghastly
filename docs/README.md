@@ -37,7 +37,9 @@ function helloWorld() {
 
 Notice how we didn't even need to touch a `Message` object. Handler functions have a specific purpose in Ghastly: they consume a received message and produce a response value. There's no need to actually use a `send()` method directly; Ghastly already does that for you.
 
-Now that our command is set up, we need to create the client. We'll pass in the Ghastly-specific `prefix` option to the client constructor. This will make Ghastly ignore messages that don't start with the given prefix; you'll want this so your bot doesn't respond to a message that wasn't directed at it. Prefixes can include spaces, too, so you could also use something like `hey siri` as a prefix.
+Our bot will now listen for messages starting with `hello` and promptly respond with `world!`. This is great, though it does pose a problem since we'll be rather trigger happy with messages that weren't necessarily directed at us.
+
+To solve that problem, we'll pass in the Ghastly-specific `prefix` option to the client constructor. This will make Ghastly ignore messages that don't start with the given prefix, so instead of responding to `hello`, we'll respond to `!hello`. Prefixes can include spaces, too, so you could also use something like `hey siri` as a prefix.
 
 ```js
 import { Client } from 'ghastly';
