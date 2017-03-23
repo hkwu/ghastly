@@ -19,6 +19,11 @@ yarn add ghastly
 ```
 
 ## Getting Started
+### Foreword
+This documentation assumes that you have a basic grasp of the Discord.js API. If not, it would be a good idea to [familiarize yourself](https://discord.js.org/#/) with it prior to building a bot with Ghastly.
+
+It would also be helpful to be comfortable with ES2015+ features such as promises and `async` functions.
+
 ### Hello, world
 Let's walk through the basics of Ghastly using the most appropriate exercise: a "Hello, world" command. To create a command, we define a function which returns an object. This object needs two properties to work properly: a `handler` function to generate a response and a set of `triggers` which determine when a command is dispatched. With that in mind, take a peek at our "Hello, world" command below.
 
