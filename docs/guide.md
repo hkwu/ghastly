@@ -1,7 +1,7 @@
 # Guide
 This section is a more in-depth dive into the Ghastly API. If you haven't already, you might want to finish reading the section on [getting started](/#getting-started) with Ghastly.
 
-## Core Concepts
+## Topics
 ### The Client
 At the core of this library is the Ghastly client. It provides an interface to register commands and services in addition to handling the tasks carried out by the base Discord.js client.
 
@@ -252,13 +252,13 @@ Object literal definitions are essentially a superset of string definitions. The
 
 String and object literal definitions can be freely mixed together, so you might opt to use object literals only as required.
 
-#### Defining a Handler
+### Command Handlers
 It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
 
-##### Context
+#### Context
 The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
 
-###### `context.message`
+##### `context.message`
 The Discord.js `Message` object representing the message which triggered the command.
 
 ```js
@@ -267,22 +267,22 @@ function handler({ message }) {
 }
 ```
 
-###### `context.args`
+##### `context.args`
 The parsed command arguments as specified in the command's `parameters` configuration option. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
 
-###### `context.client`
+##### `context.client`
 A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
 
-###### `context.dispatch`
+##### `context.dispatch`
 The dispatch helper function. See [Sending Multiple Responses](#sending-multiple-responses).
 
-###### `context.commands`
+##### `context.commands`
 The dispatcher's command registry.
 
-###### `context.services`
+##### `context.services`
 The client's [service registry](#services).
 
-##### Response Types
+#### Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
 
 <p class="tip">
@@ -293,7 +293,7 @@ Handlers don't actually need to interact with the Discord.js `Message` object in
   Unless otherwise stated, responses will be sent to the channel from which the triggering message originated.
 </p>
 
-###### Strings
+##### Strings
 Return a string to dispatch a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
 
 ```js
@@ -302,7 +302,7 @@ function handler() {
 }
 ```
 
-###### Arrays
+##### Arrays
 Return an array to have Ghastly randomly select one of the array elements as the response to dispatch.
 
 ```js
@@ -334,7 +334,7 @@ function handler() {
 }
 ```
 
-###### Embeds
+##### Embeds
 Return a Discord.js `RichEmbed` object to dispatch an embed.
 
 ```js
@@ -352,7 +352,7 @@ function handler() {
 }
 ```
 
-###### Custom Responses
+##### Custom Responses
 In case the above response types don't adequately cover your requirements, you can always elect to manually dispatch responses.
 
 ```js
@@ -363,7 +363,103 @@ function handler({ message }) {
 
 Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
 
-###### Sending Multiple Responses
+#### Complex Response Types
+In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
+
+##### Using `CustomResponse`
+The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic.
+
+In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
+
+```js
+import { CustomResponse } from 'ghastly';
+
+class ReversedResponse extends CustomResponse {
+  constructor() {
+    super(({ message }) => {
+      const reversed = message.content.split('').reverse().join('');
+
+      return message.channel.sendMessage(reversed);
+    });
+  }
+}
+
+function handler() {
+  return new ReversedResponse();
+}
+```
+
+When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
+
+```js
+async function handler({ dispatch }) {
+  const message = await dispatch(new ReversedResponse());
+}
+```
+
+<p class="warning">
+  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
+</p>
+
+##### Builtin Responses
+Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
+
+###### Code Blocks
+You can send a multi-line code block using `CodeResponse`.
+
+```js
+import { CodeResponse } from 'ghastly';
+
+function handler() {
+  const response = new CodeResponse('js', `console.log('Hello, world');
+console.log(2 + 2);`);
+
+  return response;
+}
+```
+
+###### Voice Responses
+You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
+
+```js
+import ytdl from 'ytdl-core';
+import { VoiceResponse } from 'ghastly';
+
+function handler() {
+  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
+
+  // must be connected to voice channel at this point
+  return new VoiceResponse({ type: 'stream', stream });
+}
+```
+
+The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` stream play methods.
+
+```js
+// play a file
+const fileResponse = new VoiceResponse({ type: 'file', stream: '/path/to/file.mp3' });
+
+// send in StreamOptions
+const fileResponseWithOptions = new VoiceResponse({
+  type: 'file',
+  stream: 'path/to/file.mp3',
+  options: { volume: 0.5 },
+});
+```
+
+If you need access to the returned Discord.js `StreamDispatcher`, you can provide a callback as the `receiveDispatcher` property.
+
+```js
+const response = new VoiceResponse({
+  type: 'stream',
+  stream,
+  receiveDispatcher(dispatcher) {
+    dispatcher.on('end', console.log);
+  },
+})
+```
+
+#### Sending Multiple Responses
 It's often desirable to send more than one response type from the same handler. Unfortunately, this is not possible with the tools we've described up to this point. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
 
 In order to facilitate response flows which dispatch multiple times, Ghastly injects the `dispatch()` helper into your handler's context.
@@ -410,103 +506,6 @@ async function handler({ dispatch }) {
 
   console.log(message.content);
 }
-```
-
-## Advanced
-### Complex Response Types
-In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
-
-#### Using `CustomResponse`
-The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic.
-
-In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
-
-```js
-import { CustomResponse } from 'ghastly';
-
-class ReversedResponse extends CustomResponse {
-  constructor() {
-    super(({ message }) => {
-      const reversed = message.content.split('').reverse().join('');
-
-      return message.channel.sendMessage(reversed);
-    });
-  }
-}
-
-function handler() {
-  return new ReversedResponse();
-}
-```
-
-When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
-
-```js
-async function handler({ dispatch }) {
-  const message = await dispatch(new ReversedResponse());
-}
-```
-
-<p class="warning">
-  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
-</p>
-
-#### Builtin Responses
-Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
-
-##### Code Blocks
-You can send a multi-line code block using `CodeResponse`.
-
-```js
-import { CodeResponse } from 'ghastly';
-
-function handler() {
-  const response = new CodeResponse('js', `console.log('Hello, world');
-console.log(2 + 2);`);
-
-  return response;
-}
-```
-
-##### Voice Responses
-You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
-
-```js
-import ytdl from 'ytdl-core';
-import { VoiceResponse } from 'ghastly';
-
-function handler() {
-  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
-
-  // must be connected to voice channel at this point
-  return new VoiceResponse({ type: 'stream', stream });
-}
-```
-
-The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` stream play methods.
-
-```js
-// play a file
-const fileResponse = new VoiceResponse({ type: 'file', stream: '/path/to/file.mp3' });
-
-// send in StreamOptions
-const fileResponseWithOptions = new VoiceResponse({
-  type: 'file',
-  stream: 'path/to/file.mp3',
-  options: { volume: 0.5 },
-});
-```
-
-If you need access to the returned Discord.js `StreamDispatcher`, you can provide a callback as the `receiveDispatcher` property.
-
-```js
-const response = new VoiceResponse({
-  type: 'stream',
-  stream,
-  receiveDispatcher(dispatcher) {
-    dispatcher.on('end', console.log);
-  },
-})
 ```
 
 ### Middleware
