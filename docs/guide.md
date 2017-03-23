@@ -253,12 +253,12 @@ Object literal definitions are essentially a superset of string definitions. The
 String and object literal definitions can be freely mixed together, so you might opt to use object literals only as required.
 
 ### Command Handlers
-It's time to dive deeper into actually building a command handler. There are a couple of things which are of importance here, namely **context** and **response types**.
+Ghastly command handlers carry the majority of the responsibility of reacting to commands and executing response logic. The general idea behind command handlers is quite simple: they consume some data and produce a response. Ghastly makes this process more convenient to handle by stripping away the need to deal with the underlying Discord.js API and automatically preprocessing data such as command arguments into a more user friendly form.
 
 #### Context
-The handler receives a `context` object as its only argument. The context contains useful properties for making responses.
+The handler receives a `context` object as its only argument. The context contains useful data such as references to the received message and arguments that were parsed from the command.
 
-##### `context.message`
+##### `message`
 The Discord.js `Message` object representing the message which triggered the command.
 
 ```js
@@ -267,22 +267,22 @@ function handler({ message }) {
 }
 ```
 
-##### `context.args`
+##### `args`
 The parsed command arguments as specified in the command's `parameters` configuration option. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
 
-##### `context.client`
+##### `client`
 A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
 
-##### `context.dispatch`
-The dispatch helper function. See [Sending Multiple Responses](#sending-multiple-responses).
+##### `dispatch`
+The dispatch helper function. See the section about the [dispatch function](#the-dispatch-function).
 
-##### `context.commands`
+##### `commands`
 The dispatcher's command registry.
 
-##### `context.services`
+##### `services`
 The client's [service registry](#services).
 
-#### Response Types
+#### Basic Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
 
 <p class="tip">
@@ -361,7 +361,7 @@ function handler({ message }) {
 }
 ```
 
-Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for [sending more complicated responses](#complex-response-types).
+Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for sending more complicated responses.
 
 #### Complex Response Types
 In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
@@ -459,8 +459,10 @@ const response = new VoiceResponse({
 })
 ```
 
-#### Sending Multiple Responses
-It's often desirable to send more than one response type from the same handler. Unfortunately, this is not possible with the tools we've described up to this point. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
+#### The `dispatch()` Function
+It's often desirable to send more than one response from the same handler. For instance, commands which query third party services such as a weather API may take several seconds to complete. In order to improve the user experience, it's often best to dispatch a message prior to making an asynchronous request to inform the user that there may be a delay.
+
+Unfortunately, the response flow we just described is simply not possible with what we've seen so far. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
 
 In order to facilitate response flows which dispatch multiple times, Ghastly injects the `dispatch()` helper into your handler's context.
 
