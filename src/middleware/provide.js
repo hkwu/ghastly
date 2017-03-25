@@ -22,12 +22,12 @@ export default function provide(source, target) {
     return async (next, context) => {
       const services = {};
 
-      for (const name of context.services.mainBindings) {
+      context.services.mainBindings.forEach((name) => {
         // can't be sure what's been overwritten in the context
         if (!Object.prototype.hasOwnProperty.call(context, name)) {
           services[name] = context.services.fetch(name);
         }
-      }
+      });
 
       return next({ ...context, ...services });
     };
@@ -48,20 +48,20 @@ export default function provide(source, target) {
     });
   } else if (isPlainObject(source)) {
     // inject each service under the specified name
-    for (const [key, val] of Object.entries(source)) {
-      names.set(key, val);
-    }
+    Object.entries(source).forEach(([key, value]) => {
+      names.set(key, value);
+    });
   }
 
   return async (next, context) => {
     const services = {};
 
     // inject services based on the name mapping constructed earlier
-    for (const [serviceName, contextName] of names) {
+    names.forEach((contextName, serviceName) => {
       if (context.services.has(serviceName)) {
         services[contextName] = context.services.fetch(serviceName);
       }
-    }
+    });
 
     return next({ ...context, ...services });
   };
