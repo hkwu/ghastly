@@ -10,6 +10,6 @@ export default class CodeResponse extends Response {
    * @param {string} code - The code.
    */
   constructor(language, code) {
-    super(({ message }) => message.channel.sendCode(language, code));
+    super(async ({ message }) => message.channel.sendCode(language, code));
   }
 }
