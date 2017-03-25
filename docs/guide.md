@@ -3,7 +3,7 @@ This section is a more in-depth dive into the Ghastly API. If you haven't alread
 
 ## Topics
 ### The Client
-At the core of this library is the Ghastly client. It provides an interface to register commands and services in addition to handling the tasks carried out by the base Discord.js client.
+At the core of the library is the Ghastly client. It provides a convenient interface to register commands and bind services.
 
 ```js
 import { Client } from 'ghastly';
@@ -11,9 +11,12 @@ import { Client } from 'ghastly';
 const client = new Client();
 ```
 
-The client processes messages using a `Dispatcher`. In order to take advantage of the dispatcher, you need to configure it when you create the client.
+The Ghastly client is an extension of the Discord.js client, so any methods, properties and events are inherited by the Ghastly client, if you require them.
 
-#### Prefixes
+#### Configuration
+The client processes messages using a component called the dispatcher. In order to take advantage of the dispatcher, you need to configure it when you create the client.
+
+##### Setting Prefixes
 The dispatcher filters messages based on a prefix. The prefix can be any string (spaces are valid), with specific exceptions as outlined below.
 
 ```js
@@ -24,17 +27,17 @@ const client = new Client({ prefix: '> ' });
   Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
 </p>
 
-##### Mention
+###### Using the Client's Mention as a Prefix
 You can specify the client's mention as a prefix by using the special value `@self`. This is the recommended prefix as it's inherently unique.
 
 ```js
 const client = new Client({ prefix: '@self' });
 ```
 
-The dispatcher will only respond to `@client#1234 messages like these`.
+The dispatcher will now only respond to `@client#1234 messages like these`.
 
 #### Registering Commands
-Commands should be registered before logging in with the client. The client's dispatcher (available through `client.dispatcher`) provides the `loadCommands()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
+Commands should be registered before logging in with the client. The dispatcher (available through `client.dispatcher`) provides the `loadCommands()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
 
 ```js
 client.dispatcher.loadCommands(foo, bar, baz);
@@ -44,10 +47,10 @@ client.dispatcher.loadCommands(foo, bar, baz);
   `loadCommands()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.loadCommands(...commands)`.
 </p>
 
-### Commands
+### Configurators
 The main purpose of Ghastly is to ease the design and management of client commands. This allows you to avoid the boilerplate and/or spaghetti code that inevitably results when defining inline commands with the native Discord.js events system.
 
-Unlike other command frameworks, Ghastly doesn't export any base `Command` class. Commands are defined as functions. This is meant to encourage stateless commands, which will help keep your code focused and easy to reason about.
+Ghastly doesn't export any base `Command` class; commands are defined as functions. This is meant to encourage stateless commands, which will help keep your code focused and easy to reason about.
 
 ```js
 function ping() {
@@ -64,18 +67,18 @@ function ping() {
 }
 ```
 
-These functions must return a configuration object which describes the behaviour of the command. To keep things simple, we'll label these functions as command configurators, or **configurators** for short.
+These functions must return a configuration object which describes the behaviour of the command. We'll call these functions command configurators, or **configurators** for short.
 
-#### Configuration
-Let's examine what the configuration object should actually contain.
+#### Command Configuration
+This section will describe what the configuration object should contain.
 
 ##### Handler
-The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client.
+The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client. We'll cover in more detail how handlers work later on.
 
 ```js
 function handler() {
-  // command logic
-  return 'message';
+  // returning a string sends it as a message
+  return 'Hello, world!';
 }
 ```
 
@@ -93,15 +96,17 @@ return {
 ```
 
 ##### Parameters
-Your command may accept any number of parameters of various types. `parameters` is an array of parameter definitions. There are actually two different ways to define parameters, but both will yield the same end result.
+Your command may accept any number of parameters of various types. `parameters` is an array of parameter definitions.
 
 ```js
 return {
   parameters: [
-    'parameter : This is a parameter definition.',
+    // you can define parameters as a string
+    'age : Your age.',
+    // or as an object
     {
-      name: 'parameterCopy',
-      description: 'This is also a parameter definition.',
+      name: 'height',
+      description: 'Your height.',
     },
   ],
 };
@@ -110,8 +115,14 @@ return {
 ##### Description
 The `description` is an optional string which describes the command's function and is only stored for your own use (useful if you're making a `help` command, for instance).
 
+```js
+return {
+  description: 'Fetches weather data.',
+};
+```
+
 ##### Middleware
-You can also define middleware for your commands. Middleware are simply functions which wrap the command handler. They provide an easy, modular way to extend command handler functionality.
+You can also define middleware for your commands. Middleware are simply functions which wrap the command handler and provide an easy, modular way to extend command handler functionality.
 
 The `middleware` array is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
 
@@ -126,39 +137,39 @@ return {
 
 If you're not familiar with the concept of middleware, it's useful to think of them as layers stacked on top of the command handler. Each layer can intercept and potentially alter what gets sent into the next layer. We will cover middleware usage and the process of creating your own middleware in [another section](#middleware1).
 
-#### Command Parameters
-The parameter system in Ghastly allows you to specify user inputs for your commands. All parameters are defined within the `parameters` array in your configuration options.
+### Command Parameters
+The parameter system in Ghastly allows you to specify user inputs for your commands. All parameters are defined within the `parameters` array in your configurator options.
 
 There are two different ways to define parameters: as strings or as object literals. Object literals have more flexibility and power, but strings are more fluent and easier to read.
 
-##### Defining Parameters as Strings
+#### Defining Parameters as Strings
 The most basic parameters require only a name. The parameter name is used as a key when passing arguments to the command handler.
 
 ```js
 return {
   parameters: [
-    // defines a parameter called 'param'
-    // the corresponding input will be passed to the command handler as `args.param`
     'param',
   ],
 };
 ```
 
-###### Description
+This defines a parameter with the name `param`. The value of this parameter will be passed to the command handler as `args.param`.
+
+##### Description
 Similarly to commands, you can add a description to your parameter.
 
 ```
 param : This is a parameter description.
 ```
 
-###### Optional Parameters
+##### Optional Parameters
 Optional parameters are identified by a leading `-` character.
 
 ```
 - optionalParam : This is an optional parameter.
 ```
 
-###### Parameter Types
+##### Parameter Types
 It's possible to specify the expected type of a parameter's value by prefacing the parameter name with a type declaration.
 
 ```
@@ -174,7 +185,7 @@ The following are the available parameter types:
 * `number`, `num`: any valid `Number`.
 * `string`, `str`: a string. This is the default type.
 
-###### Default Values
+##### Default Values
 Default values may be specified for optional parameters by placing the value after the parameter name followed by a `=` character.
 
 ```
@@ -191,7 +202,7 @@ param = default : This is also an optional parameter.
   If a default is not provided, all optional parameters default to `null`.
 </p>
 
-###### Repeatable Values
+##### Repeatable Values
 You can define a parameter which takes multiple values by appending a `*` to the parameter name.
 
 ```
@@ -216,7 +227,7 @@ The given values will be parsed into an array: `['one', 'two three']`.
   Repeatable parameters must not be followed by any other parameter, i.e. they must be the last parameter.
 </p>
 
-###### Literal Values
+##### Literal Values
 Literal parameters will take the value of the input verbatim. You can define literals by appending an ellipsis (`...`) to the parameter name.
 
 ```
@@ -235,7 +246,7 @@ will generate a single argument: `'one two three'`.
   Literal parameters may only be used when they are the only parameter in a command.
 </p>
 
-##### Defining Parameters as Objects
+#### Defining Parameters as Objects
 Object literal definitions are essentially a superset of string definitions. They share the same options though you must specify them as key/value pairs.
 
 ```js
@@ -270,20 +281,28 @@ function handler({ message }) {
 ##### `args`
 The parsed command arguments as specified in the command's `parameters` configuration option. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
 
+```js
+function handler({ args }) {
+  Object.entries(args).forEach(([key, value]) => {
+    console.log(`Got argument: ${key}, ${value}`);
+  });
+}
+```
+
 ##### `client`
-A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message`.
+A reference to the Ghastly client. This is just a convenience property, since the client is also available via `context.message.client`.
 
 ##### `dispatch`
-The dispatch helper function. See the section about the [dispatch function](#the-dispatch-function).
+The dispatch helper function. It allows the handler to generate a response action from a value. We'll come back to this in a bit.
 
 ##### `commands`
 The dispatcher's command registry.
 
 ##### `services`
-The client's [service registry](#services).
+The client's [service registry](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
 
 #### Basic Response Types
-Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This saves you from repeating `message.channel.sendMessage()` in every single one of your handlers.
+Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This helps to decouple your handler implementations from the underlying messaging API, letting you concentrate on *what* your handlers should respond with, rather than *how* they should respond.
 
 <p class="tip">
   Although all the examples below use a synchronous handler function, you can also define handlers as `async` functions as desired.
@@ -294,11 +313,11 @@ Handlers don't actually need to interact with the Discord.js `Message` object in
 </p>
 
 ##### Strings
-Return a string to dispatch a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (make sure they're in raw form as required by the Discord API!).
+You can return a string to dispatch a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (just make sure they're in raw form as required by the Discord API).
 
 ```js
 function handler() {
-  return 'I will get sent back where I came from!';
+  return 'Check out this `code` it is absolutely **fabulous**';
 }
 ```
 
@@ -352,8 +371,8 @@ function handler() {
 }
 ```
 
-##### Custom Responses
-In case the above response types don't adequately cover your requirements, you can always elect to manually dispatch responses.
+##### Manual Responses
+You can always elect to handle the message dispatching on your own.
 
 ```js
 function handler({ message }) {
@@ -361,10 +380,10 @@ function handler({ message }) {
 }
 ```
 
-Note that returning a falsey value will cause Ghastly to take no response action. Custom responses are useful for complex response flows, but they don't fit well with the concept of responses being values. That's why Ghastly provides the `CustomResponse` class and several specialized types with self-contained logic for sending more complicated responses.
+Note that returning a falsey value will cause Ghastly to take no response action. Manual responses are useful if you have highly customized response logic, but you should try to avoid this as much as possible since it's more verbose and doesn't fit well with the declarative nature of command handlers. In fact, Ghastly has a builtin way to deal with these situations in a more declarative fashion: the `CustomResponse` class.
 
 #### Complex Response Types
-In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic. This allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
+In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic; this allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
 
 ##### Using `CustomResponse`
 The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic.
@@ -559,7 +578,7 @@ return {
 ```
 
 ##### Working with Context
-Since layers have direct access to the context object, they are able to read, write and even completely obliterate the context (though that's a stupid idea, so don't do it).
+Since layers have direct access to the context object, they are able to read, write and even completely obliterate the context.
 
 ```js
 function middlewareThatChangesProperties() {

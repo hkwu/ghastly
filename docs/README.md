@@ -63,3 +63,6 @@ client.dispatcher.loadCommands(helloWorld);
 ```
 
 Once our command is loaded, we can `login()` with the client and test it out.
+
+### Next Steps
+We've covered the basics of Ghastly with a high-level walkthrough and built a bot with some interesting commands, but there's still more we haven't dived into yet. The [Guide](/guide) will take you through some of the more advanced topics in Ghastly, at the same time going deeper into topics that we've already covered.
