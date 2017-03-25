@@ -279,7 +279,7 @@ export default class Dispatcher {
 
     switch (this.constructor.resolveResponseType(response)) {
       case RESPONSE_TYPES.STRING:
-        return message.channel.sendMessage(response);
+        return message.channel.send(response);
       case RESPONSE_TYPES.ARRAY: {
         const choice = sample(response);
 

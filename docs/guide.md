@@ -376,7 +376,7 @@ You can always elect to handle the message dispatching on your own.
 
 ```js
 function handler({ message }) {
-  message.channel.sendMessage('My message!');
+  message.channel.send('My message!');
 }
 ```
 
@@ -398,7 +398,7 @@ class ReversedResponse extends CustomResponse {
     super(({ message }) => {
       const reversed = message.content.split('').reverse().join('');
 
-      return message.channel.sendMessage(reversed);
+      return message.channel.send(reversed);
     });
   }
 }
