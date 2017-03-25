@@ -1,9 +1,12 @@
-# Ghastly
-[![npm](https://img.shields.io/npm/v/ghastly.svg?style=flat-square)](https://www.npmjs.com/package/ghastly)
-[![npm](https://img.shields.io/npm/l/ghastly.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+<div align="center">
+  <a href="https://ghastly.js.org" target="_blank"><img src="https://raw.githubusercontent.com/hkwu/ghastly/refactor/docs/assets/logo.png"></a>
+  <h1>Ghastly</h1>
+  <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg?style=flat-square" alt="npm"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg?style=flat-square" alt="license"></a>
+</div>
 
 ## Introduction
-Ghastly is a modular command library built for Discord.js bots. It aims to provide a powerful but flexible API which abstracts away boilerplate and lets you deal directly with the core logic of a command.
+Ghastly is a modular command library built for Discord.js bots. It provides a powerful but flexible API which abstracts away boilerplate and makes command building a more elegant process.
 
 ## Installation
 Ghastly is available through [npm](https://www.npmjs.com/package/ghastly).
@@ -17,6 +20,8 @@ or
 ```bash
 yarn add ghastly
 ```
+
+You should also install Discord.js v11 if you haven't already. This library requires Node.js >=7. For Node.js <7.6, you must start your application using `node --harmony` in order to enable support for `async` functions.
 
 ## Getting Started
 ### Foreword

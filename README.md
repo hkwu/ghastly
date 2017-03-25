@@ -1,101 +1,47 @@
-# Ghastly
+<div align="center">
+  <a href="https://ghastly.js.org" target="_blank"><img src="https://raw.githubusercontent.com/hkwu/ghastly/refactor/docs/assets/logo.png"></a>
+  <h1>Ghastly</h1>
+  <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg?style=flat-square" alt="npm"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg?style=flat-square" alt="license"></a>
+</div>
 
-A lightweight library designed to make it easier to modularize clients built on top of [Discord.js](http://hydrabolt.github.io/discord.js/).
+## Introduction
+Ghastly is a modular command library built for Discord.js bots. It provides a powerful but flexible API which abstracts away boilerplate and makes command building a more elegant process.
 
 ## Installation
-
-To install, use
+Ghastly is available through [npm](https://www.npmjs.com/package/ghastly).
 
 ```bash
 npm install --save ghastly
 ```
 
-Discord.js is a peer dependency for this package, so make sure you have it installed as well.
+or
 
-## Quick Start
+```bash
+yarn add ghastly
+```
 
-Import the Ghastly client constructor, define some commands, register them and login. That's it!
+You should also install Discord.js v11 if you haven't already. This library requires Node.js >=7. For Node.js <7.6, you must start your application using `node --harmony` in order to enable support for `async` functions.
 
-Further documentation is available on the [GitHub project page](https://hkwu.github.io/ghastly).
+## Example
+This is a short runnable snippet using Ghastly. You can find more information and examples on the [Ghastly website](https://ghastly.js.org).
 
 ```js
-import Discord from 'discord.js';
-import { Command, make } from 'ghastly';
+import { Client } from 'ghastly';
 
-class Ping extends Command {
-  get signature() {
-    return '!ping'; // responds to messages starting with '!ping'
+function ping() {
+  async function handler() {
+    return 'Pong!';
   }
-
-  handle(message, args) {
-    // ignore args for now
-    message.reply('pong!');
-  }
+  
+  return {
+    handler,
+    triggers: ['ping'],
+  };
 }
 
-const client = make(Discord.Client).addCommand('ping', Ping);
+const client = new Client({ prefix: '!' });
+
+client.dispatcher.loadCommands(ping);
 client.login('token');
 ```
-
-Usage with `require()` is similar.
-
-```js
-const Discord = require('discord.js');
-const Ghastly = require('ghastly');
-
-class Ping extends Ghastly.Command {
-  get signature() {
-    return '!ping'; // responds to messages starting with '!ping'
-  }
-
-  handle(message, args) {
-    // ignore args for now
-    message.reply('pong!');
-  }
-}
-
-const client = Ghastly.make(Discord.Client).addCommand('ping', Ping);
-client.login('token');
-```
-
-## Developing
-
-### Linting
-
-Use
-
-```bash
-npm run lint
-```
-
-to lint the `src/` folder. To fix some linting errors automatically, use
-
-```bash
-npm run lint:fix
-```
-
-### Testing
-
-Run
-
-```bash
-npm run test
-```
-
-[Mocha](https://mochajs.org/) and [Chai](http://chaijs.com/) (with the `expect` BDD style) are used for unit testing.
-
-### Building
-
-This library uses [Babel](https://babeljs.io/) to transpile the source code into the final distributed library. Simply make changes to the source in `src/` then type
-
-```bash
-npm run build
-```
-
-to transpile the entire `src/` directory into the `lib/` directory. You can also use
-
-```
-npm run watch
-```
-
-to continuously watch the `src/` directory for changes and transpile on the go.
