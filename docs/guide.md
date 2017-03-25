@@ -380,98 +380,10 @@ async function handler({ message }) {
 }
 ```
 
-Note that returning a falsey value will cause Ghastly to take no response action. Manual responses are useful if you have highly customized response logic, but you should try to avoid this as much as possible since it's more verbose and doesn't fit well with the declarative nature of command handlers. In fact, Ghastly has a builtin way to deal with these situations in a more declarative fashion: the `Response` class.
-
-#### Complex Response Types
-In addition to the basic response types, Ghastly provides more complex response handling through the `Response` class. `Response` is simply a wrapper for specialized response logic; this allows you to return an instance of a `Response` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
-
-##### Creating Custom Types
-The `Response` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `Response` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
-
-In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
-
-```js
-import { Response } from 'ghastly';
-
-class ReversedResponse extends Response {
-  constructor() {
-    super(async ({ message }) => {
-      const reversed = message.content.split('').reverse().join('');
-
-      return message.channel.send(reversed);
-    });
-  }
-}
-
-async function handler() {
-  return new ReversedResponse();
-}
-```
-
-<p class="warning">
-  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
-</p>
-
-##### Builtin Responses
-Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
-
-###### Code Blocks
-You can send a multi-line code block using `CodeResponse`.
-
-```js
-import { CodeResponse } from 'ghastly';
-
-async function handler() {
-  const response = new CodeResponse('js', `console.log('Hello, world');
-console.log(2 + 2);`);
-
-  return response;
-}
-```
-
-###### Voice Responses
-You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
-
-```js
-import ytdl from 'ytdl-core';
-import { VoiceResponse } from 'ghastly';
-
-async function handler() {
-  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
-
-  // must be connected to voice channel at this point
-  return new VoiceResponse({ type: 'stream', stream });
-}
-```
-
-The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` stream play methods.
-
-```js
-// play a file
-const fileResponse = new VoiceResponse({ type: 'file', stream: '/path/to/file.mp3' });
-
-// send in StreamOptions
-const fileResponseWithOptions = new VoiceResponse({
-  type: 'file',
-  stream: 'path/to/file.mp3',
-  options: { volume: 0.5 },
-});
-```
-
-If you need access to the returned Discord.js `StreamDispatcher`, you can provide a callback as the `receiveDispatcher` property.
-
-```js
-const response = new VoiceResponse({
-  type: 'stream',
-  stream,
-  receiveDispatcher(dispatcher) {
-    dispatcher.on('end', console.log);
-  },
-});
-```
+Note that returning a falsey value will cause Ghastly to take no response action. Manual responses are useful if you have highly customized response logic, but you should try to avoid this as much as possible since it's more verbose and doesn't fit well with the declarative nature of command handlers. In fact, Ghastly has a couple of helpful features to deal with these situations in a more declarative fashion: the `dispatch()` function and the `Response` class.
 
 #### The `dispatch()` Function
-Complex response types are great for encapsulating logic on a single response action, but what if we want to send multiple response types in the same handler? For instance, commands which query third party services such as a weather API may take several seconds to complete. In order to improve the user experience, it's often best to dispatch a message prior to making an asynchronous request to inform the user that there may be a delay.
+Response types are great for responding with a single message, but what if we want to send multiple response types in the same handler? For instance, commands which query third party services such as a weather API may take several seconds to complete. In order to improve the user experience, it's often best to dispatch a message prior to making an asynchronous request to inform the user that there may be a delay.
 
 Unfortunately, the response flow we just described is simply not possible with what we've seen so far. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
 
@@ -521,11 +433,96 @@ async function handler({ dispatch }) {
 }
 ```
 
+#### Complex Response Types
+In addition to the basic response types, Ghastly provides more complex response handling through the `Response` class. `Response` is simply a wrapper for specialized response logic; this allows you to return an instance of a `Response` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
+
+##### Creating Custom Types
+The `Response` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `Response` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
+
+In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
+
+```js
+import { Response } from 'ghastly';
+
+class ReversedResponse extends Response {
+  constructor() {
+    super(async ({ message }) => {
+      const reversed = message.content.split('').reverse().join('');
+
+      return message.channel.send(reversed);
+    });
+  }
+}
+
+async function handler() {
+  return new ReversedResponse();
+}
+```
+
 When using `dispatch()` on `Response` objects, the returned promise resolves to the return value of the executor.
 
 ```js
 async function handler({ dispatch }) {
   const message = await dispatch(new ReversedResponse());
+}
+```
+
+<p class="warning">
+  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
+</p>
+
+##### Builtin Responses
+Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
+
+###### Code Blocks
+You can send a multi-line code block using `CodeResponse`.
+
+```js
+import { CodeResponse } from 'ghastly';
+
+async function handler() {
+  const response = new CodeResponse('js', `console.log('Hello, world');
+console.log(2 + 2);`);
+
+  return response;
+}
+```
+
+The `CodeResponse` executor returns a promise resolving to the `Message` containing the code block.
+
+###### Voice Responses
+You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
+
+```js
+import ytdl from 'ytdl-core';
+import { VoiceResponse } from 'ghastly';
+
+async function handler() {
+  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
+
+  // must be connected to voice channel at this point
+  return new VoiceResponse('stream', stream);
+}
+```
+
+The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` play methods.
+
+```js
+// play a file
+const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
+
+// send in StreamOptions
+const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
+```
+
+The `VoiceResponse` executor returns a promise resolving to the `StreamDispatcher` returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
+
+```js
+async function handler({ dispatch }) {
+  const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
+
+  // we can access the dispatcher now
+  const dispatcher = await dispatch(new VoiceResponse('stream', stream));
 }
 ```
 
