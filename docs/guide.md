@@ -380,20 +380,20 @@ async function handler({ message }) {
 }
 ```
 
-Note that returning a falsey value will cause Ghastly to take no response action. Manual responses are useful if you have highly customized response logic, but you should try to avoid this as much as possible since it's more verbose and doesn't fit well with the declarative nature of command handlers. In fact, Ghastly has a builtin way to deal with these situations in a more declarative fashion: the `CustomResponse` class.
+Note that returning a falsey value will cause Ghastly to take no response action. Manual responses are useful if you have highly customized response logic, but you should try to avoid this as much as possible since it's more verbose and doesn't fit well with the declarative nature of command handlers. In fact, Ghastly has a builtin way to deal with these situations in a more declarative fashion: the `Response` class.
 
 #### Complex Response Types
-In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic; this allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
+In addition to the basic response types, Ghastly provides more complex response handling through the `Response` class. `Response` is simply a wrapper for specialized response logic; this allows you to return an instance of a `Response` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
 
-##### Using `CustomResponse`
-The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
+##### Creating Custom Types
+The `Response` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `Response` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
 
-In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
+In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
 
 ```js
-import { CustomResponse } from 'ghastly';
+import { Response } from 'ghastly';
 
-class ReversedResponse extends CustomResponse {
+class ReversedResponse extends Response {
   constructor() {
     super(async ({ message }) => {
       const reversed = message.content.split('').reverse().join('');
@@ -413,7 +413,7 @@ async function handler() {
 </p>
 
 ##### Builtin Responses
-Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `CustomResponse` classes to handle some of the more common cases.
+Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
 
 ###### Code Blocks
 You can send a multi-line code block using `CodeResponse`.
@@ -467,11 +467,11 @@ const response = new VoiceResponse({
   receiveDispatcher(dispatcher) {
     dispatcher.on('end', console.log);
   },
-})
+});
 ```
 
 #### The `dispatch()` Function
-It's often desirable to send more than one response from the same handler. For instance, commands which query third party services such as a weather API may take several seconds to complete. In order to improve the user experience, it's often best to dispatch a message prior to making an asynchronous request to inform the user that there may be a delay.
+Complex response types are great for encapsulating logic on a single response action, but what if we want to send multiple response types in the same handler? For instance, commands which query third party services such as a weather API may take several seconds to complete. In order to improve the user experience, it's often best to dispatch a message prior to making an asynchronous request to inform the user that there may be a delay.
 
 Unfortunately, the response flow we just described is simply not possible with what we've seen so far. You can't return more than one value from a function, so you'll be stuck with dispatching responses manually (what a pain!).
 
@@ -521,7 +521,7 @@ async function handler({ dispatch }) {
 }
 ```
 
-When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
+When using `dispatch()` on `Response` objects, the returned promise resolves to the return value of the executor.
 
 ```js
 async function handler({ dispatch }) {
@@ -651,7 +651,7 @@ When you have access to the context object, a reference to the registry is autom
 
 ```js
 async function handler({ services }) {
-  const queue = services.fetch('music:queue');
+  const queue = services.fetch('music.queue');
   const nextStream = queue.next();
 
   return new VoiceResponse('stream', nextStream);
@@ -660,15 +660,18 @@ async function handler({ services }) {
 
 Elsewhere, you can access the registry through `client.services`.
 
-#### Binding Services
+#### Using the Service Registry
+The service registry provides several methods for binding and retrieving services.
+
+##### Binding Services
 To bind a new service, use `services.bind()`.
 
 ```js
 // bind the MusicQueue instance under a single name
-client.services.bind('music:queue', new MusicQueue());
+client.services.bind('music.queue', new MusicQueue());
 
 // bind the MusicQueue instance with an alias
-client.services.bind(['music:queue', 'queue'], new MusicQueue());
+client.services.bind(['music.queue', 'queue'], new MusicQueue());
 ```
 
 <p class="warning">
@@ -678,7 +681,7 @@ client.services.bind(['music:queue', 'queue'], new MusicQueue());
 When you bind an instance as a service, the same instance is returned each time you fetch that service. In order to construct a new instance each time the service is fetched, you can bind a function instead.
 
 ```js
-client.services.bind('music:queue', () => {
+client.services.bind('music.queue', () => {
   const queue = new MusicQueue();
 
   // perform some queue initialization
@@ -687,21 +690,21 @@ client.services.bind('music:queue', () => {
 });
 ```
 
-#### Unbinding Services
+##### Unbinding Services
 To remove bindings, use `services.unbind()`.
 
 ```js
-client.services.unbind('music:queue');
+client.services.unbind('music.queue');
 ```
 
 Unbinding a service will remove all aliases associated with that service.
 
-#### Binding With Providers
+##### Binding Services with Providers
 Once you start binding a large number of services, it may be useful to take advantage of the **service provider** functionality. Providers are functions which bind a predefined selection of services to the service registry.
 
 ```js
 function musicProvider({ registry }) {
-  registry.bind('music:queue', new MusicQueue());
+  registry.bind('music.queue', new MusicQueue());
 }
 ```
 
@@ -711,15 +714,18 @@ Providers receive the service registry as an argument. They may bind any number 
 client.services.bindProviders(musicProvider);
 ```
 
-#### Fetching Services
+##### Checking a Service Exists
+If you wish to check that a service exists, you can use the `has()` method.
+
+```js
+client.services.has('music.queue'); // true
+```
+
+##### Fetching Services
 To retrieve a service from the registry, use the registry's `fetch()` method.
 
 ```js
-const queue = client.services.fetch('music:queue');
+const queue = client.services.fetch('music.queue');
 ```
 
-If the requested service is not found, `null` is returned instead. If you wish to check that a service exists, you can use the `has()` method.
-
-```js
-client.services.has('music:queue'); // true
-```
+If the requested service is not found, `null` is returned instead. 
