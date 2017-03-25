@@ -54,7 +54,7 @@ Ghastly doesn't export any base `Command` class; commands are defined as functio
 
 ```js
 function ping() {
-  function handler() {
+  async function handler() {
     return 'Pong!';
   }
 
@@ -76,7 +76,7 @@ This section will describe what the configuration object should contain.
 The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client. We'll cover in more detail how handlers work later on.
 
 ```js
-function handler() {
+async function handler() {
   // returning a string sends it as a message
   return 'Hello, world!';
 }
@@ -273,7 +273,7 @@ The handler receives a `context` object as its only argument. The context contai
 The Discord.js `Message` object representing the message which triggered the command.
 
 ```js
-function handler({ message }) {
+async function handler({ message }) {
   console.log(message.content);
 }
 ```
@@ -282,7 +282,7 @@ function handler({ message }) {
 The parsed command arguments as specified in the command's `parameters` configuration option. These arguments are parsed from the message according to their type. Arguments must be named, so they can be referenced directly via `context.args.name`.
 
 ```js
-function handler({ args }) {
+async function handler({ args }) {
   Object.entries(args).forEach(([key, value]) => {
     console.log(`Got argument: ${key}, ${value}`);
   });
@@ -305,7 +305,7 @@ The client's [service registry](#services). Ghastly services are similar in spir
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This helps to decouple your handler implementations from the underlying messaging API, letting you concentrate on *what* your handlers should respond with, rather than *how* they should respond.
 
 <p class="tip">
-  Although all the examples below use a synchronous handler function, you can also define handlers as `async` functions as desired.
+  Although synchronous handler functions are supported, `async` functions make it much easier to work with a promise-based control flow. As such, it's highly recommended that you define all your handlers as `async` functions.
 </p>
 
 <p class="tip">
@@ -316,7 +316,7 @@ Handlers don't actually need to interact with the Discord.js `Message` object in
 You can return a string to dispatch a plain text response. The text returned will be sent verbatim, so you can embed things such as Markdown, emoji codes or mentions directly (just make sure they're in raw form as required by the Discord API).
 
 ```js
-function handler() {
+async function handler() {
   return 'Check out this `code` it is absolutely **fabulous**';
 }
 ```
@@ -325,7 +325,7 @@ function handler() {
 Return an array to have Ghastly randomly select one of the array elements as the response to dispatch.
 
 ```js
-function handler() {
+async function handler() {
   return [
     'Will it be me?',
     'Or me?',
@@ -337,7 +337,7 @@ function handler() {
 Array elements can be any valid response type; the selected response will be recursively dispatched. For instance, you could even have an array of arrays to group responses into random "buckets".
 
 ```js
-function handler() {
+async function handler() {
   return [
     [
       'Cat',
@@ -359,7 +359,7 @@ Return a Discord.js `RichEmbed` object to dispatch an embed.
 ```js
 import { RichEmbed } from 'discord.js';
 
-function handler() {
+async function handler() {
   const embed = new RichEmbed();
 
   embed.setTitle('My Embed')
@@ -375,7 +375,7 @@ function handler() {
 You can always elect to handle the message dispatching on your own.
 
 ```js
-function handler({ message }) {
+async function handler({ message }) {
   message.channel.send('My message!');
 }
 ```
@@ -386,7 +386,7 @@ Note that returning a falsey value will cause Ghastly to take no response action
 In addition to the basic response types, Ghastly provides more complex response handling through the `CustomResponse` class. `CustomResponse` is simply a wrapper for specialized response logic; this allows you to return an instance of a `CustomResponse` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
 
 ##### Using `CustomResponse`
-The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic.
+The `CustomResponse` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `CustomResponse` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
 
 In general, it's a good idea to extend the `CustomResponse` class and create your own specialized response classes rather than directly instantiating a new `CustomResponse` in your command handler (otherwise what's the point in using it?).
 
@@ -395,7 +395,7 @@ import { CustomResponse } from 'ghastly';
 
 class ReversedResponse extends CustomResponse {
   constructor() {
-    super(({ message }) => {
+    super(async ({ message }) => {
       const reversed = message.content.split('').reverse().join('');
 
       return message.channel.send(reversed);
@@ -403,16 +403,8 @@ class ReversedResponse extends CustomResponse {
   }
 }
 
-function handler() {
+async function handler() {
   return new ReversedResponse();
-}
-```
-
-When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
-
-```js
-async function handler({ dispatch }) {
-  const message = await dispatch(new ReversedResponse());
 }
 ```
 
@@ -429,7 +421,7 @@ You can send a multi-line code block using `CodeResponse`.
 ```js
 import { CodeResponse } from 'ghastly';
 
-function handler() {
+async function handler() {
   const response = new CodeResponse('js', `console.log('Hello, world');
 console.log(2 + 2);`);
 
@@ -444,7 +436,7 @@ You can send an audio response to the voice channel the client is currently conn
 import ytdl from 'ytdl-core';
 import { VoiceResponse } from 'ghastly';
 
-function handler() {
+async function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // must be connected to voice channel at this point
@@ -529,6 +521,14 @@ async function handler({ dispatch }) {
 }
 ```
 
+When using `dispatch()` on `CustomResponse` objects, the returned promise resolves to the return value of the executor.
+
+```js
+async function handler({ dispatch }) {
+  const message = await dispatch(new ReversedResponse());
+}
+```
+
 ### Middleware
 Ghastly provides a middleware system that allows additional logic to be wrapped around command handlers.
 
@@ -546,19 +546,15 @@ return {
 Notice how we use `myMiddleware()` instead of `myMiddleware`. As a matter of convention, middleware are not used directly; they are always wrapped and created by higher order functions. This allows us to configure the middleware prior to attaching it to a command.
 
 #### Defining Middleware
-In order to define your own custom middleware, simply create a higher order function which returns the middleware function. We will call this function a middleware layer, or **layer** for short.
+In order to define your own custom middleware, simply create a higher order function which returns the `async` middleware function. We will call this function a middleware layer, or **layer** for short.
 
 Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed. The command handler function lies at the end of the middleware chain.
-
-<p class="warning">
-  Layers can be defined as synchronous or `async` functions, but it's prudent to be aware of the fact that the next layer could return a synchronous value or a promise. However, by using `async` functions you can easily `await` the return value of the next layer and not worry about whether or not it's synchronous.
-</p>
 
 ```js
 import util from 'util';
 
 function loggingMiddleware() {
-  return (next, context) => {
+  return async (next, context) => {
     console.log('Current context:');
     console.log(util.inspect(context));
 
@@ -582,7 +578,7 @@ Since layers have direct access to the context object, they are able to read, wr
 
 ```js
 function middlewareThatChangesProperties() {
-  return (next, context) => {
+  return async (next, context) => {
     Object.keys(context).forEach((key) => {
       context[key] = 'I changed this!';
     });
@@ -601,7 +597,7 @@ You can make your layer execute before or after other layers depending on when y
 
 ```js
 function before() {
-  return (next, context) => {
+  return async (next, context) => {
     doSomething(context);
 
     return next(context);
@@ -613,8 +609,8 @@ Whereas this middleware will delegate and wait for the return value of the next 
 
 ```js
 function after() {
-  return (next, context) => {
-    const returned = next(context);
+  return async (next, context) => {
+    const returned = await next(context);
 
     doSomething(returned);
 
@@ -635,7 +631,7 @@ import { VoiceResponse } from 'ghastly';
 const queue = new MusicQueue();
 
 function playSong() {
-  function handler() {
+  async function handler() {
     const nextStream = queue.next();
 
     return new VoiceResponse('stream', nextStream);
@@ -654,7 +650,7 @@ However, this becomes ugly when you need to share the queue with other commands 
 When you have access to the context object, a reference to the registry is automatically injected for you.
 
 ```js
-function handler({ services }) {
+async function handler({ services }) {
   const queue = services.fetch('music:queue');
   const nextStream = queue.next();
 
