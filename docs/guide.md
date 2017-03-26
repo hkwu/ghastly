@@ -515,7 +515,7 @@ const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
 const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
 ```
 
-The `VoiceResponse` executor returns a promise resolving to the `StreamDispatcher` returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
+The `VoiceResponse` executor returns a promise resolving to the [StreamDispatcher](https://discord.js.org/#/docs/main/stable/class/StreamDispatcher) returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
 
 ```js
 async function handler({ dispatch }) {
@@ -711,7 +711,7 @@ Providers receive the service registry as an argument. They may bind any number 
 client.services.bindProviders(musicProvider);
 ```
 
-##### Checking a Service Exists
+##### Checking If a Service Exists
 If you wish to check that a service exists, you can use the `has()` method.
 
 ```js
