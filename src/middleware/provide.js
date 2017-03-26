@@ -14,7 +14,7 @@ import StringMap from '../util/StringMap';
  * @param {(string|Array|Object)} source - The service name source.
  * @param {string} [target] - Given only if injecting a single service under a
  *   new name. Represents the new name of the service inside the context.
- * @returns {middlewareLayer} The middleware which injects the services.
+ * @returns {middlewareLayer} The layer which injects the services.
  */
 export default function provide(source, target) {
   if (!source) {

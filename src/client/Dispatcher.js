@@ -202,18 +202,20 @@ export default class Dispatcher {
       throw new DispatchError('Dispatch middleware did not return a context object.');
     }
 
+    const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
+    const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
+
     const createDispatch = handlerContext => (
       response => this.dispatchResponse(handlerContext, response)
     );
     const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
-    const {
-      response,
-      [Symbol.for('ghastly.originalContext')]: handlerContext,
-    } = await command.handler({
-      ...context,
-      args,
-      [Symbol.for('ghastly.createDispatch')]: createDispatch,
-    });
+    const result = await command.handler({ ...context, args, [CREATE_DISPATCH]: createDispatch });
+
+    if (!result) {
+      throw new DispatchError('Handler middleware did not return a dispatch value.');
+    }
+
+    const { response, [ORIGINAL_CONTEXT]: handlerContext } = result;
 
     return this.dispatchResponse(handlerContext, response);
   }
