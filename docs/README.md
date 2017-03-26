@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://ghastly.js.org" target="_blank"><img src="https://raw.githubusercontent.com/hkwu/ghastly/refactor/docs/assets/logo.png"></a>
+  <a href="https://ghastly.js.org" target="_blank"><img src="/assets/logo.png"></a>
   <h1>Ghastly</h1>
   <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg?style=flat-square" alt="npm"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg?style=flat-square" alt="license"></a>
@@ -45,7 +45,7 @@ function helloWorld() {
 }
 ```
 
-Notice how we didn't even need to touch a `Message` object. Handler functions have a specific purpose in Ghastly: they consume a received message and produce a response value. There's no need to actually use a `send()` method directly; Ghastly already does that for you.
+Notice how we didn't even need to touch a [Message](https://discord.js.org/#/docs/main/stable/class/Message) object. Handler functions have a specific purpose in Ghastly: they consume a received message and produce a response value. There's no need to actually use a `send()` method directly; Ghastly already does that for you.
 
 Our bot will now listen for messages starting with `hello` and promptly respond with `world!`. This is great, though it does pose a problem since we'll be rather trigger happy with messages that weren't necessarily directed at us.
 
@@ -69,13 +69,17 @@ client.dispatcher.loadCommands(helloWorld);
 
 Once our command is loaded, we can `login()` with the client and test it out.
 
+<div align="center">
+  <img src="/assets/readme/hello-world.png">
+</div>
+
 ### Evil Eval
 Have you ever had the itch to use your bot as a JavaScript console? Now you can! We'll build a command which interprets input as JavaScript, evaluates it, and returns to us the results of the evaluation.
 
 We start off similarly to our previous example by defining a configurator for the `eval` command. What's different is that we now have to handle retrieving the script which we need to evaluate as a command argument. To do this, we'll add a new property to the returned configuration object: an array called `parameters`.
 
 ```js
-function eval() {
+function evilEval() {
   async function handler({ args }) {
     console.log(args.code);
   }
@@ -138,10 +142,10 @@ Discord.js already provides the [RichEmbed](https://discord.js.org/#/docs/main/s
 import { RichEmbed } from 'discord.js';
 import { inspect } from 'util';
 
-async function handler({ args }) {
+async function handler({ args, message }) {
   const embed = new RichEmbed();
 
-  embed.setTitle('EVAL');
+  embed.setTitle('EVAL').setAuthor(message.author.username, message.author.avatarURL);
 
   const start = Date.now();
 
@@ -166,49 +170,44 @@ async function handler({ args }) {
 }
 ```
 
-#### Sandboxing `eval()`
-There's still an obvious problem with our `eval` command. The code we're retrieving as an argument is run within the scope of the command handler, so it basically has access to anything our handler has access to. This can evidently lead to serious *accidents*. With this in mind, we're going to want to sandbox our script's execution as much as possible. To do this, we can take advantage of Node's [VM](https://nodejs.org/api/vm.html) module.
+<div align="center">
+  <img src="/assets/readme/eval-embed.png">
+</div>
+
+#### Restricting Command Access
+There's still an obvious problem with our `eval` command. The code we're retrieving as an argument is run within the scope of the command handler, so it basically has access to anything our handler has access to. This can evidently lead to serious *accidents*.
+
+The easiest way to deal with this is to simply keep a whitelist of people allowed to use the command (hopefully you trust said people with your life). We'll introduce a new concept to handle this: **middleware**.
+
+Middleware are functions which intercept messages before they're passed to the command handler. They have the power to modify what's passed to the handler in addition to blocking anything they don't want to pass through. In our case, we'll use middleware to block incoming `eval` commands from people we don't trust. Luckily, Ghastly provides us with a useful filter middleware that lets us whitelist people who can use the `eval` command.
 
 ```js
-import vm from 'vm';
-import { RichEmbed } from 'discord.js';
-import { inspect } from 'util';
+import { userId } from 'ghastly';
 
-async function handler({ args, client, message }) {
-  const embed = new RichEmbed();
+function evilEval() {
+  // ...
 
-  embed.setTitle('EVAL');
-
-  const start = Date.now();
-
-  try {
-    // run inside a VM context and limit what the code can access
-    const result = vm.runInNewContext(args.code, { client, message });
-    const end = Date.now();
-
-    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-      .setColor(0x2ECC71)
-      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-      .addField('RESULT', `\`\`\`js\n${inspect(result)}\n\`\`\``);
-  } catch (error) {
-    const end = Date.now();
-
-    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-      .setColor(0xE74C3C)
-      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-      .addField('ERROR', `\`\`\`js\n${error}\n\`\`\``);
-  }
-
-  return embed;
+  return {
+    handler,
+    triggers: ['eval'],
+    parameters: ['code...'],
+    // middleware are executed in the order they're defined
+    middleware: [
+      // supply any number of user IDs to whitelist
+      userId(
+        '606780443435650178',
+        '427870646725546192',
+      ),
+    ],
+  };
 }
 ```
 
-Now the code will only be able to access certain variables within our scope, as well as some basic globals. However, there's still a problem. What if someone sneaks in an infinite loop, in the manner of `while (true) {}`? We'll protect against this by specifying an execution timeout.
+Now our command will be restricted to a certain group of (hopefully well-behaved) users.
 
-```js
-// if the code doesn't finish running in 5 seconds, we'll get an error
-const result = vm.runInNewContext(args.code, { client, message }, { timeout: 5000 });
-```
+<p class="tip">
+  In case you're still not happy with the safety of `eval`, or if you just don't trust anyone, it's possible to make `eval` run inside of a sandboxed environment (so no danger of someone tampering with Node globals like `process`). Since this isn't directly related to Ghastly, we've relegated that to the [Examples](/examples#a-less-evil-eval) page for you to check out whenever you feel like it.
+</p>
 
 ### Next Steps
-We've covered the basics of Ghastly with a high-level walkthrough and built a bot with some interesting commands, but there's still more we haven't dived into yet. The [Guide](/guide) will take you through some of the more advanced topics in Ghastly, at the same time going deeper into topics that we've already covered.
+We've covered the basics of Ghastly with a high-level walkthrough and built a bot with some interesting commands, but there's still more we haven't dived into yet. The [Guide](/guide) will take you through some of the more advanced topics in Ghastly and at the same time go deeper into topics that we've already covered.
