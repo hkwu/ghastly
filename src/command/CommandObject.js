@@ -29,13 +29,13 @@ export default class CommandObject {
        * The command handler function, with middleware applied to it.
        * @type {Function}
        */
-      this.handler = apply(...middleware)((context) => {
+      this.handler = apply(...middleware)(async (context) => {
         const originalContext = { ...context };
         const createDispatch = context[Symbol.for('ghastly.createDispatch')];
         const dispatch = createDispatch(originalContext);
 
         return {
-          response: handler({ ...context, dispatch }),
+          response: await handler({ ...context, dispatch }),
           [Symbol.for('ghastly.originalContext')]: originalContext,
         };
       });
