@@ -30,11 +30,11 @@ This documentation assumes that you have a basic grasp of the Discord.js API. If
 It would also be helpful to be comfortable with ES2015+ features such as promises and `async` functions.
 
 ### Hello, world
-Let's walk through the basics of Ghastly using the most appropriate exercise: a "Hello, world" command. To create a command, we define a function which returns an object. This object needs two properties to work properly: a `handler` function to generate a response and a set of `triggers` which determine when a command is dispatched. With that in mind, take a peek at our "Hello, world" command below.
+Let's walk through the basics of Ghastly using the most appropriate exercise: a "Hello, world" command. To create a command, we define a function (call it a **configurator**) which returns an object. This object needs two properties to work properly: a `handler` function to generate a response and a set of `triggers` which determine when a command is dispatched. With that in mind, take a peek at our "Hello, world" command below.
 
 ```js
 function helloWorld() {
-  function handler() {
+  async function handler() {
     return 'world!';
   }
 
@@ -68,6 +68,147 @@ client.dispatcher.loadCommands(helloWorld);
 ```
 
 Once our command is loaded, we can `login()` with the client and test it out.
+
+### Evil Eval
+Have you ever had the itch to use your bot as a JavaScript console? Now you can! We'll build a command which interprets input as JavaScript, evaluates it, and returns to us the results of the evaluation.
+
+We start off similarly to our previous example by defining a configurator for the `eval` command. What's different is that we now have to handle retrieving the script which we need to evaluate as a command argument. To do this, we'll add a new property to the returned configuration object: an array called `parameters`.
+
+```js
+function eval() {
+  async function handler({ args }) {
+    console.log(args.code);
+  }
+
+  return {
+    handler,
+    triggers: ['eval'],
+    parameters: ['code...'],
+  };
+}
+```
+
+By adding the string `code` to the `parameters` array, we're telling Ghastly to parse a parameter from the input string and place its value into the `args` object. Every time a handler is invoked, it gets passed a **context** object containing several useful properties; the `args` object is one of those properties.
+
+Notice that we also added the ellipsis (`...`) to the parameter name. Ghastly actually delimits command parameters by spaces, with exception to strings wrapped in quotes. The ellipsis tells Ghastly to skip this preprocessing step and retrieve the parameter value as is so that we don't accidentally change the meaning of the code.
+
+With that done, we only need to evaluate the code and report the results:
+
+```js
+import { inspect } from 'util';
+
+async function handler({ args }) {
+  try {
+    const result = eval(args.code);
+
+    return `\`\`\`js\n${inspect(result)}\n\`\`\``;
+  } catch (error) {
+    return `\`\`\`js\n${error}\n\`\`\``;
+  }
+}
+```
+
+#### Reporting with Better Codeblocks
+Our command reports results in a nicely formatted code block, but having to manually format the Markdown is quite messy. Instead, we'll introduce an abstraction that will make this much nicer to work with: the `CodeResponse` class.
+
+```js
+import { CodeResponse } from 'ghastly';
+import { inspect } from 'util';
+
+async function handler({ args }) {
+  try {
+    const result = eval(args.code);
+
+    // just supply the syntax language and the codeblock contents
+    return new CodeResponse('js', inspect(result));
+  } catch (error) {
+    return new CodeResponse('js', error);
+  }
+}
+```
+
+The `CodeResponse` class is actually part of a broader group of custom `Response` classes. These custom classes bundle response logic into a single value, allowing you to execute complex actions simply by returning a `Response` instance. This allows you to treat response actions as modules and reuse them as much as you like!
+
+#### Reporting with Embeds
+Codeblocks are nice, but you have to admit that they look rather plain. In the past, message formatting was basically limited to what Markdown could offer, but with the introduction of [embeds](https://discordapp.com/developers/docs/resources/channel#embed-object) we can finally begin generating messages that actually look *proper*.
+
+Discord.js already provides the [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) class as a helpful wrapper around the message embed feature, so let's put it to use.
+
+```js
+import { RichEmbed } from 'discord.js';
+import { inspect } from 'util';
+
+async function handler({ args }) {
+  const embed = new RichEmbed();
+
+  embed.setTitle('EVAL');
+
+  const start = Date.now();
+
+  try {
+    const result = eval(args.code);
+    const end = Date.now();
+
+    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
+      .setColor(0x2ECC71) // green
+      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
+      .addField('RESULT', `\`\`\`js\n${inspect(result)}\n\`\`\``);
+  } catch (error) {
+    const end = Date.now();
+
+    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
+      .setColor(0xE74C3C) // red
+      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
+      .addField('ERROR', `\`\`\`js\n${error}\n\`\`\``);
+  }
+
+  return embed;
+}
+```
+
+#### Sandboxing `eval()`
+There's still an obvious problem with our `eval` command. The code we're retrieving as an argument is run within the scope of the command handler, so it basically has access to anything our handler has access to. This can evidently lead to serious *accidents*. With this in mind, we're going to want to sandbox our script's execution as much as possible. To do this, we can take advantage of Node's [VM](https://nodejs.org/api/vm.html) module.
+
+```js
+import vm from 'vm';
+import { RichEmbed } from 'discord.js';
+import { inspect } from 'util';
+
+async function handler({ args, client, message }) {
+  const embed = new RichEmbed();
+
+  embed.setTitle('EVAL');
+
+  const start = Date.now();
+
+  try {
+    // run inside a VM context and limit what the code can access
+    const result = vm.runInNewContext(args.code, { client, message });
+    const end = Date.now();
+
+    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
+      .setColor(0x2ECC71)
+      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
+      .addField('RESULT', `\`\`\`js\n${inspect(result)}\n\`\`\``);
+  } catch (error) {
+    const end = Date.now();
+
+    embed.setDescription(`Finished evaluating in ${end - start} ms.`)
+      .setColor(0xE74C3C)
+      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
+      .addField('ERROR', `\`\`\`js\n${error}\n\`\`\``);
+  }
+
+  return embed;
+}
+```
+
+Now the code will only be able to access certain variables within our scope, as well as some basic globals. However, there's still a problem. What if someone sneaks in an infinite loop, in the manner of `while (true) {}`? We'll protect against this by specifying an execution timeout.
+
+```js
+// if the code doesn't finish running in 5 seconds, we'll get an error
+const result = vm.runInNewContext(args.code, { client, message }, { timeout: 5000 });
+```
 
 ### Next Steps
 We've covered the basics of Ghastly with a high-level walkthrough and built a bot with some interesting commands, but there's still more we haven't dived into yet. The [Guide](/guide) will take you through some of the more advanced topics in Ghastly, at the same time going deeper into topics that we've already covered.
