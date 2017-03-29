@@ -1,6 +1,6 @@
 import { isArray, isFunction } from 'lodash/lang';
 import ServiceRegistryEntry from './ServiceRegistryEntry';
-import StringMap from '../util/StringMap';
+import StringMap from '../utils/StringMap';
 
 /**
  * @classdesc Manages services in the application.

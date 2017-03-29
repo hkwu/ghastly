@@ -1,5 +1,5 @@
 import { isArray, isPlainObject, isString } from 'lodash/lang';
-import StringMap from '../util/StringMap';
+import StringMap from '../utils/StringMap';
 
 /**
  * Middleware which injects services from the client's provider into the context.

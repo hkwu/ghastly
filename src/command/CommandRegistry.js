@@ -1,7 +1,7 @@
 import { isString } from 'lodash/lang';
 import CommandError from '../errors/CommandError';
 import CommandObject from './CommandObject';
-import StringMap from '../util/StringMap';
+import StringMap from '../utils/StringMap';
 
 /**
  * @classdesc Class handling storage and access control for commands.
