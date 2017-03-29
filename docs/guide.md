@@ -27,7 +27,7 @@ const client = new Client({ prefix: '> ' });
   Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
 </p>
 
-###### Using the Client's Mention as a Prefix
+###### Client Mention
 You can specify the client's mention as a prefix by using the special value `@self`. This is the recommended prefix as it's inherently unique.
 
 ```js
@@ -37,14 +37,14 @@ const client = new Client({ prefix: '@self' });
 The dispatcher will now only respond to `@client#1234 messages like these`.
 
 #### Registering Commands
-Commands should be registered before logging in with the client. The dispatcher (available through `client.dispatcher`) provides the `loadCommands()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
+Commands should be registered before logging in with the client. The dispatcher (available through `client.dispatcher`) provides the `load()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
 
 ```js
-client.dispatcher.loadCommands(foo, bar, baz);
+client.dispatcher.load(foo, bar, baz);
 ```
 
 <p class="danger">
-  `loadCommands()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.loadCommands(...commands)`.
+  `load()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.load(...commands)`.
 </p>
 
 ### Configurators

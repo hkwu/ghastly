@@ -141,7 +141,7 @@ export default class Dispatcher {
    * @param {...Function} commands - The command generators.
    * @returns {Dispatcher} The instance this method was called on.
    */
-  loadCommands(...commands) {
+  load(...commands) {
     commands.map(generate).forEach((commandConfig) => {
       this.commands.load(new CommandObject(commandConfig));
     });
@@ -154,7 +154,7 @@ export default class Dispatcher {
    * @param {...string} names - The identifiers of commands to unload.
    * @returns {Dispatcher} The instance this method was called on.
    */
-  unloadCommands(...names) {
+  unload(...names) {
     names.forEach((name) => {
       this.commands.unload(name);
     });

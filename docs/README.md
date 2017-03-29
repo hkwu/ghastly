@@ -64,7 +64,7 @@ const client = new Client({ prefix: '!' });
 Now that our client is instantiated, we can start registering commands on the client's dispatcher.
 
 ```js
-client.dispatcher.loadCommands(helloWorld);
+client.dispatcher.load(helloWorld);
 ```
 
 Once our command is loaded, we can `login()` with the client and test it out.

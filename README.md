@@ -42,6 +42,6 @@ function ping() {
 
 const client = new Client({ prefix: '!' });
 
-client.dispatcher.loadCommands(ping);
+client.dispatcher.load(ping);
 client.login('token');
 ```
