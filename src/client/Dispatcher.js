@@ -7,6 +7,7 @@ import CommandObject from '../command/CommandObject';
 import CommandParser from '../command/parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
 import DispatchError from '../errors/DispatchError';
+import MarkdownFormatter from '../utils/MarkdownFormatter';
 import Response from '../command/responses/Response';
 import generate from '../core/generate';
 
@@ -196,6 +197,7 @@ export default class Dispatcher {
       client: this.client,
       services: this.client.services,
       commands: this.commands,
+      formatter: MarkdownFormatter,
     });
 
     if (!context) {

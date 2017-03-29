@@ -301,6 +301,26 @@ The dispatcher's command registry.
 ##### `services`
 The client's [service registry](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
 
+##### `formatter`
+The `MarkdownFormatter` utility class. Contains useful methods for composing Markdown within text.
+
+* `italic(text)` - Formats italic text.
+* `bold(text)` - Formats bold text.
+* `strikeout(text)` - Formats strikeout text.
+* `underline(text)` - Formats underlined text.
+* `code(text)` - Formats inline code.
+* `codeBlock(text, language = '')` - Formats multi-line code blocks.
+
+Sample usage:
+
+```js
+async function handler({ formatter }) {
+  const { italic, bold } = formatter;
+
+  return `To ${bold('boldly')} go where no ${italic('man')} has gone before.`;
+}
+```
+
 #### Basic Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This helps to decouple your handler implementations from the underlying messaging API, letting you concentrate on *what* your handlers should respond with, rather than *how* they should respond.
 

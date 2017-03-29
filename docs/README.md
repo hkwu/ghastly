@@ -105,33 +105,32 @@ async function handler({ args }) {
   try {
     const result = eval(args.code);
 
-    return `\`\`\`js\n${inspect(result)}\n\`\`\``;
+    return `**RESULT**:\n\`\`\`js\n${inspect(result)}\n\`\`\``;
   } catch (error) {
-    return `\`\`\`js\n${error}\n\`\`\``;
+    return `**ERROR**:\n\`\`\`js\n${error}\n\`\`\``;
   }
 }
 ```
 
-#### Reporting with Better Codeblocks
-Our command reports results in a nicely formatted code block, but having to manually format the Markdown is quite messy. Instead, we'll introduce an abstraction that will make this much nicer to work with: the `CodeResponse` class.
+#### Doing Markdown the Right Way
+Our command reports results in a nicely formatted code block, but having to manually format the Markdown is quite messy. Instead, we'll take advantage of the handy Markdown formatter that Ghastly injects into the context:
 
 ```js
-import { CodeResponse } from 'ghastly';
 import { inspect } from 'util';
 
-async function handler({ args }) {
+async function handler({ args, formatter }) {
+  const { bold, codeBlock } = formatter;
+
   try {
     const result = eval(args.code);
 
-    // just supply the syntax language and the codeblock contents
-    return new CodeResponse('js', inspect(result));
+    // just supply the code and (optional) syntax highlighting language
+    return `${bold('RESULT')}:\n${codeBlock(inspect(result), 'js')}`;
   } catch (error) {
-    return new CodeResponse('js', error);
+    return `${bold('ERROR')}:\n${codeBlock(error, 'js')}`;
   }
 }
 ```
-
-The `CodeResponse` class is actually part of a broader group of custom `Response` classes. These custom classes bundle response logic into a single value, allowing you to execute complex actions simply by returning a `Response` instance. This allows you to treat response actions as modules and reuse them as much as you like!
 
 #### Reporting with Embeds
 Codeblocks are nice, but you have to admit that they look rather plain. In the past, message formatting was basically limited to what Markdown could offer, but with the introduction of [embeds](https://discordapp.com/developers/docs/resources/channel#embed-object) we can finally begin generating messages that actually look *proper*.
