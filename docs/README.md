@@ -179,10 +179,14 @@ There's still an obvious problem with our `eval` command. The code we're retriev
 
 The easiest way to deal with this is to simply keep a whitelist of people allowed to use the command (hopefully you trust said people with your life). We'll introduce a new concept to handle this: **middleware**.
 
-Middleware are functions which intercept messages before they're passed to the command handler. They have the power to modify what's passed to the handler in addition to blocking anything they don't want to pass through. In our case, we'll use middleware to block incoming `eval` commands from people we don't trust. Luckily, Ghastly provides us with a useful filter middleware that lets us whitelist people who can use the `eval` command.
+Middleware are functions which intercept messages before they're passed to the command handler. They have the power to modify what's passed to the handler in addition to blocking anything they don't want to pass through. There can be multiple middleware functions chained to each other so that the results of one function gets passed to the next; we call each of these chained functions a **layer**.
+
+In our case, we'll use middleware to block incoming `eval` commands from people we don't trust. Luckily, Ghastly provides us with a useful filter middleware called `requireUser()` which lets us whitelist people who can use the `eval` command. `requireUser()` can whitelist users by ID or by a combination of username and discriminator (e.g. `Bob#1234`).
+
+To attach middleware to a command, we supply an array of layers as the `middleware` option in our configurator:
 
 ```js
-import { userId } from 'ghastly';
+import { requireUser } from 'ghastly/middleware';
 
 function evilEval() {
   // ...
@@ -191,12 +195,13 @@ function evilEval() {
     handler,
     triggers: ['eval'],
     parameters: ['code...'],
-    // middleware are executed in the order they're defined
+    // layers are executed in the order they're defined
     middleware: [
-      // supply any number of user IDs to whitelist
-      userId(
+      // supply any number of user identifiers to whitelist
+      requireUser(
         '606780443435650178',
         '427870646725546192',
+        'ITrustThisGuy#4953',
       ),
     ],
   };

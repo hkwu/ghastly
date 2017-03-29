@@ -442,7 +442,7 @@ The `Response` constructor takes a single **executor** function. The executor re
 In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
 
 ```js
-import { Response } from 'ghastly';
+import { Response } from 'ghastly/command';
 
 class ReversedResponse extends Response {
   constructor() {
@@ -474,28 +474,12 @@ async function handler({ dispatch }) {
 ##### Builtin Responses
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
 
-###### Code Blocks
-You can send a multi-line code block using `CodeResponse`.
-
-```js
-import { CodeResponse } from 'ghastly';
-
-async function handler() {
-  const response = new CodeResponse('js', `console.log('Hello, world');
-console.log(2 + 2);`);
-
-  return response;
-}
-```
-
-The `CodeResponse` executor returns a promise resolving to the `Message` containing the code block.
-
 ###### Voice Responses
 You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
 
 ```js
 import ytdl from 'ytdl-core';
-import { VoiceResponse } from 'ghastly';
+import { VoiceResponse } from 'ghastly/command';
 
 async function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
