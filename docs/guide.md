@@ -495,7 +495,7 @@ async function handler({ dispatch }) {
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
 
 ###### Voice Responses
-You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response will be ignored.
+You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response is ignored.
 
 ```js
 import ytdl from 'ytdl-core';

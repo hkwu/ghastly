@@ -76,7 +76,7 @@ Once our command is loaded, we can `login()` with the client and test it out.
 ### Evil Eval
 Have you ever had the itch to use your bot as a JavaScript console? Now you can! We'll build a command which interprets input as JavaScript, evaluates it, and returns to us the results of the evaluation.
 
-We start off similarly to our previous example by defining a configurator for the `eval` command. What's different is that we now have to handle retrieving the script which we need to evaluate as a command argument. To do this, we'll add a new property to the returned configuration object: an array called `parameters`.
+We start off similarly to our previous example by defining a configurator for the `eval` command. What's different is that we now have to handle retrieving command arguments. To do this, we'll add a new property to the returned configuration object: an array called `parameters`.
 
 ```js
 function evilEval() {
@@ -94,7 +94,7 @@ function evilEval() {
 
 By adding the string `code` to the `parameters` array, we're telling Ghastly to parse a parameter from the input string and place its value into the `args` object. Every time a handler is invoked, it gets passed a **context** object containing several useful properties; the `args` object is one of those properties.
 
-Notice that we also added the ellipsis (`...`) to the parameter name. Ghastly actually delimits command parameters by spaces, with exception to strings wrapped in quotes. The ellipsis tells Ghastly to skip this preprocessing step and retrieve the parameter value as is so that we don't accidentally change the meaning of the code.
+Notice that we also added the ellipsis (`...`) to the parameter name. Ghastly delimits command arguments by spaces (with exception to strings wrapped in quotes). The ellipsis forms what's called a *literal parameter*, telling Ghastly to skip this preprocessing step and retrieve the parameter value as is so that we don't accidentally change the meaning of the code.
 
 With that done, we only need to evaluate the code and report the results:
 
@@ -210,7 +210,7 @@ function evilEval() {
 Now our command will be restricted to a certain group of (hopefully well-behaved) users.
 
 <p class="tip">
-  In case you're still not happy with the safety of `eval`, or if you just don't trust anyone, it's possible to make `eval` run inside of a sandboxed environment (so no danger of someone tampering with Node globals like `process`). Since this isn't directly related to Ghastly, we've relegated that to the [Examples](/examples#a-less-evil-eval) page for you to check out whenever you feel like it.
+  In case you're still not happy with the safety of `eval`, or if you just don't trust anyone, it's possible to make `eval` run inside of a sandboxed environment (so there's no danger of someone tampering with Node globals like `process`). Since this isn't directly related to Ghastly, we've relegated that to the [Examples](/examples#a-less-evil-eval) page for you to check out whenever you feel like it.
 </p>
 
 ### Next Steps
