@@ -552,12 +552,10 @@ In order to define your own custom middleware, simply create a higher order func
 Layers receive two arguments: the `next` layer in the middleware chain, and the `context` object passed in by the previous layer. A layer has the power to continue the chain or exit it. By calling the `next` layer, the chain continues. Conversely, if the layer does not call `next`, the chain stops and no other layers are executed. The command handler function lies at the end of the middleware chain.
 
 ```js
-import util from 'util';
-
 function loggingMiddleware() {
   return async (next, context) => {
     console.log('Current context:');
-    console.log(util.inspect(context));
+    console.log(context);
 
     return next(context);
   };
