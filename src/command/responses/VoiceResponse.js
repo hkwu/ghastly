@@ -7,15 +7,15 @@ import Response from './Response';
  */
 
 /**
- * @external ReadableStream https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable
+ * @external {ReadableStream} https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable
  */
 
 /**
- * @external StreamOptions https://discord.js.org/#/docs/main/master/typedef/StreamOptions
+ * @external {StreamOptions} https://discord.js.org/#/docs/main/master/typedef/StreamOptions
  */
 
 /**
- * @classdesc Wrapper for voice channel audio responses.
+ * @desc Wrapper for voice channel audio responses.
  */
 export default class VoiceResponse extends Response {
   /**

@@ -4,6 +4,7 @@ import { isNumber, isString, toInteger, toNumber } from 'lodash/lang';
  * Boolean type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const BOOLEAN = 'boolean';
 
@@ -11,6 +12,7 @@ export const BOOLEAN = 'boolean';
  * Alias for Boolean type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const BOOL = 'bool';
 
@@ -18,6 +20,7 @@ export const BOOL = 'bool';
  * Integer type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const INTEGER = 'integer';
 
@@ -25,6 +28,7 @@ export const INTEGER = 'integer';
  * Alias for Integer type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const INT = 'int';
 
@@ -32,6 +36,7 @@ export const INT = 'int';
  * Number type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const NUMBER = 'number';
 
@@ -39,6 +44,7 @@ export const NUMBER = 'number';
  * Alias for Number type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const NUM = 'num';
 
@@ -46,6 +52,7 @@ export const NUM = 'num';
  * String type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const STRING = 'string';
 
@@ -53,6 +60,7 @@ export const STRING = 'string';
  * Alias for String type.
  * @type {string}
  * @const
+ * @ignore
  */
 export const STR = 'str';
 
@@ -60,6 +68,7 @@ export const STR = 'str';
  * Resolves a string value to a type string.
  * @param {string} value - The string.
  * @returns {?string} The resolved value type, or `null` if it could not be resolved.
+ * @ignore
  */
 export const resolveType = (value) => {
   if (!isString(value)) {
@@ -89,6 +98,7 @@ export const resolveType = (value) => {
  * @param {string} value - The string.
  * @param {string} expectedType - The expected type.
  * @returns {boolean} `true` if the value is of the expected type, else `false`.
+ * @ignore
  */
 export const isType = (value, expectedType) => {
   if (!isString(value)) {
@@ -118,6 +128,7 @@ export const isType = (value, expectedType) => {
  * @param {string} type - The type to convertType to.
  * @returns {*} The converted type, or the given string if it couldn't be converted
  *   to the given type.
+ * @ignore
  */
 export const convertType = (value, type) => {
   if (!isString(value)) {

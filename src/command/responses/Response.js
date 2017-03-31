@@ -1,7 +1,7 @@
 import { isFunction } from 'lodash/lang';
 
 /**
- * @classdesc Wrapper for custom message responses.
+ * @desc Wrapper for custom message responses.
  */
 export default class Response {
   /**

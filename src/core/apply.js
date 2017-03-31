@@ -45,6 +45,7 @@ const compose = (...functions) => {
  * @returns {Function} Function consuming a single command handler function and
  *   returns a new handler function with the given middleware applied to it.
  * @throws {TypeError} Thrown if any of the given middleware is not a function.
+ * @ignore
  */
 export default function apply(...middleware) {
   middleware.forEach((layer) => {

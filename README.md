@@ -1,8 +1,9 @@
 <div align="center">
-  <a href="https://ghastly.js.org" target="_blank"><img src="docs/assets/logo.png"></a>
+  <a href="https://ghastly.js.org" target="_blank"><img src="https://ghastly.js.org/assets/logo.png"></a>
   <h1>Ghastly</h1>
-  <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg?style=flat-square" alt="npm"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg?style=flat-square" alt="license"></a>
+  <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg" alt="npm"></a>
+  <a href="https://doc.esdoc.org/github.com/hkwu/ghastly"><img src="https://doc.esdoc.org/github.com/hkwu/ghastly/badge.svg"</a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg" alt="license"></a>
 </div>
 
 ## Introduction

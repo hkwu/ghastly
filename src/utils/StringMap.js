@@ -1,8 +1,9 @@
 import { isString } from 'lodash/lang';
 
 /**
- * @classdesc Specialization of builtin `Map` that only stores strings as keys.
+ * @desc Specialization of builtin `Map` that only stores strings as keys.
  * @extends Map
+ * @ignore
  */
 export default class StringMap extends Map {
   /**

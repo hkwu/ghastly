@@ -1,7 +1,8 @@
 import ParsedCommand from './ParsedCommand';
 
 /**
- * @classdesc Handles parsing a message for a command.
+ * @desc Handles parsing a message for a command.
+ * @ignore
  */
 export default class CommandParser {
   /**

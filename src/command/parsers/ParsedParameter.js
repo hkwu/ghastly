@@ -4,7 +4,8 @@
  */
 
 /**
- * @classdesc Wrapper for results returned from `ParameterParser`.
+ * @desc Wrapper for results returned from `ParameterParser`.
+ * @ignore
  */
 export default class ParsedParameter {
   /**

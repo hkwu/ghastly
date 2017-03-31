@@ -3,7 +3,7 @@ import ServiceRegistryEntry from './ServiceRegistryEntry';
 import StringMap from '../utils/StringMap';
 
 /**
- * @classdesc Manages services in the application.
+ * @desc Manages services in the application.
  */
 export default class ServiceRegistry {
   /**

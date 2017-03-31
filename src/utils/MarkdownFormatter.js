@@ -1,5 +1,5 @@
 /**
- * @classdesc Utility class with methods for adding Markdown syntax to text.
+ * @desc Utility class with methods for adding Markdown syntax to text.
  */
 export default class MarkdownFormatter {
   /**
