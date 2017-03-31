@@ -22,6 +22,7 @@ import { STRING, convertType, isType, resolveType } from './Types';
 
 /**
  * @classdesc Parses and validates parameter definitions.
+ * @ignore
  */
 export default class ParameterParser {
   /**

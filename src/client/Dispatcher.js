@@ -26,7 +26,7 @@ const RESPONSE_TYPES = {
 };
 
 /**
- * @external Message https://discord.js.org/#/docs/main/stable/class/Message
+ * @external {Message} https://discord.js.org/#/docs/main/stable/class/Message
  */
 
 /**

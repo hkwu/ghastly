@@ -1,7 +1,7 @@
 import { isNumber, isString } from 'lodash/lang';
 
 /**
- * @external PermissionResolvable https://discord.js.org/#/docs/main/stable/typedef/PermissionResolvable
+ * @external {PermissionResolvable} https://discord.js.org/#/docs/main/stable/typedef/PermissionResolvable
  */
 
 /**

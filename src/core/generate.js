@@ -6,6 +6,7 @@ const generatorApi = { apply, config: {} };
  * Extracts the configuration from a command generator.
  * @param {Function} commandGenerator - The command generator.
  * @returns {Object} The configuration the generator returns.
+ * @ignore
  */
 export default function generate(commandGenerator) {
   return commandGenerator(generatorApi);

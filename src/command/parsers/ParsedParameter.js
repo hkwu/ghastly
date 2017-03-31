@@ -5,6 +5,7 @@
 
 /**
  * @classdesc Wrapper for results returned from `ParameterParser`.
+ * @ignore
  */
 export default class ParsedParameter {
   /**

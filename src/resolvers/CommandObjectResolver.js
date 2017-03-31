@@ -3,6 +3,7 @@ import BaseResolver from './BaseResolver';
 /**
  * @classdesc Options resolver for CommandObject class.
  * @extends BaseResolver
+ * @ignore
  */
 export default class CommandObjectResolver extends BaseResolver {
   /**

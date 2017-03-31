@@ -7,11 +7,11 @@ import Response from './Response';
  */
 
 /**
- * @external ReadableStream https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable
+ * @external {ReadableStream} https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable
  */
 
 /**
- * @external StreamOptions https://discord.js.org/#/docs/main/master/typedef/StreamOptions
+ * @external {StreamOptions} https://discord.js.org/#/docs/main/master/typedef/StreamOptions
  */
 
 /**

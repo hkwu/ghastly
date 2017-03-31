@@ -3,13 +3,18 @@ import Dispatcher from './Dispatcher';
 import ServiceRegistry from './ServiceRegistry';
 
 /**
+ * @external {ClientOptions} https://discord.js.org/#/docs/main/stable/typedef/ClientOptions
+ */
+
+/**
  * @classdesc The Ghastly client.
  * @extends Client
  */
 export default class Ghastly extends Client {
   /**
    * Constructor.
-   * @param {Object} options - The options for the client.
+   * @param {ClientOptions} options - The options for the client.
+   * @param {string} options.prefix - The prefix for the client's dispatcher.
    */
   constructor(options) {
     const { prefix, ...rest } = options;

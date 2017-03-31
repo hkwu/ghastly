@@ -2,6 +2,7 @@ import createResolver from './createResolver';
 
 /**
  * @classdesc Base class for creating options resolvers.
+ * @ignore
  */
 export default class BaseResolver {
   /**
