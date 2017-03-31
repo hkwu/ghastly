@@ -26,6 +26,10 @@ const RESPONSE_TYPES = {
 };
 
 /**
+ * @external Message https://discord.js.org/#/docs/main/stable/class/Message
+ */
+
+/**
  * Emitted when a message response could not be dispatched.
  * @event Ghastly#dispatchError
  * @param {DispatchError} error - The error thrown by the dispatcher function.
@@ -167,9 +171,9 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
    *   received only when the message event was an update.
-   * @returns {Promise.<(Message|*), Error>} Promise resolving to a Discord.js
-   *   `Message` object if a message was dispatched directly. If a custom response
-   *   is dispatched, resolves to whatever the custom response handler returns.
+   * @returns {Promise.<*, Error>} Promise resolving to a Discord.js `Message`
+   *   object if a message was dispatched directly. If a custom response is
+   *   dispatched, resolves to whatever the custom response handler returns.
    *   Resolves to `null` if no response is dispatched.
    * Errors bubble up regularly. Rejects with a `DispatchError` specifically when
    *   the given response type is not recognized.

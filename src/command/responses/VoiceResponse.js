@@ -7,6 +7,14 @@ import Response from './Response';
  */
 
 /**
+ * @external ReadableStream https://nodejs.org/dist/latest/docs/api/stream.html#stream_class_stream_readable
+ */
+
+/**
+ * @external StreamOptions https://discord.js.org/#/docs/main/master/typedef/StreamOptions
+ */
+
+/**
  * @classdesc Wrapper for voice channel audio responses.
  */
 export default class VoiceResponse extends Response {
@@ -16,7 +24,6 @@ export default class VoiceResponse extends Response {
    * @param {(ReadableStream|string)} stream - The stream to play, or a string
    *   containing the path to a file.
    * @param {StreamOptions} [options={}] - The options for playing the stream.
-   *   See [StreamOptions]{@link https://discord.js.org/#/docs/main/master/typedef/StreamOptions}.
    */
   constructor(streamType, stream, options = {}) {
     super(async ({ message }) => {
