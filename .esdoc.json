@@ -1,0 +1,7 @@
+{
+  "source": "./src",
+  "destination": "./api-docs",
+  "experimentalProposal": {
+    "objectRestSpread": true
+  }
+}
