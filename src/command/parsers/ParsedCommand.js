@@ -1,5 +1,5 @@
 /**
- * @classdesc Wrapper for results returned from `CommandParser`.
+ * @desc Wrapper for results returned from `CommandParser`.
  * @ignore
  */
 export default class ParsedCommand {

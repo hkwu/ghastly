@@ -15,7 +15,7 @@ import Response from './Response';
  */
 
 /**
- * @classdesc Wrapper for voice channel audio responses.
+ * @desc Wrapper for voice channel audio responses.
  */
 export default class VoiceResponse extends Response {
   /**

@@ -4,7 +4,7 @@ import ParameterParser from './parsers/ParameterParser';
 import apply from '../core/apply';
 
 /**
- * @classdesc Class which wraps a command handler with additional useful data.
+ * @desc Class which wraps a command handler with additional useful data.
  */
 export default class CommandObject {
   /**

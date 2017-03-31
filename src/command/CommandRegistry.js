@@ -4,7 +4,7 @@ import CommandObject from './CommandObject';
 import StringMap from '../utils/StringMap';
 
 /**
- * @classdesc Class handling storage and access control for commands.
+ * @desc Class handling storage and access control for commands.
  */
 export default class CommandRegistry {
   /**

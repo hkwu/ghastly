@@ -7,7 +7,7 @@ import ServiceRegistry from './ServiceRegistry';
  */
 
 /**
- * @classdesc The Ghastly client.
+ * @desc The Ghastly client.
  * @extends Client
  */
 export default class Ghastly extends Client {

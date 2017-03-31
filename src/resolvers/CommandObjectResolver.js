@@ -1,7 +1,7 @@
 import BaseResolver from './BaseResolver';
 
 /**
- * @classdesc Options resolver for CommandObject class.
+ * @desc Options resolver for CommandObject class.
  * @extends BaseResolver
  * @ignore
  */

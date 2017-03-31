@@ -4,7 +4,7 @@ import ArgumentParserError from '../../errors/ArgumentParserError';
 import { convertType, isType } from './Types';
 
 /**
- * @classdesc Handles parsing of commands given by users.
+ * @desc Handles parsing of commands given by users.
  * @ignore
  */
 export default class ArgumentParser {

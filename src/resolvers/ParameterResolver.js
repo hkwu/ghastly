@@ -2,7 +2,7 @@ import BaseResolver from './BaseResolver';
 import { STRING } from '../command/parsers/Types';
 
 /**
- * @classdesc Options resolver for command parameter definitions.
+ * @desc Options resolver for command parameter definitions.
  * @extends BaseResolver
  * @ignore
  */

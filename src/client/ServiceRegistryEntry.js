@@ -1,5 +1,5 @@
 /**
- * @classdesc Records information about a service.
+ * @desc Records information about a service.
  */
 export default class ServiceRegistryEntry {
   /**

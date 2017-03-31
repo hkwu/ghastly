@@ -40,7 +40,7 @@ const RESPONSE_TYPES = {
  */
 
 /**
- * @classdesc Receives and dispatches messages.
+ * @desc Receives and dispatches messages.
  */
 export default class Dispatcher {
   /**
