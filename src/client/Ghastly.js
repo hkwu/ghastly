@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
 import Dispatcher from './Dispatcher';
-import ServiceRegistry from './ServiceRegistry';
+import ServiceContainer from './ServiceContainer';
 
 /**
  * @external {ClientOptions} https://discord.js.org/#/docs/main/stable/typedef/ClientOptions
@@ -27,9 +27,9 @@ export default class Ghastly extends Client {
     this.dispatcher = new Dispatcher({ client: this, prefix });
 
     /**
-     * The client's service registry.
-     * @type {ServiceRegistry}
+     * The client's service container.
+     * @type {ServiceContainer}
      */
-    this.services = new ServiceRegistry();
+    this.services = new ServiceContainer();
   }
 }

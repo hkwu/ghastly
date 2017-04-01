@@ -25,7 +25,7 @@ export default function provide(source, target) {
       context.services.mainBindings.forEach((name) => {
         // can't be sure what's been overwritten in the context
         if (!Object.prototype.hasOwnProperty.call(context, name)) {
-          services[name] = context.services.fetch(name);
+          services[name] = context.services.get(name);
         }
       });
 
@@ -59,7 +59,7 @@ export default function provide(source, target) {
     // inject services based on the name mapping constructed earlier
     names.forEach((contextName, serviceName) => {
       if (context.services.has(serviceName)) {
-        services[contextName] = context.services.fetch(serviceName);
+        services[contextName] = context.services.get(serviceName);
       }
     });
 
