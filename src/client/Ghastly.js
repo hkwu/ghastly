@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
-import Dispatcher from './Dispatcher';
-import ServiceContainer from './ServiceContainer';
+import Dispatcher from './dispatcher/Dispatcher';
+import ServiceContainer from './services/ServiceContainer';
 
 /**
  * @external {ClientOptions} https://discord.js.org/#/docs/main/stable/typedef/ClientOptions
