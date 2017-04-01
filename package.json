@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "build:docs": "jsdoc2md src/**/*.js > docs/api.md",
+    "build:api-docs": "esdoc",
     "watch": "babel --watch src --out-dir lib",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -45,10 +45,10 @@
     "chai": "^3.5.0",
     "chai-subset": "^1.3.0",
     "docute-cli": "^0.5.0",
+    "esdoc": "^0.5.2",
     "eslint": "^3.1.1",
     "eslint-config-airbnb-base": "^11.0.0",
     "eslint-plugin-import": "^2.2.0",
-    "jsdoc-to-markdown": "^3.0.0",
     "mocha": "^3.0.2"
   },
   "peerDependencies": {
