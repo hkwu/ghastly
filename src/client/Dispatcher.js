@@ -6,7 +6,6 @@ import ArgumentParser from '../command/parsers/ArgumentParser';
 import CommandObject from '../command/CommandObject';
 import CommandParser from '../command/parsers/CommandParser';
 import CommandRegistry from '../command/CommandRegistry';
-import DispatchError from '../errors/DispatchError';
 import MarkdownFormatter from '../utils/MarkdownFormatter';
 import Response from '../command/responses/Response';
 import generate from '../core/generate';
@@ -30,13 +29,11 @@ const RESPONSE_TYPES = {
  */
 
 /**
- * Emitted when a message response could not be dispatched.
- * @event Ghastly#dispatchError
- * @param {DispatchError} error - The error thrown by the dispatcher function.
- * @param {Message} message - The Discord.js `Message` object which triggered
- *   the dispatch action.
- * @param {Message} [newMessage] - The updated Discord.js `Message` object which
- *   triggered the dispatch action. Only given when the event was a message update.
+ * Emitted when a response could not be dispatched.
+ * @event Ghastly#dispatchFail
+ * @param {string} type - The type of failure encountered.
+ * @param {Object} payload - An object containing context on the failure encountered.
+ *   Contents vary depending on the type of the failure.
  */
 
 /**
@@ -75,45 +72,11 @@ export default class Dispatcher {
      */
     this.prefix = null;
 
-    /**
-     * The dispatcher middleware stack.
-     * @type {middlewareLayer[]}
-     * @private
-     */
-    this.middleware = [];
-
-    /**
-     * The composed dispatcher middleware function.
-     * @type {Function}
-     * @private
-     */
-    this.dispatchMiddleware = this.constructor.dispatchMiddlewareCore;
-
-    const dispatchHandler = async (...args) => {
-      try {
-        await this.dispatch(...args);
-      } catch (error) {
-        this.client.emit('dispatchError', error, ...args);
-      }
-    };
-
     client.once('ready', () => {
       this.prefix = this.regexifyPrefix(this.rawPrefix);
     });
-    client.on('message', dispatchHandler);
-    client.on('messageUpdate', dispatchHandler);
-  }
-
-  /**
-   * The default middleware layer for the dispatch handler. Simply returns the
-   *   given context.
-   * @param {Object} context - The dispatch context.
-   * @returns {Promise.<Object>} Resolves to the given context.
-   * @static
-   * @private
-   */
-  static async dispatchMiddlewareCore(context) {
-    return context;
+    client.on('message', this.dispatch.bind(this));
+    client.on('messageUpdate', this.dispatch.bind(this));
   }
 
   /**
@@ -170,59 +133,100 @@ export default class Dispatcher {
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
    *   received only when the message event was an update.
-   * @returns {Promise.<*, Error>} Promise resolving to a Discord.js `Message`
-   *   object if a message was dispatched directly. If a custom response is
-   *   dispatched, resolves to whatever the custom response handler returns.
-   *   Resolves to `null` if no response is dispatched.
-   * Errors bubble up regularly. Rejects with a `DispatchError` specifically when
-   *   the given response type is not recognized.
+   * @returns {Promise.<Dispatcher>} Promise resolving to the instance this method
+   *   was called on.
+   * @emits {Ghastly#dispatchFail} Emitted when a response could not be dispatched.
    */
   async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {
-      throw new DispatchError('Message did not pass the event filter.');
+      return this.client.emit('dispatchFail', 'eventFilter', { message, newMessage });
     }
 
     const contentMessage = newMessage || message;
 
     if (this.shouldFilterContent(contentMessage.content)) {
-      throw new DispatchError('Message did not pass the content filter.');
+      return this.client.emit('dispatchFail', 'contentFilter', { message: contentMessage });
     }
 
-    const parsedCommand = CommandParser.parse(contentMessage, this.prefix);
+    let parsedCommand;
+
+    try {
+      parsedCommand = CommandParser.parse(contentMessage, this.prefix);
+    } catch (error) {
+      return this.client.emit('dispatchFail', 'parseCommand', { message: contentMessage, error });
+    }
+
     const command = this.commands.get(parsedCommand.identifier);
 
     if (!command) {
-      throw new DispatchError('Parsed command could not be found.');
+      return this.client.emit('dispatchFail', 'unknownCommand', {
+        message: contentMessage,
+        command: parsedCommand.identifier,
+      });
     }
 
-    const context = await this.dispatchMiddleware({
+    const context = {
       message: contentMessage,
       client: this.client,
       services: this.client.services,
       commands: this.commands,
       formatter: MarkdownFormatter,
-    });
-
-    if (!context) {
-      throw new DispatchError('Dispatch middleware did not return a context object.');
-    }
+    };
 
     const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
     const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
-
     const createDispatch = handlerContext => (
       response => this.dispatchResponse(handlerContext, response)
     );
-    const args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
-    const result = await command.handler({ ...context, args, [CREATE_DISPATCH]: createDispatch });
+
+    let args;
+
+    try {
+      args = ArgumentParser.parse(command.parameters, parsedCommand.rawArgs);
+    } catch (error) {
+      return this.client.emit('dispatchFail', 'parseArguments', {
+        message: contentMessage,
+        command: parsedCommand.identifier,
+        error,
+      });
+    }
+
+    let result;
+
+    try {
+      result = await command.handler({ ...context, args, [CREATE_DISPATCH]: createDispatch });
+    } catch (error) {
+      return this.client.emit('dispatchFail', 'handlerError', {
+        message: contentMessage,
+        command: command.name,
+        args,
+        error,
+      });
+    }
 
     if (!result) {
-      throw new DispatchError('Handler middleware did not return a dispatch value.');
+      return this.client.emit('dispatchFail', 'middlewareFilter', {
+        message: contentMessage,
+        command: command.name,
+        args,
+      });
     }
 
     const { response, [ORIGINAL_CONTEXT]: handlerContext } = result;
 
-    return this.dispatchResponse(handlerContext, response);
+    try {
+      await this.dispatchResponse(handlerContext, response);
+
+      return this;
+    } catch (error) {
+      return this.client.emit('dispatchFail', 'dispatch', {
+        message: contentMessage,
+        command: command.name,
+        args,
+        response,
+        error,
+      });
+    }
   }
 
   /**
@@ -273,12 +277,12 @@ export default class Dispatcher {
    * @param {Object} context - The context object which was received by the
    *   dispatched command's handler.
    * @param {*} response - The response value.
-   * @returns {Promise.<(Message|*), Error>} Promise resolving to a Discord.js
-   *   `Message` object if a message was dispatched directly. If a custom response
-   *   is dispatched, resolves to whatever the custom response handler returns.
+   * @returns {Promise.<*, Error>} Promise resolving to a Discord.js `Message`
+   *   object if a message was dispatched directly. If a custom response is
+   *   dispatched, resolves to whatever the custom response handler returns.
    *   Resolves to `null` if no response is dispatched.
-   * Errors bubble up regularly. Rejects with a `DispatchError` specifically when
-   *   the given response type is not recognized.
+   * Rejects with an `Error` when the given response type is not recognized, or
+   *   when an error is encountered while dispatching a value.
    * @private
    */
   async dispatchResponse(context, response) {
@@ -299,7 +303,7 @@ export default class Dispatcher {
       case RESPONSE_TYPES.NO_RESPONSE:
         return null;
       default:
-        throw new DispatchError('Returned value from command handler is not of a recognized type.');
+        throw new Error('Returned value from command handler is not of a recognized type.');
     }
   }
 }
