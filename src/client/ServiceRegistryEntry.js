@@ -3,7 +3,6 @@
  */
 export default class ServiceRegistryEntry {
   /**
-   * Constructor.
    * @param {Object} options - Options for the entry.
    * @param {boolean} options.isSingleton - Whether or not this service is
    *   treated as a singleton.

@@ -8,7 +8,6 @@ import apply from '../core/apply';
  */
 export default class CommandObject {
   /**
-   * Constructor.
    * @param {(Function|CommandObject)} source - The command handler function, or
    *   a `CommandObject` instance whose data will be copied over.
    * @throws {TypeError} Thrown if the given source is not a function or

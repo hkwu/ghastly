@@ -7,7 +7,6 @@ import { isString } from 'lodash/lang';
  */
 export default class StringMap extends Map {
   /**
-   * Constructor.
    * @param {*} iterable - The iterable to use to construct the map.
    * @throws {TypeError} Thrown if any of the keys are not strings.
    */

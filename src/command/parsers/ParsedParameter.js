@@ -9,7 +9,6 @@
  */
 export default class ParsedParameter {
   /**
-   * Constructor.
    * @param {Object} values - The parsed data.
    * @param {string} values.name - The name of the parameter.
    * @param {boolean} values.optional - Whether or not the parameter is optional.

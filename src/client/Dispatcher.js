@@ -44,7 +44,6 @@ const RESPONSE_TYPES = {
  */
 export default class Dispatcher {
   /**
-   * Constructor.
    * @param {Object} options - The configuration values for the dispatcher.
    * @param {Ghastly} options.client - The client this dispatcher is attached to.
    * @param {string} options.prefix - The prefix for this dispatcher.
