@@ -1,10 +1,11 @@
 {
   "name": "ghastly",
   "version": "0.2.1",
-  "description": "A lightweight library that helps to modularize applications built with Discord.js.",
+  "description": "A powerful and flexible library for modularizing Discord.js clients.",
   "keywords": [
     "discord.js",
     "library",
+    "command",
     "plugin",
     "bot"
   ],
@@ -15,7 +16,9 @@
   "license": "MIT",
   "author": "Kelvin Wu <kelvinwu1996@gmail.com>",
   "files": [
-    "lib"
+    "lib",
+    "command.js",
+    "middleware.js"
   ],
   "main": "lib/index.js",
   "repository": {
