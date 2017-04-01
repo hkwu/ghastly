@@ -1,6 +1,9 @@
 import { isArray, isFunction } from 'lodash/lang';
-import ServiceContainerEntry from './ServiceContainerEntry';
-import StringMap from '../utils/StringMap';
+import ConstructedService from './ConstructedService';
+import InstanceService from './InstanceService';
+import Service from './Service';
+import SingletonService from './SingletonService';
+import StringMap from '../../utils/StringMap';
 
 /**
  * @desc Manages services in the application.
@@ -9,7 +12,7 @@ export default class ServiceContainer {
   constructor() {
     /**
      * The services stored in this container.
-     * @type {StringMap.<ServiceContainerEntry>}
+     * @type {StringMap.<Service>}
      * @private
      */
     this.services = new StringMap();
@@ -44,7 +47,7 @@ export default class ServiceContainer {
       throw new TypeError('Expected service builder to be a function.');
     }
 
-    return this.addService(identifier, ServiceContainerEntry.CONSTRUCTED, builder);
+    return this.addService(Service.CONSTRUCTED, identifier, builder);
   }
 
   /**
@@ -61,7 +64,7 @@ export default class ServiceContainer {
       throw new TypeError('Expected service builder to be a function.');
     }
 
-    return this.addService(identifier, ServiceContainerEntry.SINGLETON, builder);
+    return this.addService(Service.SINGLETON, identifier, builder);
   }
 
   /**
@@ -73,7 +76,7 @@ export default class ServiceContainer {
    * @returns {ServiceContainer} The instance this method was called on.
    */
   instance(identifier, value) {
-    return this.addService(identifier, ServiceContainerEntry.INSTANCE, value);
+    return this.addService(Service.INSTANCE, identifier, value);
   }
 
   /**
@@ -159,17 +162,33 @@ export default class ServiceContainer {
 
   /**
    * Adds a service to the container.
+   * @param {string} type - The type of service being added.
    * @param {(string|string[])} identifier - The identifier of the service. If
    *   given an array, additional identifiers are added as service aliases.
-   * @param {string} type - The type of service being added.
    * @param {*} service - The service being added.
    * @return {ServiceContainer} The instance this method was called on.
+   * @throws {Error} Thrown if the service type is invalid.
    * @private
    */
-  addService(identifier, type, service) {
+  addService(type, identifier, service) {
     const [name, ...aliases] = isArray(identifier) ? identifier : [identifier];
 
-    this.services.set(name, new ServiceContainerEntry({ type, service, aliases }));
+    switch (type) {
+      case Service.CONSTRUCTED:
+        this.services.set(name, new ConstructedService(aliases, service));
+
+        break;
+      case Service.SINGLETON:
+        this.services.set(name, new SingletonService(aliases, service));
+
+        break;
+      case Service.INSTANCE:
+        this.services.set(name, new InstanceService(aliases, service));
+
+        break;
+      default:
+        throw new Error('Unrecognized service type.');
+    }
 
     aliases.forEach((alias) => {
       this.aliases.set(alias, name);
