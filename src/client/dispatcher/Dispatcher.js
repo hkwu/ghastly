@@ -65,7 +65,7 @@ export default class Dispatcher {
      * @type {string}
      * @private
      */
-    this.prefix = escapeRegExp(prefix);
+    this.prefix = escapeRegExp(prefix.trim());
 
     /**
      * The prefix filter constructed from the raw prefix.
@@ -238,14 +238,18 @@ export default class Dispatcher {
    * @private
    */
   createPrefixFilter(prefix) {
-    switch (prefix.toLowerCase().trim()) {
-      case '@client':
-        return new RegexFilter(`^<@!?${this.client.user.id}>`);
-      case '@me':
-        return new ClosureFilter(({ author }) => author.id === this.client.user.id);
-      default:
-        return new RegexFilter(`^${prefix}`);
+    if (/^@client$/i.test(prefix)) {
+      return new RegexFilter(`^<@!?${this.client.user.id}>`);
+    } else if (/^@me:.+/i.test(prefix)) {
+      const prefixString = prefix.match(/@me:(.+)/)[1];
+      const prefixRegex = new RegExp(`^${prefixString}`);
+
+      return new ClosureFilter(({ author, content }) => (
+        author.id === this.client.user.id && content.test(prefixRegex)
+      ));
     }
+
+    return new RegexFilter(`^${prefix}`);
   }
 
   /**

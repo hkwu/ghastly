@@ -1,4 +1,5 @@
 import { Client } from 'discord.js';
+import { isString } from 'lodash/lang';
 import Dispatcher from './dispatcher/Dispatcher';
 import ServiceContainer from './services/ServiceContainer';
 
@@ -14,9 +15,14 @@ export default class Ghastly extends Client {
   /**
    * @param {ClientOptions} options - The options for the client.
    * @param {string} options.prefix - The prefix for the client's dispatcher.
+   * @throws {TypeError} Thrown if any option is of the wrong type.
    */
   constructor(options) {
     const { prefix, ...rest } = options;
+
+    if (!isString(prefix)) {
+      throw new TypeError('Expected prefix to be a string.');
+    }
 
     super(rest);
 
