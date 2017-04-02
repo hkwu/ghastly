@@ -12,7 +12,7 @@ describe('configure()', function () {
       const originalConfigurator = () => ({ description: 'Foosball' });
       const generatedConfigurator = configure({ description: 'Bar' })(originalConfigurator);
 
-      expect(generatedConfigurator()).to.containSubset({ description: 'Bar' });
+      expect(generatedConfigurator({})).to.containSubset({ description: 'Bar' });
     });
 
     it('configures default properties', function () {
@@ -29,7 +29,7 @@ describe('configure()', function () {
         description: 'Something.',
       })(originalConfigurator);
 
-      expect(generatedConfigurator()).to.containSubset({
+      expect(generatedConfigurator({})).to.containSubset({
         triggers: [
           'one',
           'two',
@@ -52,7 +52,7 @@ describe('configure()', function () {
         ],
       })(originalConfigurator);
 
-      expect(generatedConfigurator()).to.containSubset({
+      expect(generatedConfigurator({})).to.containSubset({
         triggers: [
           'original',
           'four',
@@ -85,7 +85,7 @@ describe('configure()', function () {
         originalConfigurator,
       );
 
-      expect(generatedConfigurator()).to.containSubset({
+      expect(generatedConfigurator({})).to.containSubset({
         triggers: ['foo'],
         description: 'Unbelievable.',
       });
@@ -95,12 +95,51 @@ describe('configure()', function () {
   describe('function configurations', function () {
     it('changes configurations', function () {
       const originalConfigurator = () => ({ description: 'Foosball' });
-      const generatedConfigurator = configure((configuration) => ({
+      const generatedConfigurator = configure(configuration => ({
         ...configuration,
         description: 'Bar',
       }))(originalConfigurator);
 
-      expect(generatedConfigurator()).to.containSubset({ description: 'Bar' });
+      expect(generatedConfigurator({})).to.containSubset({ description: 'Bar' });
+    });
+
+    it('configures multiple times', function () {
+      const originalConfigurator = ({ additionalTriggers = [] }) => ({
+        triggers: ['original', ...additionalTriggers],
+        description: 'original',
+      });
+      const applicators = [
+        configure(({ triggers, ...rest }) => ({
+          ...rest,
+          triggers: [
+            ...triggers,
+            'two',
+            'three',
+            'four',
+            'five',
+          ],
+          description: 'Something.',
+        })),
+        configure(options => ({
+          ...options,
+          description: 'Unbelievable.',
+        })),
+      ];
+      const generatedConfigurator = applicators.reduce(
+        (configurator, applicator) => applicator(configurator),
+        originalConfigurator,
+      );
+
+      expect(generatedConfigurator({})).to.containSubset({
+        triggers: [
+          'original',
+          'two',
+          'three',
+          'four',
+          'five',
+        ],
+        description: 'Unbelievable.',
+      });
     });
   });
 });

@@ -1,6 +1,12 @@
 import { isFunction, isPlainObject } from 'lodash/lang';
 
 /**
+ * Properties which are automatically handled when using object configurations.
+ * @type {string[]}
+ */
+const DEFAULT_PROPERTIES = ['triggers', 'description', 'middleware'];
+
+/**
  * Provides a bridge to provide configuration data for command configurators.
  *   Consumes a config object containing the configuration data and produces a
  *   function. This function consumes a configurator and returns another configurator
@@ -27,30 +33,20 @@ export default function configure(configuration) {
       return options => configuration(configurator(options));
     }
 
-    return (options = {}) => {
-      // merge the original config and the trickled config
-      const mergedOptions = { ...configuration, ...options };
-      // extract default keys
-      const {
-        triggers: optionTriggers,
-        description: optionDescription,
-        middleware: optionMiddleware,
-        ...rest
-      } = mergedOptions;
-
-      // get the constructed config from the lower levels
-      const lowerConfiguration = configurator(rest);
-      const {
-        triggers: configurationTriggers,
-        description: configurationDescription,
-        middleware: configurationMiddleware,
-      } = lowerConfiguration;
+    return (options) => {
+      // merge the original config and the next config
+      const merged = { ...configuration, ...options };
+      // generate the configuration from the given configurator
+      const bubbled = configurator(merged);
 
       return {
-        ...lowerConfiguration,
-        triggers: optionTriggers || configurationTriggers,
-        description: optionDescription || configurationDescription,
-        middleware: optionMiddleware || configurationMiddleware,
+        ...bubbled,
+        ...DEFAULT_PROPERTIES.reduce((accumulated, property) => ({
+          ...accumulated,
+          // if the merged configuration specifies these keys, use them
+          // else use the values that were bubbled up
+          [property]: merged[property] || bubbled[property],
+        }), {}),
       };
     };
   };

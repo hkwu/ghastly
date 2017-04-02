@@ -128,7 +128,7 @@ export default class Dispatcher {
    * @returns {Dispatcher} The instance this method was called on.
    */
   load(...configurators) {
-    configurators.map(configurator => configurator()).forEach((commandConfig) => {
+    configurators.map(configurator => configurator({})).forEach((commandConfig) => {
       this.commands.load(new CommandObject(commandConfig));
     });
 
