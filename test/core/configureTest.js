@@ -9,7 +9,11 @@ describe('configure()', function () {
 
   describe('object configurations', function () {
     it('changes configurations', function () {
-      const originalConfigurator = () => ({ description: 'Foosball' });
+      const originalConfigurator = () => ({
+        handler() {},
+        triggers: ['hairy'],
+        description: 'Foosball',
+      });
       const generatedConfigurator = configure({ description: 'Bar' })(originalConfigurator);
 
       expect(generatedConfigurator({})).to.containSubset({ description: 'Bar' });
@@ -17,6 +21,7 @@ describe('configure()', function () {
 
     it('configures default properties', function () {
       const originalConfigurator = () => ({
+        handler() {},
         triggers: ['original'],
         description: 'original',
       });
@@ -39,8 +44,38 @@ describe('configure()', function () {
       });
     });
 
+    it('configures middleware properly', function () {
+      const originalConfigurator = () => ({
+        handler() {},
+        triggers: ['original'],
+        description: 'original',
+        middleware: [
+          'three',
+          'four',
+        ],
+      });
+      const generatedConfigurator = configure({
+        middleware: [
+          'one',
+          'two',
+        ],
+      })(originalConfigurator);
+
+      expect(generatedConfigurator({})).to.containSubset({
+        triggers: ['original'],
+        description: 'original',
+        middleware: [
+          'one',
+          'two',
+          'three',
+          'four',
+        ],
+      });
+    });
+
     it('configures non-default properties', function () {
       const originalConfigurator = ({ additionalTriggers }) => ({
+        handler() {},
         triggers: ['original', ...additionalTriggers],
         description: 'original',
       });
@@ -64,6 +99,7 @@ describe('configure()', function () {
 
     it('configures multiple times', function () {
       const originalConfigurator = ({ additionalTriggers }) => ({
+        handler() {},
         triggers: ['original', ...additionalTriggers],
         description: 'original',
       });
@@ -90,56 +126,14 @@ describe('configure()', function () {
         description: 'Unbelievable.',
       });
     });
-  });
 
-  describe('function configurations', function () {
-    it('changes configurations', function () {
-      const originalConfigurator = () => ({ description: 'Foosball' });
-      const generatedConfigurator = configure(configuration => ({
-        ...configuration,
-        description: 'Bar',
-      }))(originalConfigurator);
-
-      expect(generatedConfigurator({})).to.containSubset({ description: 'Bar' });
-    });
-
-    it('configures multiple times', function () {
-      const originalConfigurator = ({ additionalTriggers = [] }) => ({
-        triggers: ['original', ...additionalTriggers],
-        description: 'original',
+    it('validates configurations', function () {
+      const originalConfigurator = () => ({
+        handler() {},
       });
-      const applicators = [
-        configure(({ triggers, ...rest }) => ({
-          ...rest,
-          triggers: [
-            ...triggers,
-            'two',
-            'three',
-            'four',
-            'five',
-          ],
-          description: 'Something.',
-        })),
-        configure(options => ({
-          ...options,
-          description: 'Unbelievable.',
-        })),
-      ];
-      const generatedConfigurator = applicators.reduce(
-        (configurator, applicator) => applicator(configurator),
-        originalConfigurator,
-      );
+      const generatedConfigurator = configure({})(originalConfigurator);
 
-      expect(generatedConfigurator({})).to.containSubset({
-        triggers: [
-          'original',
-          'two',
-          'three',
-          'four',
-          'five',
-        ],
-        description: 'Unbelievable.',
-      });
+      expect(() => generatedConfigurator({})).to.throw(Error);
     });
   });
 });
