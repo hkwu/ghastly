@@ -26,7 +26,11 @@ export default function expectPermissions(...permissions) {
   });
 
   return async (next, context) => {
-    const { member } = context;
+    const {
+      message: {
+        member,
+      },
+    } = context;
 
     if (!member) {
       return next(context);

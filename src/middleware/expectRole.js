@@ -23,7 +23,11 @@ export default function expectRole(...identifiers) {
   const whitelist = new Set(identifiers);
 
   return async (next, context) => {
-    const { member } = context;
+    const {
+      message: {
+        member,
+      },
+    } = context;
 
     if (!member) {
       return next(context);
