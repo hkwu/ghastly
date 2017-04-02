@@ -21,6 +21,7 @@ export default class CommandObject {
       handler,
       triggers: [name, ...aliases],
       parameters,
+      group,
       description,
       middleware,
     } = resolver.resolve(configuration);
@@ -44,6 +45,12 @@ export default class CommandObject {
     this.parameters = ParameterParser.validate(...parameters);
 
     /**
+     * The group this command is part of, if any.
+     * @type {?CommandGroup}
+     */
+    this.group = group;
+
+    /**
      * The description for the command.
      * @type {?string}
      */
@@ -54,18 +61,7 @@ export default class CommandObject {
      * @type {Function}
      * @private
      */
-    this.handler = apply(...middleware)(async (context) => {
-      const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
-      const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
-      const originalContext = { ...context };
-      const createDispatch = context[CREATE_DISPATCH];
-      const dispatch = createDispatch(originalContext);
-
-      return {
-        response: await handler({ ...context, dispatch }),
-        [ORIGINAL_CONTEXT]: originalContext,
-      };
-    });
+    this.handler = this.constructor.generateHandler(handler, middleware);
 
     /**
      * The original command handler function.
@@ -80,6 +76,28 @@ export default class CommandObject {
      * @private
      */
     this.middleware = middleware;
+
+    /**
+     * The original command middleware.
+     * @type {middlewareLayer[]}
+     * @private
+     */
+    this.originalMiddleware = middleware;
+  }
+
+  static generateHandler(handler, middleware) {
+    return apply(...middleware)(async (context) => {
+      const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
+      const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
+      const originalContext = { ...context };
+      const createDispatch = context[CREATE_DISPATCH];
+      const dispatch = createDispatch(originalContext);
+
+      return {
+        response: await handler({ ...context, dispatch }),
+        [ORIGINAL_CONTEXT]: originalContext,
+      };
+    });
   }
 
   /**
@@ -89,5 +107,16 @@ export default class CommandObject {
    */
   handle(context) {
     return this.handler(context);
+  }
+
+  group(commandGroup) {
+    this.group = commandGroup;
+
+    commandGroup.on('middlewareUpdate', (layers) => {
+      this.handler = this.constructor.generateHandler(this.originalHandler, [
+        ...layers,
+        ...this.middleware,
+      ]);
+    });
   }
 }

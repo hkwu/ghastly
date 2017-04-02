@@ -17,11 +17,13 @@ export default class CommandObjectResolver extends BaseResolver {
       'triggers',
     ]).setDefaults({
       parameters: [],
+      group: null,
       description: null,
       middleware: [],
     }).setAllowedTypes('handler', 'function')
       .setAllowedTypes('triggers', 'array')
       .setAllowedTypes('parameters', 'array')
+      .setAllowedTypes('group', ['string', 'null'])
       .setAllowedTypes('description', ['string', 'null'])
       .setAllowedTypes('middleware', 'array');
   }
