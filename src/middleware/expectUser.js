@@ -8,16 +8,10 @@ import { isString } from 'lodash/lang';
  * @return {middlewareLayer} The layer which filters the messages.
  * @throws {TypeError} Thrown if the identifiers aren't strings.
  * @example
- * ```js
- * return {
- *   middleware: [
- *     expectRole(
- *       '275532051244111663',
- *       'LiamNeeson#5364',
- *     ),
- *   ],
- * };
- * ```
+ * expectUser(
+ *   '275532051244111663',
+ *   'LiamNeeson#5364',
+ * );
  */
 export default function expectUser(...identifiers) {
   identifiers.forEach((id) => {

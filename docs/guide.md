@@ -708,7 +708,7 @@ async function handler({ services }) {
 Elsewhere, you can access the container through `client.services`.
 
 #### Using the Service Container
-The service container provides several methods for binding and retrieving services. For detailed documentation, you can check the [ServiceContainer](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/client/ServiceContainer.js~ServiceContainer.html) entry in the API reference.
+The service container provides several methods for binding and retrieving services.
 
 ##### Binding Constructed Services
 Constructed services are services which are rebuilt each time they're fetched from the service container. To bind a new constructed service, use `services.construct()`. You must provide a name for the service in addition to a function which constructs and returns that service.
