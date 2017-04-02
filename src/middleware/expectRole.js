@@ -7,6 +7,17 @@ import { isString } from 'lodash/lang';
  *   pass the filter.
  * @return {middlewareLayer} The layer which filters the messages.
  * @throws {TypeError} Thrown if the identifiers aren't strings.
+ * @example
+ * ```js
+ * return {
+ *   middleware: [
+ *     expectRole(
+ *       '750315226641451132',
+ *       'Batman',
+ *     ),
+ *   ],
+ * };
+ * ```
  */
 export default function expectRole(...identifiers) {
   identifiers.forEach((id) => {

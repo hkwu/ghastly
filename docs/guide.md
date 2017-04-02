@@ -13,11 +13,8 @@ const client = new Client();
 
 The Ghastly client is an extension of the Discord.js client, so any methods, properties and events are inherited by the Ghastly client, if you require them.
 
-#### Configuration
-The client processes messages using a component called the dispatcher. In order to take advantage of the dispatcher, you need to configure it when you create the client.
-
-##### Setting Prefixes
-The dispatcher filters messages based on a prefix. The prefix can be any string (spaces are valid), with specific exceptions as outlined below.
+#### Setting a Prefix
+The client processes messages using a component called the dispatcher. In order to take advantage of the dispatcher, you need to configure it when you create the client. The dispatcher filters messages based on a prefix. The prefix can be any string (spaces are valid), with specific exceptions as outlined below.
 
 ```js
 const client = new Client({ prefix: '> ' });
@@ -27,14 +24,23 @@ const client = new Client({ prefix: '> ' });
   Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
 </p>
 
-###### Client Mention
-You can specify the client's mention as a prefix by using the special value `@self`. This is the recommended prefix as it's inherently unique.
+##### Mentions
+You can specify the client's mention as a prefix by using the special value `@client`. This is the recommended prefix as it's inherently unique.
 
 ```js
-const client = new Client({ prefix: '@self' });
+const client = new Client({ prefix: '@client' });
 ```
 
 The dispatcher will now only respond to `@client#1234 messages like these`.
+
+##### Selfbots
+Selfbots can use the `@me` prefix to ignore all messages not originating from the client itself. You will also need to specify the actual message prefix by prepending it with a colon:
+
+```js
+const client = new Client({ prefix: '@me:/' });
+```
+
+You can then trigger selfbot commands by using `/command`.
 
 #### Registering Commands
 Commands should be registered before logging in with the client. The dispatcher (available through `client.dispatcher`) provides the `load()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
@@ -299,7 +305,7 @@ The dispatch helper function. It allows the handler to generate a response actio
 The dispatcher's command registry.
 
 ##### `services`
-The client's [service registry](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
+The client's [service container](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
 
 ##### `formatter`
 The `MarkdownFormatter` utility class. Contains useful methods for composing Markdown within text.
@@ -491,7 +497,7 @@ async function handler({ dispatch }) {
   \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
 </p>
 
-##### Builtin Responses
+##### Builtins
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
 
 ###### Voice Responses
@@ -620,11 +626,56 @@ function after() {
 
 The returned value depends on the layer that's next in the chain. If there are no other layers left, the returned value is that of the command's handler function.
 
+#### Builtins
+Ghastly comes equipped with several convenience middleware. You can access these as named exports from `ghastly/middleware`:
+
+```js
+import { expectPermissions } from 'ghastly/middleware';
+```
+
+##### Filters
+Filter middleware are intended to block messages based on certain restrictions. They can be useful to prevent command abuse.
+
+###### `expectPermissions()`
+`expectPermissions()` blocks a message if a user does not have all of the specified permissions.
+
+```js
+expectPermissions(
+  'KICK_MEMBERS',
+  'BAN_MEMBERS',
+);
+```
+
+###### `expectRole()`
+`expectRole()` blocks a message if the user does not have any of the specified roles. Role IDs and names are accepted.
+
+```js
+expectRole(
+  '451517041536222613',
+  'The Rock',
+);
+```
+
+<p class="warning">
+  Keep in mind that role names are non-unique so the filter may not behave as expected when identical names exist.
+</p>
+
+###### `expectUser()`
+`expectUser()` blocks a message if it didn't come from any of the specified users. User IDs and username/discriminator combos (the kind you see after typing a mention) are accepted.
+
+```js
+expectRole(
+  '513412460316527251',
+  'The Rock#5555',
+  'RainbowFiend#9386',
+);
+```
+
 ### Services
 In some cases, you may find that your commands have external dependencies. For instance, a music client may depend on a queueing system to store information about which songs to play next. You may be tempted to simply store the queue somewhere your handler can reach:
 
 ```js
-import { VoiceResponse } from 'ghastly';
+import { VoiceResponse } from 'ghastly/command';
 
 // our magic music queue
 const queue = new MusicQueue();
@@ -636,57 +687,64 @@ function playSong() {
     return new VoiceResponse('stream', nextStream);
   }
 
-  return {
-    handler,
-    // ...
-  };
+  // ...
 }
 ```
 
-However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the `ServiceRegistry` interface.
+However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the `ServiceContainer` interface.
 
-#### Accessing the Service Registry
-When you have access to the context object, a reference to the registry is automatically injected for you.
+#### Accessing the Service Container
+When you have access to the context object, a reference to the container is automatically injected for you.
 
 ```js
 async function handler({ services }) {
-  const queue = services.fetch('music.queue');
+  const queue = services.get('music.queue');
   const nextStream = queue.next();
 
   return new VoiceResponse('stream', nextStream);
 }
 ```
 
-Elsewhere, you can access the registry through `client.services`.
+Elsewhere, you can access the container through `client.services`.
 
-#### Using the Service Registry
-The service registry provides several methods for binding and retrieving services.
+#### Using the Service Container
+The service container provides several methods for binding and retrieving services. For detailed documentation, you can check the [ServiceContainer](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/client/ServiceContainer.js~ServiceContainer.html) entry in the API reference.
 
-##### Binding Services
-To bind a new service, use `services.bind()`.
+##### Binding Constructed Services
+Constructed services are services which are rebuilt each time they're fetched from the service container. To bind a new constructed service, use `services.construct()`. You must provide a name for the service in addition to a function which constructs and returns that service.
 
 ```js
 // bind the MusicQueue instance under a single name
-client.services.bind('music.queue', new MusicQueue());
+client.services.construct('music.queue', () => new MusicQueue());
 
 // bind the MusicQueue instance with an alias
-client.services.bind(['music.queue', 'queue'], new MusicQueue());
+client.services.construct(['music.queue', 'queue'], () => new MusicQueue());
 ```
 
 <p class="warning">
   Every service binding is stored in the same namespace, so make sure you pick names that won't collide easily.
 </p>
 
-When you bind an instance as a service, the same instance is returned each time you fetch that service. In order to construct a new instance each time the service is fetched, you can bind a function instead.
+##### Binding Singletons
+In order to construct a service once and reuse the constructed service on subsequent fetches, use the `singleton()` method.
 
 ```js
-client.services.bind('music.queue', () => {
+client.services.singleton('music.queue', () => {
   const queue = new MusicQueue();
 
   // perform some queue initialization
 
   return queue;
 });
+```
+
+##### Binding Instances
+If you wish to bind a previously constructed service, use the `instance()` method.
+
+```js
+const queue = new MusicQueue();
+
+client.services.instance('music.queue', queue);
 ```
 
 ##### Unbinding Services
@@ -699,15 +757,15 @@ client.services.unbind('music.queue');
 Unbinding a service will remove all aliases associated with that service.
 
 ##### Binding Services with Providers
-Once you start binding a large number of services, it may be useful to take advantage of the **service provider** functionality. Providers are functions which bind a predefined selection of services to the service registry.
+Once you start binding a large number of services, it may be useful to take advantage of the **service provider** functionality. Providers are functions which bind a predefined selection of services to the service container.
 
 ```js
-function musicProvider({ registry }) {
-  registry.bind('music.queue', new MusicQueue());
+function musicProvider({ container }) {
+  container.instance('music.queue', new MusicQueue());
 }
 ```
 
-Providers receive the service registry as an argument. They may bind any number of services to the registry, though it's best to keep each provider focused on binding a specific group of services. To use a provider, you can pass the provider function to the registry's `bindProviders()` method, which accepts a variable number of providers.
+Providers receive the service container as an argument. They may bind any number of services to the container, though it's best to keep each provider focused on binding a specific group of services. To use a provider, you can pass the provider function to the container's `bindProviders()` method, which accepts a variable number of providers.
 
 ```js
 client.services.bindProviders(musicProvider);
@@ -721,10 +779,10 @@ client.services.has('music.queue'); // true
 ```
 
 ##### Fetching Services
-To retrieve a service from the registry, use the registry's `fetch()` method.
+To retrieve a service from the container, use the `get()` method.
 
 ```js
-const queue = client.services.fetch('music.queue');
+const queue = client.services.get('music.queue');
 ```
 
 If the requested service is not found, `null` is returned instead. 

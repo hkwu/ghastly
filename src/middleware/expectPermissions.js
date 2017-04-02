@@ -12,6 +12,17 @@ import { isNumber, isString } from 'lodash/lang';
  *   pass the filter.
  * @return {middlewareLayer} The layer which filters the messages.
  * @throws {TypeError} Thrown if the permissions aren't the right type.
+ * @example
+ * ```js
+ * return {
+ *   middleware: [
+ *     expectPermissions(
+ *       'MUTE_MEMBERS',
+ *       'DEAFEN_MEMBERS',
+ *     ),
+ *   ],
+ * };
+ * ```
  */
 export default function expectPermissions(...permissions) {
   permissions.forEach((id) => {
