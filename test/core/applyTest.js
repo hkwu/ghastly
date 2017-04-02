@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import apply from '../../src/core/apply';
 
-describe('apply()', function() {
-  it('composes functions properly', function() {
+describe('apply()', function () {
+  it('composes functions properly', function () {
     const coreA = (arg1, arg2) => ({ arg1, arg2 });
     const middlewareA = (next, arg1, arg2) => next(arg1, arg2);
 
@@ -22,7 +22,7 @@ describe('apply()', function() {
     expect(apply(middlewareC)(coreB)([1, 2, 3])).to.deep.equal([[1, 2, 3]]);
   });
 
-  it('composes multiple middleware properly', function() {
+  it('composes multiple middleware properly', function () {
     const core = (arg1, arg2) => ({ arg1, arg2 });
     const middlewareA = (next, arg1, arg2) => next(arg1, arg2);
     const middlewareB = next => next();
@@ -33,7 +33,7 @@ describe('apply()', function() {
     expect(apply(middlewareC, middlewareA)(core)(1, 2)).to.deep.equal({ arg1: 1, arg2: 2 });
   });
 
-  it('composes functions from right to left', function() {
+  it('composes functions from right to left', function () {
     const core = arg => arg;
     const middlewareA = (next, arg) => next(`${arg}+middlewareA`);
     const middlewareB = (next, arg) => next(`${arg}+middlewareB`);
@@ -42,7 +42,7 @@ describe('apply()', function() {
     expect(apply(middlewareB, middlewareA)(core)('arg')).to.equal('arg+middlewareB+middlewareA');
   });
 
-  it('works with before and after middleware', function() {
+  it('works with before and after middleware', function () {
     const core = arg => arg;
     const beforeMiddleware = (next, arg) => next(`(before ${arg})`);
     const afterMiddleware = (next, arg) => {
@@ -55,7 +55,7 @@ describe('apply()', function() {
     expect(apply(afterMiddleware, beforeMiddleware)(core)('arg')).to.equal('(after (before arg))');
   });
 
-  it('disallows invalid middleware', function() {
+  it('disallows invalid middleware', function () {
     const core = (arg1, arg2) => ({ arg1, arg2 });
     const middlewareA = (next, arg1, arg2) => next(arg1, arg2);
     const middlewareB = next => next();
@@ -65,7 +65,7 @@ describe('apply()', function() {
     expect(() => apply(2)(core)).to.throw(TypeError, 'Expected all provided middleware to be functions.');
   });
 
-  it('disallows invalid handlers', function() {
+  it('disallows invalid handlers', function () {
     const middlewareA = (next, arg1, arg2) => next(arg1, arg2);
 
     expect(() => apply(middlewareA)(2)).to.throw(TypeError, 'Expected handler to be a function.');

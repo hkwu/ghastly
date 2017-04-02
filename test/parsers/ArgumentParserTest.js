@@ -4,9 +4,9 @@ import ArgumentParserError from '../../src/errors/ArgumentParserError';
 import ParameterParser from '../../src/command/parsers/ParameterParser';
 import * as Types from '../../src/command/parsers/Types';
 
-describe('ArgumentParser', function() {
-  describe('#parse()', function() {
-    it('parses basic arguments', function() {
+describe('ArgumentParser', function () {
+  describe('#parse()', function () {
+    it('parses basic arguments', function () {
       const rules = ParameterParser.validate('pool', 'hello', 'poor=house');
 
       expect(ArgumentParser.parse(rules, 'bored boo')).to.deep.equal({
@@ -16,7 +16,7 @@ describe('ArgumentParser', function() {
       });
     });
 
-    it('parses single arguments', function() {
+    it('parses single arguments', function () {
       const rules = ParameterParser.validate(
         '(num) foo',
         'bar',
@@ -39,7 +39,7 @@ describe('ArgumentParser', function() {
       });
     });
 
-    it('parses repeatable arguments', function() {
+    it('parses repeatable arguments', function () {
       let rules = ParameterParser.validate('foo', 'bar*');
 
       expect(ArgumentParser.parse(rules, 'foo bar baz qux')).to.deep.equal({
@@ -63,7 +63,7 @@ describe('ArgumentParser', function() {
       });
     });
 
-    it('parses default arguments', function() {
+    it('parses default arguments', function () {
       const rules = ParameterParser.validate(
         'foo = 123',
         '(bool) bar = false',
@@ -89,15 +89,15 @@ describe('ArgumentParser', function() {
       });
     });
 
-    it('parses literal arguments', function() {
-      let rules = ParameterParser.validate('+(str) literal...');
+    it('parses literal arguments', function () {
+      const rules = ParameterParser.validate('+(str) literal...');
 
       expect(ArgumentParser.parse(rules, 'hello familia\'s reggi"o parmesian`no     ;;;')).to.deep.equal({
         literal: 'hello familia\'s reggi"o parmesian`no     ;;;',
       });
     });
 
-    it('disallows missing required arguments', function() {
+    it('disallows missing required arguments', function () {
       let rules = ParameterParser.validate('foo', 'bar');
 
       expect(() => ArgumentParser.parse(rules, 'foo')).to.throw(
@@ -115,7 +115,7 @@ describe('ArgumentParser', function() {
       );
     });
 
-    it('disallows invalid argument types', function() {
+    it('disallows invalid argument types', function () {
       let rules = ParameterParser.validate('(int) foo');
 
       expect(() => ArgumentParser.parse(rules, 'hello')).to.throw(
@@ -134,12 +134,12 @@ describe('ArgumentParser', function() {
     });
   });
 
-  describe('#normalizeArgumentType()', function() {
-    it('does nothing to string arguments', function() {
+  describe('#normalizeArgumentType()', function () {
+    it('does nothing to string arguments', function () {
       expect(ArgumentParser.normalizeArgumentType(Types.STRING, 'hallelujah')).to.equal('hallelujah');
     });
 
-    it('converts boolean, number and integer argument types', function() {
+    it('converts boolean, number and integer argument types', function () {
       expect(ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'true')).to.be.true;
       expect(ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'false')).to.be.false;
 
@@ -155,7 +155,7 @@ describe('ArgumentParser', function() {
       expect(ArgumentParser.normalizeArgumentType(Types.NUMBER, '-10')).to.equal(-10);
     });
 
-    it('disallows invalid argument types', function() {
+    it('disallows invalid argument types', function () {
       expect(() => ArgumentParser.normalizeArgumentType(Types.BOOLEAN, 'h')).to.throw(
         ArgumentParserError,
         'Expected argument \'h\' to be of type \'boolean\'.',

@@ -4,32 +4,32 @@ import ParameterParser from '../../src/command/parsers/ParameterParser';
 import ParameterParserError from '../../src/errors/ParameterParserError';
 import * as Types from '../../src/command/parsers/Types';
 
-describe('ParameterParser', function() {
-  before(function() {
+describe('ParameterParser', function () {
+  before(function () {
     chai.use(chaiSubset);
   });
 
-  describe('#validate()', function() {
-    it('allows repeatable parameters only as the last parameter', function() {
+  describe('#validate()', function () {
+    it('allows repeatable parameters only as the last parameter', function () {
       expect(() => ParameterParser.validate('paramName', 'paramName2*')).to.not.throw(ParameterParserError);
       expect(() => ParameterParser.validate('paramName*', 'paramName2')).to.throw(ParameterParserError, 'must be the last parameter');
     });
 
-    it('allows literal parameters as the only parameter', function() {
+    it('allows literal parameters as the only parameter', function () {
       expect(() => ParameterParser.validate('+(str) literal... : This is a literal')).to.not.throw(ParameterParserError);
       expect(() => ParameterParser.validate('+(str) literal... : This is a literal', 'notallowed')).to.throw(ParameterParserError, 'must be the only parameter');
       expect(() => ParameterParser.validate('notallowed', '+(str) literal... : This is a literal')).to.throw(ParameterParserError, 'must be the only parameter');
     });
 
-    it('disallows required parameters after optional parameters', function() {
+    it('disallows required parameters after optional parameters', function () {
       expect(() => ParameterParser.validate('+ required', '- optional')).to.not.throw(ParameterParserError);
       expect(() => ParameterParser.validate('- optional', '+ required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
       expect(() => ParameterParser.validate('- optional', 'required')).to.throw(ParameterParserError, 'Cannot have required parameters after optional');
     });
   });
 
-  describe('#parseParameter()', function() {
-    it('parses basic parameters', function() {
+  describe('#parseParameter()', function () {
+    it('parses basic parameters', function () {
       expect(ParameterParser.parseParameter('+foo')).to.containSubset({
         name: 'foo',
         optional: false,
@@ -81,7 +81,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses descriptions', function() {
+    it('parses descriptions', function () {
       expect(ParameterParser.parseParameter('name:description')).to.containSubset({
         name: 'name',
         description: 'description',
@@ -118,7 +118,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('strips whitespace in parameter definitions', function() {
+    it('strips whitespace in parameter definitions', function () {
       expect(ParameterParser.parseParameter('    -   (   str   )   white  *    =   space   :   man  the    ')).to.containSubset({
         name: 'white',
         optional: true,
@@ -130,13 +130,13 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('disallows empty parameters', function() {
+    it('disallows empty parameters', function () {
       expect(() => ParameterParser.parseParameter('')).to.throw(ParameterParserError, 'Parameter cannot be empty');
     });
   });
 
-  describe('#parseDefinition()', function() {
-    it('parses basic arguments', function() {
+  describe('#parseDefinition()', function () {
+    it('parses basic arguments', function () {
       expect(ParameterParser.parseDefinition('basic')).to.containSubset({
         name: 'basic',
         type: Types.STRING,
@@ -146,7 +146,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses repeatable arguments', function() {
+    it('parses repeatable arguments', function () {
       expect(ParameterParser.parseDefinition('array*')).to.containSubset({
         name: 'array',
         optional: false,
@@ -154,7 +154,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses optional arguments', function() {
+    it('parses optional arguments', function () {
       expect(ParameterParser.parseDefinition('-optional')).to.containSubset({
         name: 'optional',
         optional: true,
@@ -162,7 +162,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses optional repeatable arguments', function() {
+    it('parses optional repeatable arguments', function () {
       expect(ParameterParser.parseDefinition('-array*')).to.containSubset({
         name: 'array',
         optional: true,
@@ -171,14 +171,14 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses default single arguments', function() {
+    it('parses default single arguments', function () {
       expect(ParameterParser.parseDefinition('single=true')).to.containSubset({
         name: 'single',
         defaultValue: 'true',
       });
     });
 
-    it('parses default repeatable arguments', function() {
+    it('parses default repeatable arguments', function () {
       expect(ParameterParser.parseDefinition('array*=one two three four')).to.containSubset({
         name: 'array',
         optional: true,
@@ -187,14 +187,14 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses default repeatable values with spaces', function() {
+    it('parses default repeatable values with spaces', function () {
       expect(ParameterParser.parseDefinition('array*=\'single quotes\' "double quotes" \'nested "quotes"\'')).to.containSubset({
         name: 'array',
         defaultValue: ['single quotes', 'double quotes', 'nested "quotes"'],
       });
     });
 
-    it('parses parameter types', function() {
+    it('parses parameter types', function () {
       expect(ParameterParser.parseDefinition('(bool)variable')).to.containSubset({
         name: 'variable',
         type: Types.BOOLEAN,
@@ -242,7 +242,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('parses typed default values', function() {
+    it('parses typed default values', function () {
       expect(ParameterParser.parseDefinition('(bool)name=true')).to.containSubset({
         name: 'name',
         type: Types.BOOLEAN,
@@ -292,7 +292,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('strips redundant pluses and minuses', function() {
+    it('strips redundant pluses and minuses', function () {
       expect(ParameterParser.parseDefinition('+single')).to.containSubset({
         name: 'single',
         optional: false,
@@ -318,7 +318,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('strips redundant asterisks', function() {
+    it('strips redundant asterisks', function () {
       expect(ParameterParser.parseDefinition('array********')).to.containSubset({
         name: 'array',
         repeatable: true,
@@ -331,7 +331,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('strips whitespace', function() {
+    it('strips whitespace', function () {
       expect(ParameterParser.parseDefinition('name   =   someVal')).to.containSubset({
         name: 'name',
         optional: true,
@@ -346,7 +346,7 @@ describe('ParameterParser', function() {
       });
     });
 
-    it('disallows invalid parameter types', function() {
+    it('disallows invalid parameter types', function () {
       expect(() => (
         ParameterParser.parseDefinition('(func) name')
       )).to.throw(ParameterParserError, 'Unrecognized parameter type declaration');
@@ -356,7 +356,7 @@ describe('ParameterParser', function() {
       )).to.throw(ParameterParserError, 'Unrecognized parameter type declaration');
     });
 
-    it('disallows invalid default value types', function() {
+    it('disallows invalid default value types', function () {
       expect(() => (
         ParameterParser.parseDefinition('(int) array* = hey not an integer 123 !')
       )).to.throw(ParameterParserError, 'Given default value \'hey\' is not of the correct type');
@@ -370,7 +370,7 @@ describe('ParameterParser', function() {
       )).to.not.throw(ParameterParserError, 'Given default value \'true\' is not of the correct type');
     });
 
-    it('disallows non-string literal parameters', function() {
+    it('disallows non-string literal parameters', function () {
       expect(() => ParameterParser.parseDefinition('(int) literal...')).to.throw(ParameterParserError, 'Literals can only be used with string parameters');
       expect(() => ParameterParser.parseDefinition('(str) literal...')).to.not.throw(ParameterParserError);
       expect(() => ParameterParser.parseDefinition('(string) literal...')).to.not.throw(ParameterParserError);

@@ -3,13 +3,13 @@ import chaiSubset from 'chai-subset';
 import CommandParser from '../../src/command/parsers/CommandParser';
 import RegexFilter from '../../src/client/dispatcher/RegexFilter';
 
-describe('CommandParser', function() {
-  before(function() {
+describe('CommandParser', function () {
+  before(function () {
     chai.use(chaiSubset);
   });
 
-  describe('#parse()', function() {
-    it('parses basic commands', function() {
+  describe('#parse()', function () {
+    it('parses basic commands', function () {
       let message = {
         content: '!cmd pro',
         client: {
@@ -43,7 +43,7 @@ describe('CommandParser', function() {
       });
     });
 
-    it('parses commands with mentions', function() {
+    it('parses commands with mentions', function () {
       let message = {
         content: '<@123456789> cmd pro pro',
         client: {
@@ -93,7 +93,7 @@ describe('CommandParser', function() {
       });
     });
 
-    it('disallows mentions with no commands', function() {
+    it('disallows mentions with no commands', function () {
       const message = {
         content: '<@123456789>',
         client: {
