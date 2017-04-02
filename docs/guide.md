@@ -636,6 +636,15 @@ import { expectPermissions } from 'ghastly/middleware';
 ##### Filters
 Filter middleware are intended to block messages based on certain restrictions. They can be useful to prevent command abuse.
 
+###### `expectDM()`
+`expectDM()` blocks a message if it isn't received in a direct message channel.
+
+###### `expectGroupDM()`
+`expectDM()` blocks a message if it isn't received in a group direct message channel.
+
+###### `expectGuild()`
+`expectGuild()` blocks a message if it isn't received in a guild text channel.
+
 ###### `expectPermissions()`
 `expectPermissions()` blocks a message if a user does not have all of the specified permissions.
 
