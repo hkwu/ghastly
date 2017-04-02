@@ -42,7 +42,7 @@ export default class ServiceContainer {
    * @returns {ServiceContainer} The instance this method was called on.
    * @throws {TypeError} Thrown if the builder is not a function.
    */
-  bind(identifier, builder) {
+  construct(identifier, builder) {
     if (!isFunction(builder)) {
       throw new TypeError('Expected service builder to be a function.');
     }
