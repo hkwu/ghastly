@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import apply from '../../src/core/apply';
 
-describe('apply', function() {
+describe('apply()', function() {
   it('composes functions properly', function() {
     const coreA = (arg1, arg2) => ({ arg1, arg2 });
     const middlewareA = (next, arg1, arg2) => next(arg1, arg2);

@@ -10,7 +10,6 @@ import CommandRegistry from '../../command/CommandRegistry';
 import MarkdownFormatter from '../../utils/MarkdownFormatter';
 import RegexFilter from './RegexFilter';
 import Response from '../../command/responses/Response';
-import generate from '../../core/generate';
 
 /**
  * Response type strings.
@@ -105,12 +104,31 @@ export default class Dispatcher {
   }
 
   /**
+   * The configuration object returned by command configurators.
+   * @typedef {Object} CommandConfiguration
+   * @property {Function} handler - The command handler.
+   * @property {string[]} triggers - The command triggers. The first element is
+   *   treated as the command name. Any other elements are treated as optional
+   *   aliases.
+   * @property {(string|ParameterDefinition)} parameters - The command parameters.
+   * @property {string} description - The command description.
+   * @property {middlewareLayer[]} middleware - The command middleware.
+   */
+
+  /**
+   * Function which generates a command configuration.
+   * @callback commandConfigurator
+   * @param {Object} [options] - Options for the configurator.
+   * @returns {CommandConfiguration} The command configuration.
+   */
+
+  /**
    * Adds the given commands to the registry.
-   * @param {...Function} commands - The command generators.
+   * @param {...commandConfigurator} configurators - The command configurators.
    * @returns {Dispatcher} The instance this method was called on.
    */
-  load(...commands) {
-    commands.map(generate).forEach((commandConfig) => {
+  load(...configurators) {
+    configurators.map(configurator => configurator()).forEach((commandConfig) => {
       this.commands.load(new CommandObject(commandConfig));
     });
 
