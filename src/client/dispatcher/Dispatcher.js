@@ -214,7 +214,7 @@ export default class Dispatcher {
     let result;
 
     try {
-      result = await command.handler({ ...context, args, [CREATE_DISPATCH]: createDispatch });
+      result = await command.handle({ ...context, args, [CREATE_DISPATCH]: createDispatch });
     } catch (error) {
       return this.client.emit('dispatchFail', 'handlerError', {
         message: contentMessage,

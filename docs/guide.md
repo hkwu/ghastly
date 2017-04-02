@@ -673,7 +673,7 @@ expectRole(
 `expectUser()` blocks a message if it didn't come from any of the specified users. User IDs and username/discriminator combos (the kind you see after typing a mention) are accepted.
 
 ```js
-expectRole(
+expectUser(
   '513412460316527251',
   'The Rock#5555',
   'RainbowFiend#9386',

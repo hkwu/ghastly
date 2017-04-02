@@ -8,92 +8,86 @@ import apply from '../core/apply';
  */
 export default class CommandObject {
   /**
-   * @param {(Function|CommandObject)} source - The command handler function, or
-   *   a `CommandObject` instance whose data will be copied over.
-   * @throws {TypeError} Thrown if the given source is not a function or
-   *   a `CommandObject` instance.
+   * @param {CommandConfiguration} configuration - The command configuration.
+   * @throws {TypeError} Thrown if the given configuration is not a plain object.
    */
-  constructor(source) {
-    if (isPlainObject(source)) {
-      const resolver = new CommandObjectResolver();
-      const {
-        handler,
-        triggers: [trigger, ...aliases],
-        parameters,
-        description,
-        middleware,
-      } = resolver.resolve(source);
-
-      /**
-       * The command handler function, with middleware applied to it.
-       * @type {Function}
-       */
-      this.handler = apply(...middleware)(async (context) => {
-        const originalContext = { ...context };
-        const createDispatch = context[Symbol.for('ghastly.createDispatch')];
-        const dispatch = createDispatch(originalContext);
-
-        return {
-          response: await handler({ ...context, dispatch }),
-          [Symbol.for('ghastly.originalContext')]: originalContext,
-        };
-      });
-
-      /**
-       * The main trigger of the command, also acting as its name.
-       * @type {string}
-       */
-      this.trigger = trigger;
-
-      /**
-       * An array of aliases for the command.
-       * @type {string[]}
-       */
-      this.aliases = aliases;
-
-      /**
-       * An array of parameter definitions for the command.
-       * @type {ParameterDefinition[]}
-       */
-      this.parameters = ParameterParser.validate(...parameters);
-
-      /**
-       * The description for the command.
-       * @type {?string}
-       */
-      this.description = description;
-
-      /**
-       * The command handler function.
-       * @type {commandHandler}
-       * @private
-       */
-      this.coreHandler = handler;
-
-      /**
-       * The middleware applied to the handler function.
-       * @type {middlewareLayer[]}
-       * @private
-       */
-      this.middleware = middleware;
-    } else if (source instanceof CommandObject) {
-      this.handler = source.handler;
-      this.trigger = source.trigger;
-      this.aliases = [...source.aliases];
-      this.parameters = [...source.parameters];
-      this.description = source.description;
-      this.coreHandler = source.coreHandler;
-      this.middleware = [...source.middleware];
-    } else {
-      throw new TypeError('Expected constructor argument to be a function or a CommandObject instance.');
+  constructor(configuration) {
+    if (!isPlainObject(configuration)) {
+      throw new TypeError('Expected command configuration to be a plain object.');
     }
+
+    const resolver = new CommandObjectResolver();
+    const {
+      handler,
+      triggers: [name, ...aliases],
+      parameters,
+      description,
+      middleware,
+    } = resolver.resolve(configuration);
+
+    /**
+     * The main trigger of the command, also acting as its name.
+     * @type {string}
+     */
+    this.name = name;
+
+    /**
+     * An array of aliases for the command.
+     * @type {string[]}
+     */
+    this.aliases = aliases;
+
+    /**
+     * An array of parameter definitions for the command.
+     * @type {ParameterDefinition[]}
+     */
+    this.parameters = ParameterParser.validate(...parameters);
+
+    /**
+     * The description for the command.
+     * @type {?string}
+     */
+    this.description = description;
+
+    /**
+     * The command handler function with middleware applied to it.
+     * @type {Function}
+     * @private
+     */
+    this.handler = apply(...middleware)(async (context) => {
+      const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
+      const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
+      const originalContext = { ...context };
+      const createDispatch = context[CREATE_DISPATCH];
+      const dispatch = createDispatch(originalContext);
+
+      return {
+        response: await handler({ ...context, dispatch }),
+        [ORIGINAL_CONTEXT]: originalContext,
+      };
+    });
+
+    /**
+     * The original command handler function.
+     * @type {Function}
+     * @private
+     */
+    this.originalHandler = handler;
+
+    /**
+     * The middleware applied to the handler function.
+     * @type {middlewareLayer[]}
+     * @private
+     */
+    this.middleware = middleware;
   }
 
   /**
-   * The primary name/identifier of the command. Same as `this.trigger`.
-   * @type {string}
+   * Executes the command handler.
+   * @param {Object} context - The command context.
+   * @returns {Promise.<Object>} Promise resolving to the response object.
    */
-  get name() {
-    return this.trigger;
+  handle(context) {
+    return this.handler(context);
   }
 }
