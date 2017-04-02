@@ -1,5 +1,6 @@
 import { isString } from 'lodash/lang';
 import CommandError from '../errors/CommandError';
+import CommandGroup from './CommandGroup';
 import CommandObject from './CommandObject';
 import StringMap from '../utils/StringMap';
 
@@ -24,51 +25,45 @@ export default class CommandRegistry {
      * @private
      */
     this.aliases = new StringMap();
+
+    /**
+     * The command groups stored in the registry.
+     * @type {StringMap.<CommandGroup>}
+     * @private
+     */
+    this.groups = new StringMap();
   }
 
   /**
-   * Adds a command to the registry.
-   * @param {CommandObject} command - The command to register.
-   * @returns {CommandRegistry} The instance this method was called on.
-   * @throws {CommandError} Thrown if a duplicate command name or alias is found.
-   * @throws {TypeError} Thrown if the given command is not a `CommandObject` instance.
+   * The configuration object returned by command configurators.
+   * @typedef {Object} CommandConfiguration
+   * @property {Function} handler - The command handler.
+   * @property {string[]} triggers - The command triggers. The first element is
+   *   treated as the command name. Any other elements are treated as optional
+   *   aliases.
+   * @property {(string|ParameterDefinition)} parameters - The command parameters.
+   * @property {string} description - The command description.
+   * @property {middlewareLayer[]} middleware - The command middleware.
    */
-  load(command) {
-    if (!(command instanceof CommandObject)) {
-      throw new TypeError('Expected command to be an instance of CommandObject.');
-    } else if (this.commands.has(command.name)) {
-      throw new CommandError(`Attempting to add duplicate command: '${command.name}'.`);
-    }
 
-    this.commands.set(command.name, command);
-    this.alias(command.name, ...command.aliases);
+  /**
+   * Function which generates a command configuration.
+   * @callback commandConfigurator
+   * @param {Object} [options] - Options for the configurator.
+   * @returns {CommandConfiguration} The command configuration.
+   */
+
+  /**
+   * Adds the given commands to the registry.
+   * @param {...commandConfigurator} configurators - The command configurators.
+   * @returns {Dispatcher} The instance this method was called on.
+   */
+  add(...configurators) {
+    configurators.map(configurator => configurator({})).forEach((commandConfig) => {
+      this.addCommand(new CommandObject(commandConfig));
+    });
 
     return this;
-  }
-
-  /**
-   * Removes a command from the registry, along with its aliases.
-   * @param {string} identifier - The command's main trigger or one of its aliases.
-   * @returns {CommandObject} The removed `CommandObject`.
-   * @throws {CommandError} Thrown if given command name doesn't exist in the registry.
-   * @throws {TypeError} Thrown if the given command identifier is not a string.
-   */
-  unload(identifier) {
-    if (!isString(identifier)) {
-      throw new TypeError('Expected command name to be a string.');
-    }
-
-    const name = this.getMainName(identifier);
-    const command = this.commands.get(name);
-
-    if (!command) {
-      throw new CommandError(`Attempting to remove a non-existent command: '${identifier}'.`);
-    }
-
-    this.unalias(...command.aliases);
-    this.commands.delete(name);
-
-    return command;
   }
 
   /**
@@ -90,6 +85,58 @@ export default class CommandRegistry {
   }
 
   /**
+   * Applies middleware to a command group.
+   * @param {string} group - The command group to apply middleware to.
+   * @param {...middlewareLayer} middleware - The middleware to apply.
+   * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if the given group does not exist.
+   */
+  applyGroupMiddleware(group, middleware) {
+    const commandGroup = this.groups.get(group);
+
+    if (!commandGroup) {
+      throw new CommandError(`Attempted to apply middleware to non-existent command group: ${group}.`);
+    }
+
+    commandGroup.applyMiddleware(...middleware);
+
+    return this;
+  }
+
+  /**
+   * Adds a command to the registry.
+   * @param {CommandObject} command - The command to register.
+   * @returns {CommandRegistry} The instance this method was called on.
+   * @throws {CommandError} Thrown if a duplicate command name or alias is found.
+   * @throws {TypeError} Thrown if the given command is not a `CommandObject` instance.
+   * @private
+   */
+  addCommand(command) {
+    if (!(command instanceof CommandObject)) {
+      throw new TypeError('Expected command to be an instance of CommandObject.');
+    } else if (this.commands.has(command.name)) {
+      throw new CommandError(`Attempting to add duplicate command: '${command.name}'.`);
+    }
+
+    const { name, aliases, group } = command;
+
+    this.commands.set(name, command);
+    this.alias(name, ...aliases);
+
+    if (group) {
+      if (!this.groups.has(group)) {
+        this.groups.set(group, new CommandGroup(group));
+      }
+
+      const commandGroup = this.groups.get(group);
+
+      commandGroup.add(command);
+    }
+
+    return this;
+  }
+
+  /**
    * Returns the main name associated with an identifier.
    * @param {string} identifier - The identifier.
    * @returns {(string|undefined)} The main name associated with this identifier,
@@ -103,33 +150,6 @@ export default class CommandRegistry {
     }
 
     return this.commands.has(identifier) ? identifier : this.aliases.get(identifier);
-  }
-
-  /**
-   * Moves a command's entry in the registry from one key to another.
-   * @param {string} name - The name to rename the command to.
-   * @param {CommandObject} command - The command to rename.
-   * @returns {CommandRegistry} The instance this method was called on.
-   * @throws {CommandError} Thrown if there is a name conflict in the registry.
-   * @throws {TypeError} Thrown if the given command name is not a string,
-   *   or if the given command is not a `CommandObject` instance.
-   * @private
-   */
-  rename(name, command) {
-    if (!isString(name)) {
-      throw new TypeError('Expected command name to be a string.');
-    } else if (!(command instanceof CommandObject)) {
-      throw new TypeError('Expected command to be an instance of CommandObject.');
-    } else if (name === command.name) {
-      return this;
-    } else if (this.commands.has(name)) {
-      throw new CommandError(`Attempting to add duplicate command: '${command.name}'.`);
-    }
-
-    this.commands.delete(command.name);
-    this.commands.set(name, command);
-
-    return this;
   }
 
   /**
@@ -157,29 +177,6 @@ export default class CommandRegistry {
       }
 
       this.aliases.set(alias, name);
-    });
-
-    return this;
-  }
-
-  /**
-   * Removes command aliases from the registry.
-   * @param {...string} aliases - The command aliases.
-   * @returns {CommandRegistry} The instance this method was called on.
-   * @throws {CommandError} Thrown if the given command aliases don't exist in
-   *   the registry.
-   * @throws {TypeError} Thrown if the given command aliases are not strings.
-   * @private
-   */
-  unalias(...aliases) {
-    aliases.forEach((alias) => {
-      if (!isString(alias)) {
-        throw new TypeError('Expected command alias to be a string.');
-      } else if (!this.aliases.has(alias)) {
-        throw new CommandError(`Attempting to remove non-existent alias: '${alias}'.`);
-      }
-
-      this.aliases.delete(alias);
     });
 
     return this;

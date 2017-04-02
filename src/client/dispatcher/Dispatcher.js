@@ -4,9 +4,7 @@ import { isArray, isString } from 'lodash/lang';
 import { escapeRegExp } from 'lodash/string';
 import ArgumentParser from '../../command/parsers/ArgumentParser';
 import ClosureFilter from './ClosureFilter';
-import CommandObject from '../../command/CommandObject';
 import CommandParser from '../../command/parsers/CommandParser';
-import CommandRegistry from '../../command/CommandRegistry';
 import MarkdownFormatter from '../../utils/MarkdownFormatter';
 import RegexFilter from './RegexFilter';
 import Response from '../../command/responses/Response';
@@ -54,12 +52,6 @@ export default class Dispatcher {
     this.client = client;
 
     /**
-     * The command registry for the dispatcher.
-     * @type {CommandRegistry}
-     */
-    this.commands = new CommandRegistry();
-
-    /**
      * The raw prefix given as an option.
      * @type {string}
      * @private
@@ -104,51 +96,6 @@ export default class Dispatcher {
   }
 
   /**
-   * The configuration object returned by command configurators.
-   * @typedef {Object} CommandConfiguration
-   * @property {Function} handler - The command handler.
-   * @property {string[]} triggers - The command triggers. The first element is
-   *   treated as the command name. Any other elements are treated as optional
-   *   aliases.
-   * @property {(string|ParameterDefinition)} parameters - The command parameters.
-   * @property {string} description - The command description.
-   * @property {middlewareLayer[]} middleware - The command middleware.
-   */
-
-  /**
-   * Function which generates a command configuration.
-   * @callback commandConfigurator
-   * @param {Object} [options] - Options for the configurator.
-   * @returns {CommandConfiguration} The command configuration.
-   */
-
-  /**
-   * Adds the given commands to the registry.
-   * @param {...commandConfigurator} configurators - The command configurators.
-   * @returns {Dispatcher} The instance this method was called on.
-   */
-  load(...configurators) {
-    configurators.map(configurator => configurator({})).forEach((commandConfig) => {
-      this.commands.load(new CommandObject(commandConfig));
-    });
-
-    return this;
-  }
-
-  /**
-   * Removes the given commands from the registry.
-   * @param {...string} names - The identifiers of commands to unload.
-   * @returns {Dispatcher} The instance this method was called on.
-   */
-  unload(...names) {
-    names.forEach((name) => {
-      this.commands.unload(name);
-    });
-
-    return this;
-  }
-
-  /**
    * Receives message update events and dispatches commands found in the messages.
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
@@ -176,7 +123,7 @@ export default class Dispatcher {
       return this.client.emit('dispatchFail', 'parseCommand', { message: contentMessage, error });
     }
 
-    const command = this.commands.get(parsedCommand.identifier);
+    const command = this.client.commands.get(parsedCommand.identifier);
 
     if (!command) {
       return this.client.emit('dispatchFail', 'unknownCommand', {
@@ -189,7 +136,7 @@ export default class Dispatcher {
       message: contentMessage,
       client: this.client,
       services: this.client.services,
-      commands: this.commands,
+      commands: this.client.commands,
       formatter: MarkdownFormatter,
     };
 

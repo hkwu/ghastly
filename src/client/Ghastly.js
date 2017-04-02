@@ -1,5 +1,6 @@
 import { Client } from 'discord.js';
 import { isString } from 'lodash/lang';
+import CommandRegistry from '../command/CommandRegistry';
 import Dispatcher from './dispatcher/Dispatcher';
 import ServiceContainer from './services/ServiceContainer';
 
@@ -27,15 +28,22 @@ export default class Ghastly extends Client {
     super(rest);
 
     /**
-     * The client's dispatcher.
-     * @type {Dispatcher}
+     * The command registry for the client.
+     * @type {CommandRegistry}
      */
-    this.dispatcher = new Dispatcher({ client: this, prefix });
+    this.commands = new CommandRegistry();
 
     /**
      * The client's service container.
      * @type {ServiceContainer}
      */
     this.services = new ServiceContainer();
+
+    /**
+     * The client's dispatcher.
+     * @type {Dispatcher}
+     * @private
+     */
+    this.dispatcher = new Dispatcher({ client: this, prefix });
   }
 }

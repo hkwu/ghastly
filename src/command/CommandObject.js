@@ -1,4 +1,5 @@
 import { isPlainObject } from 'lodash/lang';
+import CommandError from '../errors/CommandError';
 import CommandObjectResolver from '../resolvers/CommandObjectResolver';
 import ParameterParser from './parsers/ParameterParser';
 import apply from '../core/apply';
@@ -76,15 +77,15 @@ export default class CommandObject {
      * @private
      */
     this.middleware = middleware;
-
-    /**
-     * The original command middleware.
-     * @type {middlewareLayer[]}
-     * @private
-     */
-    this.originalMiddleware = middleware;
   }
 
+  /**
+   * Applies middleware to a command handler and returns the resulting handler function.
+   * @param {Function} handler - The command handler.
+   * @param {middlewareLayer[]} middleware - The middleware to apply.
+   * @returns {Function} The command handler with middleware applied to it.
+   * @private
+   */
   static generateHandler(handler, middleware) {
     return apply(...middleware)(async (context) => {
       const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
@@ -109,7 +110,16 @@ export default class CommandObject {
     return this.handler(context);
   }
 
+  /**
+   * Sets the command group for this command.
+   * @param {CommandGroup} commandGroup - The command group.
+   * @throws {CommandError} Thrown if the command group has already been set.
+   */
   group(commandGroup) {
+    if (this.group) {
+      throw new CommandError(`Attempting to set command group more than once for command: ${this.name}.`);
+    }
+
     this.group = commandGroup;
 
     commandGroup.on('middlewareUpdate', (layers) => {

@@ -63,10 +63,10 @@ const client = new Client({ prefix: '!' });
   The Ghastly client actually extends the Discord.js client, so if you need to pass in any `ClientOptions`, now would be the time.
 </p>
 
-Now that our client is instantiated, we can start registering commands on the client's dispatcher.
+Now that our client is instantiated, we can start registering commands.
 
 ```js
-client.dispatcher.load(helloWorld);
+client.commands.add(helloWorld);
 ```
 
 Once our command is loaded, we can `login()` with the client and test it out.

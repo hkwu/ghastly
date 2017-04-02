@@ -43,14 +43,14 @@ const client = new Client({ prefix: '@me:/' });
 You can then trigger selfbot commands by using `/command`.
 
 #### Registering Commands
-Commands should be registered before logging in with the client. The dispatcher (available through `client.dispatcher`) provides the `load()` method to register commands. It takes a variable number of commands and adds them to the command registry. The nature of these commands is detailed in the next section.
+Commands should be registered before logging in with the client. The command registry (available through `client.commands`) provides the `add()` method to register commands. It takes a variable number of commands and adds them to the registry. The nature of these commands is detailed in the next section.
 
 ```js
-client.dispatcher.load(foo, bar, baz);
+client.commands.add(foo, bar, baz);
 ```
 
 <p class="danger">
-  `load()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `dispatcher.load(...commands)`.
+  `load()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `commands.add(...commands)`.
 </p>
 
 ### Configurators
@@ -302,7 +302,7 @@ A reference to the Ghastly client. This is just a convenience property, since th
 The dispatch helper function. It allows the handler to generate a response action from a value. We'll come back to this in a bit.
 
 ##### `commands`
-The dispatcher's command registry.
+The client's command registry.
 
 ##### `services`
 The client's [service container](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
