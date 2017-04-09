@@ -166,7 +166,7 @@ export default class ServiceContainer {
    * @param {(string|string[])} identifier - The identifier of the service. If
    *   given an array, additional identifiers are added as service aliases.
    * @param {*} service - The service being added.
-   * @return {ServiceContainer} The instance this method was called on.
+   * @returns {ServiceContainer} The instance this method was called on.
    * @throws {Error} Thrown if the service type is invalid.
    * @private
    */

@@ -7,7 +7,7 @@ import * as lang from 'lodash/lang';
 
 /**
  * Custom version of krachot/options-resolver that supports synchronous resolution.
- * @returns {(Object|Promise.<Object>)}
+ * @returns {Object}
  * @ignore
  */
 export default function createResolver() {

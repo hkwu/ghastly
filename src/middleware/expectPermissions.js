@@ -10,7 +10,7 @@ import { isNumber, isString } from 'lodash/lang';
  *   messages if in a guild context.
  * @param {...PermissionResolvable} permissions - The permissions required to
  *   pass the filter.
- * @return {middlewareLayer} The layer which filters the messages.
+ * @returns {middlewareLayer} The layer which filters the messages.
  * @throws {TypeError} Thrown if the permissions aren't the right type.
  * @example
  * expectPermissions(

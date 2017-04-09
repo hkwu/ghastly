@@ -5,7 +5,7 @@ import { isString } from 'lodash/lang';
  *   filters out messages if in a guild context.
  * @param {...string} identifiers - The role IDs or names which are allowed to
  *   pass the filter.
- * @return {middlewareLayer} The layer which filters the messages.
+ * @returns {middlewareLayer} The layer which filters the messages.
  * @throws {TypeError} Thrown if the identifiers aren't strings.
  * @example
  * expectRole(
