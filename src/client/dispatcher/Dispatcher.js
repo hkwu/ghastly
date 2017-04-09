@@ -24,19 +24,8 @@ const RESPONSE_TYPES = {
 };
 
 /**
- * @external {Message} https://discord.js.org/#/docs/main/stable/class/Message
- */
-
-/**
- * Emitted when a response could not be dispatched.
- * @event Ghastly#dispatchFail
- * @param {string} type - The type of failure encountered.
- * @param {Object} payload - An object containing context on the failure encountered.
- *   Contents vary depending on the type of the failure.
- */
-
-/**
  * @desc Receives and dispatches messages.
+ * @ignore
  */
 export default class Dispatcher {
   /**
@@ -96,6 +85,26 @@ export default class Dispatcher {
   }
 
   /**
+   * @external {Message} https://discord.js.org/#/docs/main/stable/class/Message
+   */
+
+  /**
+   * @external {Client#message} https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=message
+   */
+
+  /**
+   * @external {Client#messageUpdate} https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=messageUpdate
+   */
+
+  /**
+   * Emitted when a response could not be dispatched.
+   * @event Ghastly#dispatchFail
+   * @param {string} type - The type of failure encountered.
+   * @param {Object} payload - An object containing context on the failure encountered.
+   *   Contents vary depending on the type of the failure.
+   */
+
+  /**
    * Receives message update events and dispatches commands found in the messages.
    * @param {Message} message - A Discord.js `Message` object.
    * @param {Message} [newMessage] - A Discord.js `Message` object. Should be
@@ -103,6 +112,8 @@ export default class Dispatcher {
    * @returns {Promise.<Dispatcher>} Promise resolving to the instance this method
    *   was called on.
    * @emits {Ghastly#dispatchFail} Emitted when a response could not be dispatched.
+   * @listens {Client#message}
+   * @listens {Client#messageUpdate}
    */
   async dispatch(message, newMessage) {
     if (this.shouldFilterEvent(message, newMessage)) {

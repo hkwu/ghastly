@@ -6,6 +6,10 @@ import StringMap from '../utils/StringMap';
  * @extends EventEmitter
  */
 export default class CommandGroup extends EventEmitter {
+  /**
+   * Constructor.
+   * @param {string} name - The name of the group.
+   */
   constructor(name) {
     super();
 
@@ -51,14 +55,14 @@ export default class CommandGroup extends EventEmitter {
    */
 
   /**
-   * Applies middleware to commands in the group.
+   * Adds the given middleware to the current group middleware layers.
    * @param {...middlewareLayer} layers - The layers to apply.
    * @returns {CommandGroup} The instance this method was called on.
    * @emits {CommandGroup#middlewareUpdate}
    */
   applyMiddleware(...layers) {
-    this.middleware = layers;
+    this.middleware = [...layers, ...this.middleware];
 
-    return this.emit('middlewareUpdate', layers);
+    return this.emit('middlewareUpdate', this.middleware);
   }
 }

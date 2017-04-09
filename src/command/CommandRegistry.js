@@ -126,7 +126,7 @@ export default class CommandRegistry {
     const { name, aliases, group } = command;
 
     this.commands.set(name, command);
-    this.alias(name, ...aliases);
+    this.alias(name, aliases);
 
     if (group) {
       if (!this.groups.has(group)) {
@@ -160,14 +160,14 @@ export default class CommandRegistry {
   /**
    * Adds command aliases to the registry.
    * @param {string} name - The name of the command to add aliases to.
-   * @param {...string} aliases - The command aliases.
+   * @param {string[]} aliases - The command aliases.
    * @returns {CommandRegistry} The instance this method was called on.
    * @throws {CommandError} Thrown if given command name doesn't exist in the
    *   registry, or if a duplicate alias is detected.
    * @throws {TypeError} Thrown if the given name and aliases are not strings.
    * @private
    */
-  alias(name, ...aliases) {
+  alias(name, aliases) {
     if (!isString(name)) {
       throw new TypeError('Expected command name to be a string.');
     }
