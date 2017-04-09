@@ -5,6 +5,7 @@
  */
 export default class PrefixFilter {
   /**
+   * Constructor.
    * @param {*} filter - The filter.
    */
   constructor(filter) {

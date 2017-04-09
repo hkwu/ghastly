@@ -23,6 +23,7 @@ export default class Service {
   static INSTANCE = 'INSTANCE';
 
   /**
+   * Constructor.
    * @param {Object} options - Options for the entry.
    * @param {string[]} [options.aliases=[]] - Aliases for this entry.
    * @param {?Function} [options.builder=null] - The service builder. Only applicable

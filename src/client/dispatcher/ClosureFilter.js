@@ -8,6 +8,7 @@ import PrefixFilter from './PrefixFilter';
  */
 export default class ClosureFilter extends PrefixFilter {
   /**
+   * Constructor.
    * @param {Function} filter - The filter.
    * @throws {TypeError} Thrown if the filter is not a function.
    */

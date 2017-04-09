@@ -5,6 +5,7 @@ import { isFunction } from 'lodash/lang';
  */
 export default class Response {
   /**
+   * Constructor.
    * @param {Function} executor - The function which will handle the message response.
    * @throws {TypeError} Thrown if the given handler is not a function.
    */

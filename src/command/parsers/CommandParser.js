@@ -14,7 +14,6 @@ export default class CommandParser {
    * @param {PrefixFilter} prefixFilter - The prefix filter.
    * @returns {ParsedCommand} Data parsed from the message content.
    * @throws {CommandParserError} Thrown if the given message could not be parsed as a command.
-   * @static
    */
   static parse(message, prefixFilter) {
     if (prefixFilter instanceof ClosureFilter) {

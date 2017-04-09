@@ -2,6 +2,7 @@
   "source": "./src",
   "destination": "./api-docs",
   "experimentalProposal": {
+    "classProperties": true,
     "objectRestSpread": true
   }
 }

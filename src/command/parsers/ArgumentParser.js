@@ -16,7 +16,6 @@ export default class ArgumentParser {
    * @returns {Object} The parsed arguments given in a mapping between argument
    *   names and values.
    * @throws {ArgumentParserError} Thrown if required arguments are missing.
-   * @static
    */
   static parse(rules, args) {
     const delimited = stringArgv(args);
@@ -73,7 +72,6 @@ export default class ArgumentParser {
    * @returns {ParameterType} The converted argument.
    * @throws {ArgumentParserError} Thrown if the argument is not convertable to
    *   the specified type.
-   * @static
    */
   static normalizeArgumentType(type, argument) {
     if (!isType(argument, type)) {

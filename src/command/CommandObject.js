@@ -9,6 +9,7 @@ import apply from '../core/apply';
  */
 export default class CommandObject {
   /**
+   * Constructor.
    * @param {CommandConfiguration} configuration - The command configuration.
    * @throws {TypeError} Thrown if the given configuration is not a plain object.
    */

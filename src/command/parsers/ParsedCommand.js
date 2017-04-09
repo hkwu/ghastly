@@ -4,6 +4,7 @@
  */
 export default class ParsedCommand {
   /**
+   * Constructor.
    * @param {Object} values - The parsed data.
    * @param {string} values.raw - The raw message content.
    * @param {string} values.trimmed - The raw message content with any command

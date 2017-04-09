@@ -19,6 +19,7 @@ import Response from './Response';
  */
 export default class VoiceResponse extends Response {
   /**
+   * Constructor.
    * @param {StreamType} streamType - The type of stream to use.
    * @param {(ReadableStream|string)} stream - The stream to play, or a string
    *   containing the path to a file.

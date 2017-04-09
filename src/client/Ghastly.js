@@ -14,6 +14,7 @@ import ServiceContainer from './services/ServiceContainer';
  */
 export default class Ghastly extends Client {
   /**
+   * Constructor.
    * @param {ClientOptions} options - The options for the client.
    * @param {string} options.prefix - The prefix for the client's dispatcher.
    * @throws {TypeError} Thrown if any option is of the wrong type.

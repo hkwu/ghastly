@@ -8,6 +8,7 @@ import PrefixFilter from './PrefixFilter';
  */
 export default class RegexFilter extends PrefixFilter {
   /**
+   * Constructor.
    * @param {string} filter - The filter.
    * @throws {TypeError} Thrown if the filter is not a string.
    */

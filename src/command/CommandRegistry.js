@@ -42,6 +42,7 @@ export default class CommandRegistry {
    *   treated as the command name. Any other elements are treated as optional
    *   aliases.
    * @property {(string|ParameterDefinition)} parameters - The command parameters.
+   * @property {string} group - The command's group name.
    * @property {string} description - The command description.
    * @property {middlewareLayer[]} middleware - The command middleware.
    */

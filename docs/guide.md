@@ -1,7 +1,7 @@
 # Guide
 This section is a more in-depth dive into the Ghastly API. If you haven't already, you might want to finish reading the section on [getting started](/#getting-started) with Ghastly.
 
-## Topics
+## Command Building
 ### The Client
 At the core of the library is the Ghastly client. It provides a convenient interface to register commands and bind services.
 
@@ -76,9 +76,9 @@ function ping() {
 These functions must return a configuration object which describes the behaviour of the command. We'll call these functions command configurators, or **configurators** for short.
 
 #### Command Configuration
-This section will describe what the configuration object should contain.
+This section will briefly describe what the configuration object should contain.
 
-##### Handler
+##### `handler`
 The `handler` is a function that gets called when the command is triggered. It should contain the main logic for making a response based on the user input received from the client. We'll cover in more detail how handlers work later on.
 
 ```js
@@ -86,10 +86,14 @@ async function handler() {
   // returning a string sends it as a message
   return 'Hello, world!';
 }
+
+return {
+  handler,
+};
 ```
 
-##### Triggers
-`triggers` is a non-empty array of strings. The first string is treated as the command's main name while any additional values are used as aliases for the command.
+##### `triggers`
+`triggers` is a non-empty array of strings. The first string is treated as the command's main name while any additional values are used as aliases for the command. Each trigger should be a unique value among every command.
 
 ```js
 return {
@@ -101,7 +105,7 @@ return {
 };
 ```
 
-##### Parameters
+##### `parameters`
 Your command may accept any number of parameters of various types. `parameters` is an array of parameter definitions.
 
 ```js
@@ -118,7 +122,20 @@ return {
 };
 ```
 
-##### Description
+[Read more](#command-parameters) about command parameters.
+
+##### `group`
+Commands can optionally be tagged with a certain group to make it easier to manage multiple commands at once.
+
+```js
+return {
+  group: 'admin',
+};
+```
+
+Note that command groups do not function as a namespace for commands, so two commands in different groups will still need to have unique triggers.
+
+##### `description`
 The `description` is an optional string which describes the command's function and is only stored for your own use (useful if you're making a `help` command, for instance).
 
 ```js
@@ -127,10 +144,10 @@ return {
 };
 ```
 
-##### Middleware
+##### `middleware`
 You can also define middleware for your commands. Middleware are simply functions which wrap the command handler and provide an easy, modular way to extend command handler functionality.
 
-The `middleware` array is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
+The `middleware` option is an array of middleware that will be applied to the command's handler function. Middleware are executed in the order they're defined in the `middleware` array.
 
 ```js
 return {
@@ -302,20 +319,13 @@ A reference to the Ghastly client. This is just a convenience property, since th
 The dispatch helper function. It allows the handler to generate a response action from a value. We'll come back to this in a bit.
 
 ##### `commands`
-The client's command registry.
+The client's [command registry](#command-registry). Contains methods for managing commands.
 
 ##### `services`
 The client's [service container](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
 
 ##### `formatter`
 The `MarkdownFormatter` utility class. Contains useful methods for composing Markdown within text.
-
-* `italic(text)` - Formats italic text.
-* `bold(text)` - Formats bold text.
-* `strikeout(text)` - Formats strikeout text.
-* `underline(text)` - Formats underlined text.
-* `code(text)` - Formats inline code.
-* `codeBlock(text, language = '')` - Formats multi-line code blocks.
 
 Sample usage:
 
@@ -326,6 +336,8 @@ async function handler({ formatter }) {
   return `To ${bold('boldly')} go where no ${italic('man')} has gone before.`;
 }
 ```
+
+For a detailed method list, check the [MarkdownFormatter](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/utils/MarkdownFormatter.js~MarkdownFormatter.html) entry in the API reference.
 
 #### Basic Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This helps to decouple your handler implementations from the underlying messaging API, letting you concentrate on *what* your handlers should respond with, rather than *how* they should respond.
@@ -680,6 +692,74 @@ expectUser(
 );
 ```
 
+### Command Groups
+You can define groups to organize commands by providing the `group` option in your configurator.
+
+```js
+return {
+  group: 'admin',
+};
+```
+
+Command groups allow you to organize and configure multiple commands in a more convenient fashion.
+
+#### Group Middleware
+Groups allow us to define middleware that will be applied to multiple commands. Group middleware function identically to the middleware you define in individual configurators. To add middleware to a group, use the `applyGroupMiddleware()` method on the command registry:
+
+```js
+import { expectGuild } from 'ghastly/middleware';
+
+client.commands.applyGroupMiddleware('admin', [
+  expectGuild(),
+]);
+```
+
+Group middleware will be inserted before the first layer of each command's middleware chain. This gives group middleware the privilege of handling the context object before passing it to any other layers down the line.
+
+## Client Components
+### Command Registry
+The client stores commands in a [CommandRegistry](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/CommandRegistry.js~CommandRegistry.html). You can access the registry as an injected context property or as `client.commands`:
+
+```js
+async function handler({ commands }) {
+  const ping = commands.get('ping');
+}
+```
+
+#### Using the Command Registry
+The registry provides several methods for managing commands.
+
+##### Adding a Command
+To add a command, use `commands.add()`, providing any number of configurators as arguments:
+
+```js
+client.commands.add(ping, weather, food, sports);
+```
+
+##### Retrieving a Command
+To retrieve a command, use `commands.get()`, providing any of the command's triggers as an argument:
+
+```js
+client.commands.get('ping');
+```
+
+The retrieved command will be a [CommandObject](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/CommandObject.js~CommandObject.html) instance.
+
+<p class="danger">
+  When retrieving commands, a *reference* to the `CommandObject` is returned. Since Ghastly relies on the registry internally, you should **never** mutate the returned `CommandObject`.
+</p>
+
+##### Adding Group Middleware
+To add middleware to a command group, use `commands.applyGroupMiddleware()`, providing the command group name and an array of layers to apply:
+
+```js
+import { expectGuild } from 'ghastly/middleware';
+
+client.commands.applyGroupMiddleware('music', [
+  expectGuild(),
+]);
+```
+
 ### Services
 In some cases, you may find that your commands have external dependencies. For instance, a music client may depend on a queueing system to store information about which songs to play next. You may be tempted to simply store the queue somewhere your handler can reach:
 
@@ -700,9 +780,8 @@ function playSong() {
 }
 ```
 
-However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the `ServiceContainer` interface.
+However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the [ServiceContainer](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/client/services/ServiceContainer.js~ServiceContainer.html) interface.
 
-#### Accessing the Service Container
 When you have access to the context object, a reference to the container is automatically injected for you.
 
 ```js

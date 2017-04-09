@@ -7,6 +7,7 @@ import Service from './Service';
  */
 export default class InstanceService extends Service {
   /**
+   * Constructor.
    * @param {string[]} aliases - Aliases for this entry.
    * @param {*} instance - The service instance.
    */

@@ -9,6 +9,9 @@ import StringMap from '../../utils/StringMap';
  * @desc Manages services in the application.
  */
 export default class ServiceContainer {
+  /**
+   * Constructor.
+   */
   constructor() {
     /**
      * The services stored in this container.

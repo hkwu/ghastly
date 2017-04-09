@@ -7,6 +7,7 @@ import Service from './Service';
  */
 export default class SingletonService extends Service {
   /**
+   * Constructor.
    * @param {string[]} aliases - Aliases for this entry.
    * @param {Function} builder - The service builder.
    */

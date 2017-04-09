@@ -30,7 +30,6 @@ export default class ParameterParser {
    * @param {...(ParameterDefinition|string)} parameters - The parameters to validate.
    * @returns {ParsedParameter[]} The validated parameters.
    * @throws {ParameterParserError} Thrown if an error is encountered during validation.
-   * @static
    */
   static validate(...parameters) {
     const parsed = ParameterParser.parse(...parameters);
@@ -58,7 +57,6 @@ export default class ParameterParser {
    * @param {...(ParameterDefinition|string)} parameters - The parameters to parse.
    * @returns {ParsedParameter[]} The parsed parameters.
    * @throws {ParameterParserError} Thrown if an error is encountered during parsing.
-   * @static
    */
   static parse(...parameters) {
     const resolver = new ParameterResolver();
@@ -82,7 +80,6 @@ export default class ParameterParser {
    * @throws {ParameterParserError} Thrown if the parameter definition is not
    *   well-formed.
    * @throws {TypeError} Thrown if the parameter definition is not a string.
-   * @static
    */
   static parseParameter(parameter) {
     if (!isString(parameter)) {
@@ -115,7 +112,6 @@ export default class ParameterParser {
    * @returns {Object} An object containing data on the parsed parameter definition.
    * @throws {ParameterParserError} Thrown if the parameter definition is not
    *   well-formed.
-   * @static
    */
   static parseDefinition(definition) {
     const parsed = {
