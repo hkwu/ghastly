@@ -30,15 +30,32 @@ export default class CommandGroup extends EventEmitter {
     this.middleware = [];
   }
 
+  /**
+   * Adds a command to the group.
+   * @param {CommandObject} command - The command.
+   * @returns {CommandGroup} The instance this method was called on.
+   */
   add(command) {
     const { name } = command;
 
     this.commands.set(name, command);
-    command.group(this);
+    command.linkGroup(this);
 
     return this;
   }
 
+  /**
+   * Emitted when middleware has been applied to commands in a group.
+   * @event CommandGroup#middlewareUpdate
+   * @param {middlewareLayer[]} layers - The layers which were applied.
+   */
+
+  /**
+   * Applies middleware to commands in the group.
+   * @param {...middlewareLayer} layers - The layers to apply.
+   * @returns {CommandGroup} The instance this method was called on.
+   * @emits {CommandGroup#middlewareUpdate}
+   */
   applyMiddleware(...layers) {
     this.middleware = layers;
 

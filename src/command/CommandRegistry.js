@@ -1,4 +1,4 @@
-import { isString } from 'lodash/lang';
+import { isArray, isString } from 'lodash/lang';
 import CommandError from '../errors/CommandError';
 import CommandGroup from './CommandGroup';
 import CommandObject from './CommandObject';
@@ -56,7 +56,7 @@ export default class CommandRegistry {
   /**
    * Adds the given commands to the registry.
    * @param {...commandConfigurator} configurators - The command configurators.
-   * @returns {Dispatcher} The instance this method was called on.
+   * @returns {CommandRegistry} The instance this method was called on.
    */
   add(...configurators) {
     configurators.map(configurator => configurator({})).forEach((commandConfig) => {
@@ -87,11 +87,16 @@ export default class CommandRegistry {
   /**
    * Applies middleware to a command group.
    * @param {string} group - The command group to apply middleware to.
-   * @param {...middlewareLayer} middleware - The middleware to apply.
+   * @param {middlewareLayer[]} middleware - The middleware to apply.
    * @returns {CommandRegistry} The instance this method was called on.
    * @throws {CommandError} Thrown if the given group does not exist.
+   * @throws {TypeError} Thrown if `middleware` is not an array.
    */
   applyGroupMiddleware(group, middleware) {
+    if (!isArray(middleware)) {
+      throw new TypeError('Expected middleware to be an array.');
+    }
+
     const commandGroup = this.groups.get(group);
 
     if (!commandGroup) {

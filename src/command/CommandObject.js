@@ -46,8 +46,8 @@ export default class CommandObject {
     this.parameters = ParameterParser.validate(...parameters);
 
     /**
-     * The group this command is part of, if any.
-     * @type {?CommandGroup}
+     * The name of the group this command is part of, if any.
+     * @type {?string}
      */
     this.group = group;
 
@@ -111,17 +111,10 @@ export default class CommandObject {
   }
 
   /**
-   * Sets the command group for this command.
+   * Subscribes to updates from a command group.
    * @param {CommandGroup} commandGroup - The command group.
-   * @throws {CommandError} Thrown if the command group has already been set.
    */
-  group(commandGroup) {
-    if (this.group) {
-      throw new CommandError(`Attempting to set command group more than once for command: ${this.name}.`);
-    }
-
-    this.group = commandGroup;
-
+  linkGroup(commandGroup) {
     commandGroup.on('middlewareUpdate', (layers) => {
       this.handler = this.constructor.generateHandler(this.originalHandler, [
         ...layers,
