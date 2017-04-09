@@ -1,7 +1,7 @@
 import BaseResolver from './BaseResolver';
 
 /**
- * @desc Options resolver for CommandObject class.
+ * @desc Options resolver for `CommandObject` class.
  * @extends BaseResolver
  * @ignore
  */
@@ -19,12 +19,14 @@ export default class CommandObjectResolver extends BaseResolver {
       parameters: [],
       group: null,
       description: null,
+      dependencies: [],
       middleware: [],
     }).setAllowedTypes('handler', 'function')
       .setAllowedTypes('triggers', 'array')
       .setAllowedTypes('parameters', 'array')
       .setAllowedTypes('group', ['string', 'null'])
       .setAllowedTypes('description', ['string', 'null'])
+      .setAllowedTypes('dependencies', ['array', 'object'])
       .setAllowedTypes('middleware', 'array');
   }
 }

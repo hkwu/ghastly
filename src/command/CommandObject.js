@@ -1,7 +1,7 @@
-import { isPlainObject } from 'lodash/lang';
-import CommandError from '../errors/CommandError';
+import { isArray, isPlainObject } from 'lodash/lang';
 import CommandObjectResolver from '../resolvers/CommandObjectResolver';
 import ParameterParser from './parsers/ParameterParser';
+import StringMap from '../utils/StringMap';
 import apply from '../core/apply';
 
 /**
@@ -25,6 +25,7 @@ export default class CommandObject {
       parameters,
       group,
       description,
+      dependencies,
       middleware,
     } = resolver.resolve(configuration);
 
@@ -57,6 +58,15 @@ export default class CommandObject {
      * @type {?string}
      */
     this.description = description;
+
+    /**
+     * A mapping between service names and the context names they should be
+     *   injected under for the command handler.
+     * @type {StringMap}
+     */
+    this.dependencies = isArray(dependencies)
+      ? new StringMap(dependencies.map(serviceName => [serviceName, serviceName]))
+      : new StringMap(Object.entries(dependencies));
 
     /**
      * The command handler function with middleware applied to it.

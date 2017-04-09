@@ -44,6 +44,8 @@ export default class CommandRegistry {
    * @property {(string|ParameterDefinition)} parameters - The command parameters.
    * @property {string} group - The command's group name.
    * @property {string} description - The command description.
+   * @property {(string[]|Object)} dependencies - Service dependencies to inject
+   *   into the handler's context.
    * @property {middlewareLayer[]} middleware - The command middleware.
    */
 

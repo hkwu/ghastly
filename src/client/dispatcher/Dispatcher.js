@@ -8,6 +8,7 @@ import CommandParser from '../../command/parsers/CommandParser';
 import MarkdownFormatter from '../../utils/MarkdownFormatter';
 import RegexFilter from './RegexFilter';
 import Response from '../../command/responses/Response';
+import provide from '../../core/provide';
 
 /**
  * Response type strings.
@@ -172,7 +173,11 @@ export default class Dispatcher {
     let result;
 
     try {
-      result = await command.handle({ ...context, args, [CREATE_DISPATCH]: createDispatch });
+      result = await command.handle({
+        ...provide(this.client.services, context, command.dependencies),
+        args,
+        [CREATE_DISPATCH]: createDispatch,
+      });
     } catch (error) {
       return this.client.emit('dispatchFail', 'handlerError', {
         message: contentMessage,
