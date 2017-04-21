@@ -1,6 +1,6 @@
 {
   "name": "ghastly",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A powerful and flexible library for modularizing Discord.js clients.",
   "keywords": [
     "discord.js",
