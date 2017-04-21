@@ -8,7 +8,6 @@ import CommandParser from '../../command/parsers/CommandParser';
 import MarkdownFormatter from '../../utils/MarkdownFormatter';
 import RegexFilter from './RegexFilter';
 import Response from '../../command/responses/Response';
-import provide from '../../core/provide';
 
 /**
  * Response type strings.
@@ -173,8 +172,23 @@ export default class Dispatcher {
     let result;
 
     try {
+      const injectedServices = [...command.dependencies].reduce(
+        (accumulated, [serviceName, contextName]) => {
+          if (!this.client.services.has(serviceName)) {
+            throw new Error(`Attempting to inject a non-existent service: ${serviceName}.`);
+          }
+
+          return {
+            ...accumulated,
+            [contextName]: this.client.services.get(serviceName),
+          };
+        },
+        {},
+      );
+
       result = await command.handle({
-        ...provide(this.client.services, context, command.dependencies),
+        ...context,
+        ...injectedServices,
         args,
         [CREATE_DISPATCH]: createDispatch,
       });
