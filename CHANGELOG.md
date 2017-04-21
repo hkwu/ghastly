@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [0.3.0]
+### Added
+- `@me` prefix for selfbots.
+- Additional filter middleware.
+- Command groups.
+- Service dependency declaration within command configurations.
+
+### Changed
+- `ServiceRegistry#fetch()` is now `ServiceRegistry#get()`.
+- `ServiceRegistry#bind()` has been split up into `#bind()`, `#singleton()` and `#instance()`.
+- `dispatchError` event has been changed to `dispatchFail`. This event now emits two arguments: the type of failure encountered and an object with the failure context.
+- `@self` prefix is now `@client`.
+- Command registration moved to client's command registry's `add()` method. Client dispatcher is now a private property.
+
+### Removed
+- Function configuration support for `configure()`.
+- `unload()` method for removing registered commands.
+- `provide()` middleware for injecting services.
+
 ## [0.2.2]
 ### Fixed
 - Patch for npm release.
@@ -30,7 +49,8 @@ No change notes available.
 ## [0.1.1]
 No change notes available.
 
-[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/hkwu/ghastly/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/hkwu/ghastly/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/hkwu/ghastly/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/hkwu/ghastly/compare/v0.1.4...v0.2.0
