@@ -50,7 +50,7 @@ client.commands.add(foo, bar, baz);
 ```
 
 <p class="danger">
-  `load()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `commands.add(...commands)`.
+  `add()` does *not* take an array as an argument. In that case, you should use array spread to expand the array: `commands.add(...commands)`.
 </p>
 
 ### Configurators
