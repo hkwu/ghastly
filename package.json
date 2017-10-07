@@ -33,7 +33,7 @@
     "lint:fix": "eslint src --fix",
     "test": "mocha --require babel-register --recursive",
     "docs:dev": "docute docs --watch",
-    "prepublishOnly": "npm run build && yarn test"
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "es6-error": "^4.0.0",
