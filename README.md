@@ -29,7 +29,7 @@ You should also install Discord.js v11 if you haven't already. This library requ
 This is a short runnable snippet using Ghastly. You can find more information and examples on the [Ghastly website](https://ghastly.js.org).
 
 ```js
-import { Client } from 'ghastly';
+const { Client } = require('ghastly');
 
 function ping() {
   async function handler() {

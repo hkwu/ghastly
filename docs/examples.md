@@ -14,9 +14,9 @@ npm install --save vm2
 Now we can import the `VM` class and create a VM environment to run our code in.
 
 ```js
-import { RichEmbed } from 'discord.js';
-import { VM } from 'vm2';
-import { inspect } from 'util';
+const { RichEmbed } = require('discord.js');
+const { VM } = require('vm2');
+const { inspect } = require('util');
 
 function evilEval() {
   async function handler({ args, formatter, message }) {

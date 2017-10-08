@@ -54,7 +54,7 @@ Our bot will now listen for messages starting with `hello` and promptly respond 
 To solve that problem, we'll pass in the Ghastly-specific `prefix` option to the client constructor. This will make Ghastly ignore messages that don't start with the given prefix, so instead of responding to `hello`, we'll respond to `!hello`. Prefixes can include spaces, too, so you could also use something like `hey siri` as a prefix.
 
 ```js
-import { Client } from 'ghastly';
+const { Client } = require('ghastly');
 
 const client = new Client({ prefix: '!' });
 ```
@@ -101,7 +101,7 @@ Notice that we also added the ellipsis (`...`) to the parameter name. Ghastly de
 With that done, we only need to evaluate the code and report the results:
 
 ```js
-import { inspect } from 'util';
+const { inspect } = require('util');
 
 async function handler({ args }) {
   try {
@@ -118,7 +118,7 @@ async function handler({ args }) {
 Our command reports results in a nicely formatted code block, but having to manually format the Markdown is quite messy. Instead, we'll take advantage of the handy Markdown formatter that Ghastly injects into the context:
 
 ```js
-import { inspect } from 'util';
+const { inspect } = require('util');
 
 async function handler({ args, formatter }) {
   const { bold, codeBlock } = formatter;
@@ -140,8 +140,8 @@ Codeblocks are nice, but you have to admit that they look rather plain. In the p
 Discord.js already provides the [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) class as a helpful wrapper around the message embed feature, so let's put it to use.
 
 ```js
-import { Constants, RichEmbed } from 'discord.js';
-import { inspect } from 'util';
+const { Constants, RichEmbed } = require('discord.js');
+const { inspect } = require('util');
 
 async function handler({ args, formatter, message }) {
   const { codeBlock } = formatter;
@@ -188,7 +188,7 @@ In our case, we'll use middleware to block incoming `eval` commands from people 
 To attach middleware to a command, we supply an array of layers as the `middleware` option in our configurator:
 
 ```js
-import { expectUser } from 'ghastly/middleware';
+const { expectUser } = require('ghastly/middleware');
 
 function evilEval() {
   // ...

@@ -6,7 +6,7 @@ This section is a more in-depth dive into the Ghastly API. If you haven't alread
 At the core of the library is the Ghastly client. It provides a convenient interface to register commands and bind services.
 
 ```js
-import { Client } from 'ghastly';
+const { Client } = require('ghastly');
 
 const client = new Client();
 ```
@@ -395,7 +395,7 @@ async function handler() {
 Return a Discord.js `RichEmbed` object to dispatch an embed.
 
 ```js
-import { RichEmbed } from 'discord.js';
+const { RichEmbed } = require('discord.js');
 
 async function handler() {
   const embed = new RichEmbed();
@@ -480,7 +480,7 @@ The `Response` constructor takes a single **executor** function. The executor re
 In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
 
 ```js
-import { Response } from 'ghastly/command';
+const { Response } = require('ghastly/command');
 
 class ReversedResponse extends Response {
   constructor() {
@@ -516,8 +516,8 @@ Of course, it's a pain to have to define your own response logic for simple thin
 You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response is ignored.
 
 ```js
-import ytdl from 'ytdl-core';
-import { VoiceResponse } from 'ghastly/command';
+const ytdl = require('ytdl-core');
+const { VoiceResponse } = require('ghastly/command');
 
 async function handler() {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
@@ -642,7 +642,7 @@ The returned value depends on the layer that's next in the chain. If there are n
 Ghastly comes equipped with several convenience middleware. You can access these as named exports from `ghastly/middleware`:
 
 ```js
-import { expectPermissions } from 'ghastly/middleware';
+const { expectPermissions } = require('ghastly/middleware');
 ```
 
 ##### Filters
@@ -707,7 +707,7 @@ Command groups allow you to organize and configure multiple commands in a more c
 Groups allow us to define middleware that will be applied to multiple commands. Group middleware function identically to the middleware you define in individual configurators. To add middleware to a group, use the `applyGroupMiddleware()` method on the command registry:
 
 ```js
-import { expectGuild } from 'ghastly/middleware';
+const { expectGuild } = require('ghastly/middleware');
 
 client.commands.applyGroupMiddleware('admin', [
   expectGuild(),
@@ -753,7 +753,7 @@ The retrieved command will be a [CommandObject](https://doc.esdoc.org/github.com
 To add middleware to a command group, use `commands.applyGroupMiddleware()`, providing the command group name and an array of layers to apply:
 
 ```js
-import { expectGuild } from 'ghastly/middleware';
+const { expectGuild } = require('ghastly/middleware');
 
 client.commands.applyGroupMiddleware('music', [
   expectGuild(),
@@ -764,7 +764,7 @@ client.commands.applyGroupMiddleware('music', [
 In some cases, you may find that your commands have external dependencies. For instance, a music client may depend on a queueing system to store information about which songs to play next. You may be tempted to simply store the queue somewhere your handler can reach:
 
 ```js
-import { VoiceResponse } from 'ghastly/command';
+const { VoiceResponse } = require('ghastly/command');
 
 // our magic music queue
 const queue = new MusicQueue();
