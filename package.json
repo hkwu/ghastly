@@ -28,9 +28,9 @@
   "scripts": {
     "build": "babel src --out-dir lib",
     "build:api-docs": "esdoc",
-    "watch": "babel --watch src --out-dir lib",
+    "watch": "npm run build -- --watch",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "lint:fix": "npm run lint -- --fix",
     "test": "mocha --require babel-register --recursive",
     "docs:dev": "docute docs --watch",
     "prepublishOnly": "npm run build && npm test"

@@ -140,10 +140,11 @@ Codeblocks are nice, but you have to admit that they look rather plain. In the p
 Discord.js already provides the [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) class as a helpful wrapper around the message embed feature, so let's put it to use.
 
 ```js
-import { RichEmbed } from 'discord.js';
+import { Constants, RichEmbed } from 'discord.js';
 import { inspect } from 'util';
 
-async function handler({ args, message }) {
+async function handler({ args, formatter, message }) {
+  const { codeBlock } = formatter;
   const embed = new RichEmbed();
 
   embed.setTitle('EVAL').setAuthor(message.author.username, message.author.avatarURL);
@@ -155,16 +156,16 @@ async function handler({ args, message }) {
     const end = Date.now();
 
     embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-      .setColor(0x2ECC71) // green
-      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-      .addField('RESULT', `\`\`\`js\n${inspect(result)}\n\`\`\``);
+      .setColor(Constants.Colors.GREEN)
+      .addField('INPUT', codeBlock(args.code, 'js'))
+      .addField('RESULT', codeBlock(inspect(result), 'js'));
   } catch (error) {
     const end = Date.now();
 
     embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-      .setColor(0xE74C3C) // red
-      .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-      .addField('ERROR', `\`\`\`js\n${error}\n\`\`\``);
+      .setColor(Constants.Colors.RED)
+      .addField('INPUT', codeBlock(args.code, 'js'))
+      .addField('ERROR', codeBlock(error, 'js'));
   }
 
   return embed;

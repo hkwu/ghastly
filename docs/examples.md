@@ -19,7 +19,8 @@ import { VM } from 'vm2';
 import { inspect } from 'util';
 
 function evilEval() {
-  async function handler({ args, message }) {
+  async function handler({ args, formatter, message }) {
+    const { codeBlock } = formatter;
     const vm = new VM();
     const embed = new RichEmbed();
 
@@ -33,16 +34,16 @@ function evilEval() {
       const end = Date.now();
 
       embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-        .setColor(0x2ECC71)
-        .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-        .addField('RESULT', `\`\`\`js\n${inspect(result)}\n\`\`\``);
+        .setColor(Constants.Colors.GREEN)
+        .addField('INPUT', codeBlock(args.code, 'js'))
+        .addField('RESULT', codeBlock(inspect(result), 'js'));
     } catch (error) {
       const end = Date.now();
 
       embed.setDescription(`Finished evaluating in ${end - start} ms.`)
-        .setColor(0xE74C3C)
-        .addField('INPUT', `\`\`\`js\n${args.code}\n\`\`\``)
-        .addField('ERROR', `\`\`\`js\n${error}\n\`\`\``);
+        .setColor(Constants.Colors.RED)
+        .addField('INPUT', codeBlock(args.code, 'js'))
+        .addField('ERROR', codeBlock(error, 'js'));
     }
 
     return embed;
