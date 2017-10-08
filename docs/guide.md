@@ -475,7 +475,7 @@ async function handler({ dispatch }) {
 In addition to the basic response types, Ghastly provides more complex response handling through the `Response` class. `Response` is simply a wrapper for specialized response logic; this allows you to return an instance of a `Response` instead of coding a custom response in your handler. Not only does this keep responses contained as values, but it also enables you to modularize your response logic and reuse it across several handlers.
 
 ##### Creating Custom Types
-The `Response` constructor takes a single **executor** function. The executor receives a context object; this context will be the same as the context passed to the command handler from which the `Response` is returned\*. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
+The `Response` constructor takes a single **executor** function. The executor may be `async`, and must handle all of the response logic (including the response dispatching).
 
 In general, it's a good idea to extend the `Response` class and create your own specialized response classes rather than directly instantiating a new `Response` in your command handler (otherwise what's the point in using it?).
 
@@ -483,8 +483,10 @@ In general, it's a good idea to extend the `Response` class and create your own 
 const { Response } = require('ghastly/command');
 
 class ReversedResponse extends Response {
-  constructor() {
-    super(async ({ message }) => {
+  constructor(context) {
+    const { message } = context;
+
+    super(async () => {
       const reversed = message.content.split('').reverse().join('');
 
       return message.channel.send(reversed);
@@ -492,22 +494,23 @@ class ReversedResponse extends Response {
   }
 }
 
-async function handler() {
-  return new ReversedResponse();
+async function handler(context) {
+  return new ReversedResponse(context);
 }
 ```
+
+<p class="tip">
+  If you need access to the handler's context, a simple pattern you can follow is to pass it to your response as a constructor argument. All custom responses included with Ghastly will follow this pattern.
+</p>
 
 When using `dispatch()` on `Response` objects, the returned promise resolves to the return value of the executor.
 
 ```js
-async function handler({ dispatch }) {
-  const message = await dispatch(new ReversedResponse());
+async function handler(context) {
+  const { dispatch } = context;
+  const message = await dispatch(new ReversedResponse(context));
 }
 ```
-
-<p class="warning">
-  \* The context passed to the executor is actually a **shallow copy** of the context that the command handler receives. As such, it is possible for the context to differ if the command handler mutates some non-primitive property of the context object before returning.
-</p>
 
 ##### Builtins
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
@@ -519,11 +522,11 @@ You can send an audio response to the voice channel the client is currently conn
 const ytdl = require('ytdl-core');
 const { VoiceResponse } = require('ghastly/command');
 
-async function handler() {
+async function handler(context) {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // must be connected to voice channel at this point
-  return new VoiceResponse('stream', stream);
+  return new VoiceResponse(context, 'stream', stream);
 }
 ```
 
@@ -531,20 +534,21 @@ The `VoiceResponse` constructor is designed to be a thin facade over the Discord
 
 ```js
 // play a file
-const fileResponse = new VoiceResponse('file', '/path/to/file.mp3');
+const fileResponse = new VoiceResponse(context, 'file', '/path/to/file.mp3');
 
 // send in StreamOptions
-const fileResponseWithOptions = new VoiceResponse('file', 'path/to/file.mp3', { volume: 0.5 });
+const fileResponseWithOptions = new VoiceResponse(context, 'file', 'path/to/file.mp3', { volume: 0.5 });
 ```
 
 The `VoiceResponse` executor returns a promise resolving to the [StreamDispatcher](https://discord.js.org/#/docs/main/stable/class/StreamDispatcher) returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
 
 ```js
-async function handler({ dispatch }) {
+async function handler(context) {
+  const { dispatch } = context;
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // we can access the dispatcher now
-  const dispatcher = await dispatch(new VoiceResponse('stream', stream));
+  const dispatcher = await dispatch(new VoiceResponse(context, 'stream', stream));
 }
 ```
 
@@ -606,8 +610,6 @@ function middlewareThatChangesProperties() {
   };
 }
 ```
-
-One thing to be aware of is that the value returned from the command handler is not passed directly to any waiting layer. Instead, layers receive an object with a `response` property which contains the response value. This is essentially the reverse of the original context flow: the object is propagated from the innermost layer to the outermost layer. Consequently, any intercepting layer has the ability to interact with the response context as they see fit; the dispatcher only cares about the `response` property (in addition to some private properties injected by Ghastly, though you shouldn't be touching these in any case), so any additional properties will only be seen by the layers in the middleware chain.
 
 ##### Before and After Middleware
 You can make your layer execute before or after other layers depending on when you delegate to the `next` layer. For instance, the following middleware will execute some logic then delegate to the next layer in the chain.
@@ -682,7 +684,7 @@ expectRole(
 </p>
 
 ###### `expectUser()`
-`expectUser()` blocks a message if it didn't come from any of the specified users. User IDs and username/discriminator combos (the kind you see after typing a mention) are accepted.
+`expectUser()` blocks a message if it didn't come from any of the specified users. User IDs and tags (the kind you see after typing a mention) are accepted.
 
 ```js
 expectUser(
