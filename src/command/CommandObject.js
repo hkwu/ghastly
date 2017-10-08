@@ -98,18 +98,7 @@ export default class CommandObject {
    * @private
    */
   static generateHandler(handler, middleware) {
-    return apply(...middleware)(async (context) => {
-      const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
-      const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
-      const originalContext = { ...context };
-      const createDispatch = context[CREATE_DISPATCH];
-      const dispatch = createDispatch(originalContext);
-
-      return {
-        response: await handler({ ...context, dispatch }),
-        [ORIGINAL_CONTEXT]: originalContext,
-      };
-    });
+    return apply(...middleware)(handler);
   }
 
   /**

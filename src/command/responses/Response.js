@@ -24,10 +24,9 @@ export default class Response {
 
   /**
    * Executes the message response handler.
-   * @param {Object} context - The context object to pass to the handler.
    * @returns {*} The returned value from the handler.
    */
-  respond(context) {
-    return this.executor(context);
+  respond() {
+    return this.executor();
   }
 }

@@ -151,12 +151,6 @@ export default class Dispatcher {
       formatter: MarkdownFormatter,
     };
 
-    const ORIGINAL_CONTEXT = Symbol.for('ghastly.originalContext');
-    const CREATE_DISPATCH = Symbol.for('ghastly.createDispatch');
-    const createDispatch = handlerContext => (
-      response => this.dispatchResponse(handlerContext, response)
-    );
-
     let args;
 
     try {
@@ -169,7 +163,7 @@ export default class Dispatcher {
       });
     }
 
-    let result;
+    let response;
 
     try {
       const injectedServices = [...command.dependencies].reduce(
@@ -186,12 +180,7 @@ export default class Dispatcher {
         {},
       );
 
-      result = await command.handle({
-        ...context,
-        ...injectedServices,
-        args,
-        [CREATE_DISPATCH]: createDispatch,
-      });
+      response = await command.handle({ ...context, ...injectedServices, args });
     } catch (error) {
       return this.client.emit('dispatchFail', 'handlerError', {
         message: contentMessage,
@@ -201,7 +190,7 @@ export default class Dispatcher {
       });
     }
 
-    if (!result) {
+    if (!response) {
       return this.client.emit('dispatchFail', 'middlewareFilter', {
         message: contentMessage,
         command: command.name,
@@ -209,10 +198,8 @@ export default class Dispatcher {
       });
     }
 
-    const { response, [ORIGINAL_CONTEXT]: handlerContext } = result;
-
     try {
-      await this.dispatchResponse(handlerContext, response);
+      await this.dispatchResponse(contentMessage.channel, response);
 
       return this;
     } catch (error) {
@@ -271,9 +258,12 @@ export default class Dispatcher {
   }
 
   /**
+   * @external {Channel} https://discord.js.org/#/docs/main/stable/class/Channel
+   */
+
+  /**
    * Dispatches the given response value.
-   * @param {Object} context - The context object which was received by the
-   *   dispatched command's handler.
+   * @param {Channel} channel - The channel to send the response to.
    * @param {*} response - The response value.
    * @returns {Promise.<*, Error>} Promise resolving to a Discord.js `Message`
    *   object if a message was dispatched directly. If a custom response is
@@ -283,21 +273,19 @@ export default class Dispatcher {
    *   when an error is encountered while dispatching a value.
    * @private
    */
-  async dispatchResponse(context, response) {
-    const { message } = context;
-
+  async dispatchResponse(channel, response) {
     switch (this.constructor.resolveResponseType(response)) {
       case RESPONSE_TYPES.STRING:
-        return message.channel.send(response);
+        return channel.send(response);
       case RESPONSE_TYPES.ARRAY: {
         const choice = sample(response);
 
-        return this.dispatchResponse(context, choice);
+        return this.dispatchResponse(channel, choice);
       }
       case RESPONSE_TYPES.EMBED:
-        return message.channel.sendEmbed(response);
+        return channel.sendEmbed(response);
       case RESPONSE_TYPES.CUSTOM_RESPONSE:
-        return response.respond(context);
+        return response.respond();
       case RESPONSE_TYPES.NO_RESPONSE:
         return null;
       default:
