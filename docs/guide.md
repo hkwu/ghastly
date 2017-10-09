@@ -500,7 +500,7 @@ async function handler(context) {
 ```
 
 <p class="tip">
-  If you need access to the handler's context, a simple pattern you can follow is to pass it to your response as a constructor argument. All custom responses included with Ghastly will follow this pattern.
+  You often need to access the handler's context in custom responses. A simple pattern you can employ is to pass it to your response as a constructor argument. All custom responses included with Ghastly follow this convention.
 </p>
 
 When using `dispatch()` on `Response` objects, the returned promise resolves to the return value of the executor.
