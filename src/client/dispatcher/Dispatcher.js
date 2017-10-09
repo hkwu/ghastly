@@ -146,9 +146,10 @@ export default class Dispatcher {
     const context = {
       message: contentMessage,
       client: this.client,
-      services: this.client.services,
       commands: this.client.commands,
+      dispatch: response => this.dispatchResponse(contentMessage.channel, response),
       formatter: MarkdownFormatter,
+      services: this.client.services,
     };
 
     let args;
@@ -283,7 +284,7 @@ export default class Dispatcher {
         return this.dispatchResponse(channel, choice);
       }
       case RESPONSE_TYPES.EMBED:
-        return channel.sendEmbed(response);
+        return channel.send(response);
       case RESPONSE_TYPES.CUSTOM_RESPONSE:
         return response.respond();
       case RESPONSE_TYPES.NO_RESPONSE:
