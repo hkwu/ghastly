@@ -14,7 +14,7 @@ npm install --save vm2
 Now we can import the `VM` class and create a VM environment to run our code in.
 
 ```js
-const { RichEmbed } = require('discord.js');
+const { Constants, RichEmbed } = require('discord.js');
 const { VM } = require('vm2');
 const { inspect } = require('util');
 
