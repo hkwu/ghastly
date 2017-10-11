@@ -3,7 +3,6 @@
   <h1>Ghastly</h1>
   <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg" alt="npm"></a>
   <a href="https://travis-ci.org/hkwu/ghastly"><img src="https://img.shields.io/travis/hkwu/ghastly.svg" alt="build"></a>
-  <a href="https://doc.esdoc.org/github.com/hkwu/ghastly"><img src="https://doc.esdoc.org/github.com/hkwu/ghastly/badge.svg" alt="document"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/ghastly.svg" alt="license"></a>
 </div>
 
