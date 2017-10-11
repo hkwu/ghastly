@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [0.4.0]
+### Changed
+- Custom `Response` classes no longer receive the command handler's `context` automatically in their executor functions.
+- `VoiceResponse` now takes the handler's context as its first argument in addition to its existing arguments.
+
 ## [0.3.0]
 ### Added
 - `@me` prefix for selfbots.
@@ -49,7 +54,8 @@ No change notes available.
 ## [0.1.1]
 No change notes available.
 
-[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/hkwu/ghastly/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hkwu/ghastly/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/hkwu/ghastly/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/hkwu/ghastly/compare/v0.2.0...v0.2.1
