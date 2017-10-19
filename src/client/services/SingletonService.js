@@ -21,6 +21,9 @@ export default class SingletonService extends Service {
    */
   get service() {
     if (!this.instance) {
+      /**
+       * @inheritDoc
+       */
       this.instance = this.builder();
     }
 

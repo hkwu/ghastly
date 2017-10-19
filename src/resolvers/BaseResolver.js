@@ -9,6 +9,11 @@ export default class BaseResolver {
    * Constructor.
    */
   constructor() {
+    /**
+     * The resolver.
+     * @type {Object}
+     * @protected
+     */
     this.resolver = createResolver();
   }
 
