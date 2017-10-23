@@ -512,31 +512,40 @@ async function handler(context) {
 Of course, it's a pain to have to define your own response logic for simple things that are absent from the basic response types, so Ghastly provides a set of `Response` classes to handle some of the more common cases.
 
 ###### Voice Responses
-You can send an audio response to the voice channel the client is currently connected to using `VoiceResponse`. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response is ignored.
+You can send an audio response to the voice channel the client is currently connected to using one of the voice response types. A response will be sent only if the message is received in a guild context. In addition, the client must be connected to a voice channel in that guild. In any other case, the response is ignored.
 
 ```js
 const ytdl = require('ytdl-core');
-const { VoiceResponse } = require('ghastly/command');
+const { StreamVoiceResponse } = require('ghastly/command');
 
 async function handler(context) {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // must be connected to voice channel at this point
-  return new VoiceResponse(context, 'stream', stream);
+  return new StreamVoiceResponse(context, stream);
 }
 ```
 
-The `VoiceResponse` constructor is designed to be a thin facade over the Discord.js `VoiceConnection` play methods.
+There are six voice response types, each corresponding to a [VoiceConnection](https://discord.js.org/#/docs/main/stable/class/VoiceConnection) audio input method:
+
+- [ArbitraryVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/ArbitraryVoiceResponse.js~ArbitraryVoiceResponse.html)
+- [BroadcastVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/BroadcastVoiceResponse.js~BroadcastVoiceResponse.html)
+- [ConvertedVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/ConvertedVoiceResponse.js~ConvertedVoiceResponse.html)
+- [FileVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/FileVoiceResponse.js~FileVoiceResponse.html)
+- [OpusVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/OpusVoiceResponse.js~OpusVoiceResponse.html)
+- [StreamVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/StreamVoiceResponse.js~StreamVoiceResponse.html)
+
+Voice responses act as a thin facade over these methods.
 
 ```js
 // play a file
-const fileResponse = new VoiceResponse(context, 'file', '/path/to/file.mp3');
+const fileResponse = new FileVoiceResponse(context, '/path/to/file.mp3');
 
 // send in StreamOptions
-const fileResponseWithOptions = new VoiceResponse(context, 'file', 'path/to/file.mp3', { volume: 0.5 });
+const fileResponseWithOptions = new FileVoiceResponse(context, 'path/to/file.mp3', { volume: 0.5 });
 ```
 
-The `VoiceResponse` executor returns a promise resolving to the [StreamDispatcher](https://discord.js.org/#/docs/main/stable/class/StreamDispatcher) returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
+Voice response executors return a promise resolving to the [StreamDispatcher](https://discord.js.org/#/docs/main/stable/class/StreamDispatcher) returned by the `VoiceConnection` play method. If you need to access the `StreamDispatcher`, you will need to `dispatch()` the `VoiceResponse` instead of returning it:
 
 ```js
 async function handler(context) {
@@ -544,7 +553,7 @@ async function handler(context) {
   const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
 
   // we can access the dispatcher now
-  const dispatcher = await dispatch(new VoiceResponse(context, 'stream', stream));
+  const dispatcher = await dispatch(new StreamVoiceResponse(context, stream));
 }
 ```
 
