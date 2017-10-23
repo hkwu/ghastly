@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "build:api-docs": "esdoc",
+    "build:docs": "esdoc",
     "watch": "npm run build -- --watch",
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
