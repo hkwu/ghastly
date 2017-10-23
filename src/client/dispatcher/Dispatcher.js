@@ -13,7 +13,7 @@ import Response from '../../command/responses/Response';
  * Response type strings.
  * @type {Object}
  * @const
- * @private
+ * @ignore
  */
 const RESPONSE_TYPES = {
   STRING: 'STRING',
