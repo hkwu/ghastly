@@ -33,7 +33,7 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "mocha --require babel-register --recursive",
     "docs:dev": "docute --watch",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "rimraf lib && npm run build && npm test"
   },
   "dependencies": {
     "es6-error": "^4.0.0",
@@ -55,7 +55,8 @@
     "eslint": "^4.8.0",
     "eslint-config-airbnb-base": "^12.0.2",
     "eslint-plugin-import": "^2.2.0",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "rimraf": "^2.6.2"
   },
   "peerDependencies": {
     "discord.js": "^11.0.0"
