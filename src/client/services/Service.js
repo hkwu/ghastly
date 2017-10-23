@@ -1,27 +1,21 @@
 /**
+ * Type identifier for services.
+ * @type {Object}
+ * @const
+ * @ignore
+ */
+export const ServiceTypes = {
+  CONSTRUCTED: 'CONSTRUCTED',
+  SINGLETON: 'SINGLETON',
+  INSTANCE: 'INSTANCE',
+};
+
+/**
  * @desc Records information about a service.
  * @interface
  * @ignore
  */
 export default class Service {
-  /**
-   * Type identifier for constructed services.
-   * @type {string}
-   */
-  static CONSTRUCTED = 'CONSTRUCTED';
-
-  /**
-   * Type identifier for singleton services.
-   * @type {string}
-   */
-  static SINGLETON = 'SINGLETON';
-
-  /**
-   * Type identifier for instance services.
-   * @type {string}
-   */
-  static INSTANCE = 'INSTANCE';
-
   /**
    * Constructor.
    * @param {Object} options - Options for the entry.

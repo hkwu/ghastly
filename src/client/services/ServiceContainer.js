@@ -1,9 +1,9 @@
 import { isArray, isFunction } from 'lodash/lang';
 import ConstructedService from './ConstructedService';
 import InstanceService from './InstanceService';
-import Service from './Service';
 import SingletonService from './SingletonService';
 import StringMap from '../../utils/StringMap';
+import { ServiceTypes } from './Service';
 
 /**
  * @desc Manages services in the application.
@@ -50,7 +50,7 @@ export default class ServiceContainer {
       throw new TypeError('Expected service builder to be a function.');
     }
 
-    return this.addService(Service.CONSTRUCTED, identifier, builder);
+    return this.addService(ServiceTypes.CONSTRUCTED, identifier, builder);
   }
 
   /**
@@ -67,7 +67,7 @@ export default class ServiceContainer {
       throw new TypeError('Expected service builder to be a function.');
     }
 
-    return this.addService(Service.SINGLETON, identifier, builder);
+    return this.addService(ServiceTypes.SINGLETON, identifier, builder);
   }
 
   /**
@@ -79,7 +79,7 @@ export default class ServiceContainer {
    * @returns {ServiceContainer} The instance this method was called on.
    */
   instance(identifier, value) {
-    return this.addService(Service.INSTANCE, identifier, value);
+    return this.addService(ServiceTypes.INSTANCE, identifier, value);
   }
 
   /**
@@ -177,15 +177,15 @@ export default class ServiceContainer {
     const [name, ...aliases] = isArray(identifier) ? identifier : [identifier];
 
     switch (type) {
-      case Service.CONSTRUCTED:
+      case ServiceTypes.CONSTRUCTED:
         this.services.set(name, new ConstructedService(aliases, service));
 
         break;
-      case Service.SINGLETON:
+      case ServiceTypes.SINGLETON:
         this.services.set(name, new SingletonService(aliases, service));
 
         break;
-      case Service.INSTANCE:
+      case ServiceTypes.INSTANCE:
         this.services.set(name, new InstanceService(aliases, service));
 
         break;
