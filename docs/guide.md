@@ -787,7 +787,7 @@ function playSong() {
 }
 ```
 
-However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the [ServiceContainer](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/client/services/ServiceContainer.js~ServiceContainer.html) interface.
+However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the [ServiceContainer](https://hkwu.github.io/ghastly-docs/class/src/client/services/ServiceContainer.js~ServiceContainer.html) interface.
 
 When you have access to the context object, a reference to the container is automatically injected for you.
 
