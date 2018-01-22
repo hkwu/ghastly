@@ -1,6 +1,6 @@
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
-import { isArray, isString } from 'lodash/lang';
+import { isArray, isFunction, isString } from 'lodash/lang';
 import { escapeRegExp } from 'lodash/string';
 import ArgumentParser from '../../command/parsers/ArgumentParser';
 import ClosureFilter from './ClosureFilter';
@@ -32,7 +32,7 @@ export default class Dispatcher {
    * Constructor.
    * @param {Object} options - The configuration values for the dispatcher.
    * @param {Ghastly} options.client - The client this dispatcher is attached to.
-   * @param {string} options.prefix - The prefix for this dispatcher.
+   * @param {(string|function)} options.prefix - The prefix for this dispatcher.
    */
   constructor({ client, prefix }) {
     /**
@@ -43,10 +43,10 @@ export default class Dispatcher {
 
     /**
      * The raw prefix given as an option.
-     * @type {string}
+     * @type {(string|function)}
      * @private
      */
-    this.prefix = escapeRegExp(prefix.trim());
+    this.prefix = isString(prefix) ? escapeRegExp(prefix.trim()) : prefix;
 
     /**
      * The prefix filter constructed from the raw prefix.
@@ -122,7 +122,7 @@ export default class Dispatcher {
 
     const contentMessage = newMessage || message;
 
-    if (this.shouldFilterPrefix(contentMessage)) {
+    if (await this.shouldFilterPrefix(contentMessage)) {
       return this.client.emit('dispatchFail', 'prefixFilter', { message: contentMessage });
     }
 
@@ -215,24 +215,31 @@ export default class Dispatcher {
   }
 
   /**
-   * Transforms a prefix string into a prefix filter.
-   * @param {string} prefix - The prefix.
+   * Generates a prefix filter.
+   * @param {(string|function)} prefix - The prefix.
    * @returns {PrefixFilter} The prefix filter.
+   * @throws {TypeError} Thrown if the prefix is not a `string` or `function`.
    * @private
    */
   createPrefixFilter(prefix) {
-    if (/^@client$/i.test(prefix)) {
-      return new RegexFilter(`^<@!?${this.client.user.id}>`);
-    } else if (/^@me:.+/i.test(prefix)) {
-      const prefixString = prefix.match(/@me:(.+)/)[1];
-      const prefixRegex = new RegExp(`^${prefixString}`);
+    if (isString(prefix)) {
+      if (/^@client$/i.test(prefix)) {
+        return new RegexFilter(`^<@!?${this.client.user.id}>`);
+      } else if (/^@me:.+/i.test(prefix)) {
+        const prefixString = prefix.match(/@me:(.+)/)[1];
+        const prefixRegex = new RegExp(`^${prefixString}`);
 
-      return new ClosureFilter(({ author, content }) => (
-        author.id === this.client.user.id && content.test(prefixRegex)
-      ));
+        return new ClosureFilter(({ author, content }) => (
+          author.id === this.client.user.id && content.test(prefixRegex)
+        ));
+      }
+
+      return new RegexFilter(`^${prefix}`);
+    } else if (isFunction(prefix)) {
+      return new ClosureFilter(prefix);
     }
 
-    return new RegexFilter(`^${prefix}`);
+    throw new TypeError('Prefix should be a string or function.');
   }
 
   /**
