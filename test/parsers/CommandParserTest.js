@@ -1,7 +1,6 @@
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 import CommandParser from '../../src/command/parsers/CommandParser';
-import RegexFilter from '../../src/client/dispatcher/RegexFilter';
 
 describe('CommandParser', function () {
   before(function () {
@@ -19,7 +18,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(CommandParser.parse(message, new RegexFilter('!'))).to.containSubset({
+      expect(CommandParser.parse(message, new RegExp('!'))).to.containSubset({
         raw: '!cmd pro',
         trimmed: 'cmd pro',
         identifier: 'cmd',
@@ -35,7 +34,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(CommandParser.parse(message, new RegexFilter('!'))).to.containSubset({
+      expect(CommandParser.parse(message, new RegExp('!'))).to.containSubset({
         raw: '!cmd',
         trimmed: 'cmd',
         identifier: 'cmd',
@@ -53,7 +52,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(CommandParser.parse(message, new RegexFilter('<@123456789>'))).to.containSubset({
+      expect(CommandParser.parse(message, new RegExp('<@123456789>'))).to.containSubset({
         raw: '<@123456789> cmd pro pro',
         trimmed: 'cmd pro pro',
         identifier: 'cmd',
@@ -69,7 +68,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(CommandParser.parse(message, new RegexFilter('<@0>'))).to.containSubset({
+      expect(CommandParser.parse(message, new RegExp('<@0>'))).to.containSubset({
         raw: '<@123456789> cmd pro pro',
         trimmed: '<@123456789> cmd pro pro',
         identifier: '<@123456789>',
@@ -85,7 +84,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(CommandParser.parse(message, new RegexFilter('!'))).to.containSubset({
+      expect(CommandParser.parse(message, new RegExp('!'))).to.containSubset({
         raw: '!cmd pro <@123456789> pro',
         trimmed: 'cmd pro <@123456789> pro',
         identifier: 'cmd',
@@ -103,7 +102,7 @@ describe('CommandParser', function () {
         },
       };
 
-      expect(() => CommandParser.parse(message, new RegexFilter('<@123456789>'))).to.throw(Error);
+      expect(() => CommandParser.parse(message, new RegExp('<@123456789>'))).to.throw(Error);
     });
   });
 });
