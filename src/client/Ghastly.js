@@ -1,5 +1,5 @@
 import { Client } from 'discord.js';
-import { isFunction, isString } from 'lodash/lang';
+import { isFunction, isRegExp, isString } from 'lodash/lang';
 import CommandRegistry from '../command/CommandRegistry';
 import Dispatcher from './dispatcher/Dispatcher';
 import ServiceContainer from './services/ServiceContainer';
@@ -16,17 +16,16 @@ export default class Ghastly extends Client {
   /**
    * Constructor.
    * @param {ClientOptions} options - The options for the client.
-   * @param {(string|function)} options.prefix - The prefix for the client's
-   *   dispatcher. If a function is provided, it is given a received `Message`
-   *   as an argument and must return a `boolean` indicating if it passes the
-   *   filter.
+   * @param {PrefixType} options.prefix - The prefix for the client's dispatcher.
+   *   If a function is provided, it is given a received `Message` as an argument
+   *   and must return a `boolean` indicating if it passes the filter.
    * @throws {TypeError} Thrown if any option is of the wrong type.
    */
   constructor(options) {
     const { prefix, ...rest } = options;
 
-    if (!isString(prefix) && !isFunction(prefix)) {
-      throw new TypeError('Expected prefix to be a string or function.');
+    if (!isString(prefix) && !isRegExp(prefix) && !isFunction(prefix)) {
+      throw new TypeError('Expected prefix to be a string, RegExp or function.');
     }
 
     super(rest);
