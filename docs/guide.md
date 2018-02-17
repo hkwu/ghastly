@@ -364,7 +364,7 @@ async function handler({ formatter }) {
 }
 ```
 
-For a detailed method list, check the [MarkdownFormatter](https://hkwu.github.io/ghastly-docs/class/src/utils/MarkdownFormatter.js~MarkdownFormatter.html) entry in the API reference.
+For a detailed method list, check the [MarkdownFormatter](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/utils/MarkdownFormatter.js~MarkdownFormatter.html) entry in the API reference.
 
 #### Basic Response Types
 Handlers don't actually need to interact with the Discord.js `Message` object in order to send responses. Ghastly can evaluate the return value of handlers and automate the response process based on the returned value's type. This helps to decouple your handler implementations from the underlying messaging API, letting you concentrate on *what* your handlers should respond with, rather than *how* they should respond.
@@ -557,12 +557,12 @@ async function handler(context) {
 
 There are six voice response types, each corresponding to a [VoiceConnection](https://discord.js.org/#/docs/main/stable/class/VoiceConnection) audio input method:
 
-- [ArbitraryVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/ArbitraryVoiceResponse.js~ArbitraryVoiceResponse.html)
-- [BroadcastVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/BroadcastVoiceResponse.js~BroadcastVoiceResponse.html)
-- [ConvertedVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/ConvertedVoiceResponse.js~ConvertedVoiceResponse.html)
-- [FileVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/FileVoiceResponse.js~FileVoiceResponse.html)
-- [OpusVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/OpusVoiceResponse.js~OpusVoiceResponse.html)
-- [StreamVoiceResponse](https://hkwu.github.io/ghastly-docs/class/src/command/responses/StreamVoiceResponse.js~StreamVoiceResponse.html)
+- [ArbitraryVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/ArbitraryVoiceResponse.js~ArbitraryVoiceResponse.html)
+- [BroadcastVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/BroadcastVoiceResponse.js~BroadcastVoiceResponse.html)
+- [ConvertedVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/ConvertedVoiceResponse.js~ConvertedVoiceResponse.html)
+- [FileVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/FileVoiceResponse.js~FileVoiceResponse.html)
+- [OpusVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/OpusVoiceResponse.js~OpusVoiceResponse.html)
+- [StreamVoiceResponse](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/responses/StreamVoiceResponse.js~StreamVoiceResponse.html)
 
 Voice responses act as a thin facade over these methods.
 
@@ -754,7 +754,7 @@ Group middleware will be inserted before the first layer of each command's middl
 
 ## Client Components
 ### Command Registry
-The client stores commands in a [CommandRegistry](https://hkwu.github.io/ghastly-docs/class/src/command/CommandRegistry.js~CommandRegistry.html). You can access the registry as an injected context property or as `client.commands`:
+The client stores commands in a [CommandRegistry](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/CommandRegistry.js~CommandRegistry.html). You can access the registry as an injected context property or as `client.commands`:
 
 ```js
 async function handler({ commands }) {
@@ -779,7 +779,7 @@ To retrieve a command, use `commands.get()`, providing any of the command's trig
 client.commands.get('ping');
 ```
 
-The retrieved command will be a [CommandObject](https://hkwu.github.io/ghastly-docs/class/src/command/CommandObject.js~CommandObject.html) instance.
+The retrieved command will be a [CommandObject](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/command/CommandObject.js~CommandObject.html) instance.
 
 <p class="danger">
   When retrieving commands, a *reference* to the `CommandObject` is returned. Since Ghastly relies on the registry internally, you should **never** mutate the returned `CommandObject`.
@@ -816,7 +816,7 @@ function playSong() {
 }
 ```
 
-However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the [ServiceContainer](https://hkwu.github.io/ghastly-docs/class/src/client/services/ServiceContainer.js~ServiceContainer.html) interface.
+However, this becomes ugly when you need to share the queue with other commands that also have a dependency on it (`addSong`, `removeSong`, etc.). Ghastly provides a centralized system to organize and fetch these dependencies via the [ServiceContainer](https://doc.esdoc.org/github.com/hkwu/ghastly/class/src/client/services/ServiceContainer.js~ServiceContainer.html) interface.
 
 When you have access to the context object, a reference to the container is automatically injected for you.
 
