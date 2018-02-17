@@ -11,7 +11,7 @@ const { Client } = require('ghastly');
 const client = new Client();
 ```
 
-The Ghastly client is an extension of the Discord.js client, so any methods, properties and events are inherited by the Ghastly client, if you require them.
+The Ghastly client is an extension of the Discord.js client, so any methods, properties and events are inherited by the Ghastly client if you require them.
 
 #### Setting a Prefix
 The client processes messages using a component called the dispatcher. In order to take advantage of the dispatcher, you need to configure it when you create the client. The dispatcher filters messages based on a prefix. The prefix can be any string (spaces are valid), with specific exceptions as outlined below.
@@ -22,6 +22,8 @@ const client = new Client({ prefix: '> ' });
 
 <p class="warning">
   Since spaces are treated as part of the prefix, the above dispatcher will respond to messages of the form `> hello, world`, but will *not* respond to `>hello, world`.
+
+  Also be aware that all **string** prefixes are **case-insensitive**.
 </p>
 
 ##### Mentions
@@ -41,6 +43,33 @@ const client = new Client({ prefix: '@me:/' });
 ```
 
 You can then trigger selfbot commands by using `/command`.
+
+##### Regular Expressions
+You can also specify prefixes using a regular expression.
+
+```js
+const client = new Client({ prefix: /hey, there */ });
+```
+
+This prefix will match any message starting with the string `hey, there`, followed by any number of spaces. Note that the prefix is **case-sensitive** unless you explicitly add the `i` flag to the regular expression.
+
+##### Deferred Prefixes
+In some special cases, you may require some additional information at runtime to determine which prefix to use. For instance, you may wish to implement guild-based prefixes by checking which guild context a message was received in, then returning a prefix which is unique to that guild.
+
+This is possible by specifying a function as a prefix.
+
+```js
+const client = new Client({
+  prefix: (message) => {
+    // assume `Prefixes` is a mapping between guilds and their unique prefixes
+    return message.guild && new RegExp(Prefixes.get(message.guild.id));
+  },
+});
+```
+
+Deferred prefixes receive the `Message` as an argument and should return a `RegExp` object which specifies the message prefix, or a `Promise` which resolves to a `RegExp`.
+
+If the prefix returns `false`, the message is ignored and will not be processed further. This allows you to perform additional filtering independent of the message content.
 
 #### Registering Commands
 Commands should be registered before logging in with the client. The command registry (available through `client.commands`) provides the `add()` method to register commands. It takes a variable number of commands and adds them to the registry. The nature of these commands is detailed in the next section.
