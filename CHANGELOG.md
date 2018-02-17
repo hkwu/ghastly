@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [0.5.0]
+### Added
+- Additional options for specifying prefixes.
+    - Deferred prefixes: by passing in a function as the client prefix option, you can defer the generation of a message prefix until you receive a message.
+    - Regular expression prefixes: you can now pass a `RegExp` as a prefix. The flags associated with that `RegExp` are preserved.
+
+### Changed
+- String prefixes are no longer case-sensitive. You must switch to regular expressions if you wish to use case-sensitive prefixes.
+
 ## [0.4.1]
 ### Added
 - `ArbitraryVoiceResponse`, `BroadcastVoiceResponse`, `ConvertedVoiceResponse`, `FileVoiceResponse`, `OpusVoiceResponse`, `StreamVoiceResponse` response types for handling audio responses.
@@ -61,7 +70,8 @@ No change notes available.
 ## [0.1.1]
 No change notes available.
 
-[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/hkwu/ghastly/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/hkwu/ghastly/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/hkwu/ghastly/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/hkwu/ghastly/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hkwu/ghastly/compare/v0.2.2...v0.3.0
