@@ -1,4 +1,4 @@
-import { isString } from 'lodash/lang';
+import { isRegExp } from 'lodash/lang';
 import PrefixFilter from './PrefixFilter';
 
 /**
@@ -9,15 +9,15 @@ import PrefixFilter from './PrefixFilter';
 export default class RegexFilter extends PrefixFilter {
   /**
    * Constructor.
-   * @param {string} filter - The filter.
+   * @param {RegExp} filter - The filter.
    * @throws {TypeError} Thrown if the filter is not a string.
    */
   constructor(filter) {
-    if (!isString(filter)) {
-      throw new TypeError('Expected filter to be a string.');
+    if (!isRegExp(filter)) {
+      throw new TypeError('Expected filter to be a RegExp.');
     }
 
-    super(new RegExp(filter));
+    super(filter);
   }
 
   /**

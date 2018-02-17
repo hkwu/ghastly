@@ -6,7 +6,7 @@ import PrefixFilter from './PrefixFilter';
  * @implements {PrefixFilter}
  * @ignore
  */
-export default class ClosureFilter extends PrefixFilter {
+export default class DeferredFilter extends PrefixFilter {
   /**
    * Constructor.
    * @param {Function} filter - The filter.
@@ -23,7 +23,9 @@ export default class ClosureFilter extends PrefixFilter {
   /**
    * Tests a message and determines if it passes the filter.
    * @param {Message} message - The message.
-   * @returns {boolean} `true` if the message passes the filter, else `false`.
+   * @returns {(boolean|RegExp)} Returns `false` if the message does not pass
+   *   the filter, else a `RegExp` which represents a prefix to test against the
+   *   message.
    */
   test(message) {
     return this.filter(message);
