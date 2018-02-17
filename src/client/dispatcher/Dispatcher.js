@@ -1,13 +1,18 @@
 import { RichEmbed } from 'discord.js';
 import { sample } from 'lodash/collection';
-import { isArray, isFunction, isString } from 'lodash/lang';
+import { isArray, isFunction, isRegExp, isString } from 'lodash/lang';
 import { escapeRegExp } from 'lodash/string';
 import ArgumentParser from '../../command/parsers/ArgumentParser';
-import ClosureFilter from './ClosureFilter';
+import DeferredFilter from './DeferredFilter';
 import CommandParser from '../../command/parsers/CommandParser';
 import MarkdownFormatter from '../../utils/MarkdownFormatter';
 import RegexFilter from './RegexFilter';
 import Response from '../../command/responses/Response';
+
+/**
+ * One of the types that a prefix filter can be generated from.
+ * @typedef {(string|RegExp|function)} PrefixType
+ */
 
 /**
  * Response type strings.
@@ -32,7 +37,7 @@ export default class Dispatcher {
    * Constructor.
    * @param {Object} options - The configuration values for the dispatcher.
    * @param {Ghastly} options.client - The client this dispatcher is attached to.
-   * @param {(string|function)} options.prefix - The prefix for this dispatcher.
+   * @param {PrefixType} options.prefix - The prefix for this dispatcher.
    */
   constructor({ client, prefix }) {
     /**
@@ -43,7 +48,7 @@ export default class Dispatcher {
 
     /**
      * The raw prefix given as an option.
-     * @type {(string|function)}
+     * @type {PrefixType}
      * @private
      */
     this.prefix = isString(prefix) ? escapeRegExp(prefix.trim()) : prefix;
@@ -121,15 +126,21 @@ export default class Dispatcher {
     }
 
     const contentMessage = newMessage || message;
+    const prefixFilterResult = await this.prefixFilter.test(contentMessage);
 
-    if (await this.shouldFilterPrefix(contentMessage)) {
+    if (!prefixFilterResult) {
       return this.client.emit('dispatchFail', 'prefixFilter', { message: contentMessage });
     }
 
     let parsedCommand;
 
     try {
-      parsedCommand = CommandParser.parse(contentMessage, this.prefixFilter);
+      // DeferredFilter produces a RegExp if message is valid command
+      const prefix = this.prefixFilter instanceof DeferredFilter
+        ? prefixFilterResult
+        : this.prefixFilter.filter;
+
+      parsedCommand = CommandParser.parse(contentMessage, prefix);
     } catch (error) {
       return this.client.emit('dispatchFail', 'parseCommand', { message: contentMessage, error });
     }
@@ -216,7 +227,7 @@ export default class Dispatcher {
 
   /**
    * Generates a prefix filter.
-   * @param {(string|function)} prefix - The prefix.
+   * @param {PrefixType} prefix - The prefix.
    * @returns {PrefixFilter} The prefix filter.
    * @throws {TypeError} Thrown if the prefix is not a `string` or `function`.
    * @private
@@ -224,19 +235,23 @@ export default class Dispatcher {
   createPrefixFilter(prefix) {
     if (isString(prefix)) {
       if (/^@client$/i.test(prefix)) {
-        return new RegexFilter(`^<@!?${this.client.user.id}>`);
+        return new RegexFilter(new RegExp(`^<@!?${this.client.user.id}>`));
       } else if (/^@me:.+/i.test(prefix)) {
         const prefixString = prefix.match(/@me:(.+)/)[1];
         const prefixRegex = new RegExp(`^${prefixString}`);
 
-        return new ClosureFilter(({ author, content }) => (
-          author.id === this.client.user.id && content.test(prefixRegex)
+        return new DeferredFilter(({ author }) => (
+          author.id === this.client.user.id && prefixRegex
         ));
       }
 
-      return new RegexFilter(`^${prefix}`);
+      return new RegexFilter(new RegExp(`^${prefix}`));
+    } else if (isRegExp(prefix)) {
+      const matches = prefix.toString().match(/^\/(.+)\/(\w+)?$/);
+
+      return new RegexFilter(new RegExp(`^${matches[1]}`, matches[2]));
     } else if (isFunction(prefix)) {
-      return new ClosureFilter(prefix);
+      return new DeferredFilter(prefix);
     }
 
     throw new TypeError('Prefix should be a string or function.');
@@ -252,17 +267,6 @@ export default class Dispatcher {
    */
   shouldFilterEvent(message, newMessage) { // eslint-disable-line class-methods-use-this
     return newMessage && message.content === newMessage.content;
-  }
-
-  /**
-   * Determines if a message should be filtered from the handler based on the
-   *   dispatcher prefix.
-   * @param {Message} message - The message contents.
-   * @returns {boolean} `true` if the message should be filtered, else `false`.
-   * @private
-   */
-  shouldFilterPrefix(message) {
-    return !this.prefixFilter.test(message);
   }
 
   /**
