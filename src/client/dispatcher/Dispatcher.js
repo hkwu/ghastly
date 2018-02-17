@@ -238,14 +238,14 @@ export default class Dispatcher {
         return new RegexFilter(new RegExp(`^<@!?${this.client.user.id}>`));
       } else if (/^@me:.+/i.test(prefix)) {
         const prefixString = prefix.match(/@me:(.+)/)[1];
-        const prefixRegex = new RegExp(`^${prefixString}`);
+        const prefixRegex = new RegExp(`^${prefixString}`, 'i');
 
         return new DeferredFilter(({ author }) => (
           author.id === this.client.user.id && prefixRegex
         ));
       }
 
-      return new RegexFilter(new RegExp(`^${prefix}`));
+      return new RegexFilter(new RegExp(`^${prefix}`, 'i'));
     } else if (isRegExp(prefix)) {
       const matches = prefix.toString().match(/^\/(.+)\/(\w+)?$/);
 
