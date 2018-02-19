@@ -126,20 +126,17 @@ export default class Dispatcher {
     }
 
     const contentMessage = newMessage || message;
-    const prefixFilterResult = await this.prefixFilter.test(contentMessage);
+    const prefix = this.prefixFilter instanceof DeferredFilter
+      ? await this.prefixFilter.test(contentMessage)
+      : this.prefixFilter.filter;
 
-    if (!prefixFilterResult) {
+    if (!prefix || this.shouldFilterPrefix(prefix, contentMessage)) {
       return this.client.emit('dispatchFail', 'prefixFilter', { message: contentMessage });
     }
 
     let parsedCommand;
 
     try {
-      // DeferredFilter produces a RegExp if message is valid command
-      const prefix = this.prefixFilter instanceof DeferredFilter
-        ? prefixFilterResult
-        : this.prefixFilter.filter;
-
       parsedCommand = CommandParser.parse(contentMessage, prefix);
     } catch (error) {
       return this.client.emit('dispatchFail', 'parseCommand', { message: contentMessage, error });
@@ -257,6 +254,8 @@ export default class Dispatcher {
     throw new TypeError('Prefix should be a string or function.');
   }
 
+  /* eslint-disable class-methods-use-this */
+
   /**
    * Determines if a message event should be filtered from the handler.
    * @param {Message} message - A Discord.js `Message` object.
@@ -265,9 +264,23 @@ export default class Dispatcher {
    * @returns {boolean} `true` if the message should be filtered, else `false`.
    * @private
    */
-  shouldFilterEvent(message, newMessage) { // eslint-disable-line class-methods-use-this
+  shouldFilterEvent(message, newMessage) {
     return newMessage && message.content === newMessage.content;
   }
+
+  /**
+   * Determines if a message should be filtered from the handler based on the
+   *   given prefix.
+   * @param {RegExp} prefix - The prefix to test the message against.
+   * @param {Message} message - The message contents.
+   * @returns {boolean} `true` if the message should be filtered, else `false`.
+   * @private
+   */
+  shouldFilterPrefix(prefix, message) {
+    return !prefix.test(message.content);
+  }
+
+  /* eslint-enable class-methods-use-this */
 
   /**
    * @external {Channel} https://discord.js.org/#/docs/main/stable/class/Channel
