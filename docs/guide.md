@@ -945,7 +945,7 @@ Emitted when a [message update](https://discord.js.org/#/docs/main/stable/class/
 - `newMessage`: the `Message` after the update.
 
 ##### `prefixFilter`
-Emitted when a message is received which doesn't posssess the client's prefix.
+Emitted when a message is received which doesn't match the prefix supplied to the client.
 
 - `message`: the `Message` which was received.
 
@@ -973,7 +973,7 @@ Emitted when there is a problem executing a command handler and its middleware c
 - `message`: the `Message` which was received.
 - `command`: the command which was parsed from the message.
 - `args`: the arguments which were parsed from the message.
-- `error`: the `Error` which occurred during parsing.
+- `error`: the `Error` which occurred during execution.
 
 ##### `middlewareFilter`
 Emitted when a command's middleware chain prevented a response from being dispatched.
