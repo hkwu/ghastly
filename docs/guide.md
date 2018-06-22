@@ -69,7 +69,7 @@ const client = new Client({
 
 Deferred prefixes receive the `Message` as an argument and should return a `RegExp` object which specifies the message prefix, or a `Promise` which resolves to a `RegExp`.
 
-If the prefix returns `false`, the message is ignored and will not be processed further. This allows you to perform additional filtering independent of the message content.
+If the prefix returns a falsey value, the message is ignored and will not be processed further. This allows you to perform additional filtering independent of the message content.
 
 #### Registering Commands
 Commands should be registered before logging in with the client. The command registry (available through `client.commands`) provides the `add()` method to register commands. It takes a variable number of commands and adds them to the registry. The nature of these commands is detailed in the next section.
