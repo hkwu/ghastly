@@ -1,4 +1,9 @@
-import { isNumber, isString, toInteger, toNumber } from 'lodash/lang';
+import {
+  isNumber,
+  isString,
+  toInteger,
+  toNumber,
+} from 'lodash/lang';
 
 /**
  * Boolean type.

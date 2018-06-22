@@ -4,7 +4,12 @@ import { trimEnd, trimStart } from 'lodash/string';
 import ParameterParserError from '../../errors/ParameterParserError';
 import ParameterResolver from '../../resolvers/ParameterResolver';
 import ParsedParameter from './ParsedParameter';
-import { STRING, convertType, isType, resolveType } from './Types';
+import {
+  STRING,
+  convertType,
+  isType,
+  resolveType,
+} from './Types';
 
 /**
  * @typedef {Object} ParameterDefinition
@@ -64,7 +69,7 @@ export default class ParameterParser {
     return parameters.map((parameter) => {
       if (isString(parameter)) {
         return new ParsedParameter(ParameterParser.parseParameter(parameter));
-      } else if (isPlainObject(parameter)) {
+      } if (isPlainObject(parameter)) {
         return new ParsedParameter(resolver.resolve(parameter));
       }
 
