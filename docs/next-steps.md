@@ -1,0 +1,2 @@
+# Next Steps
+We've covered the basics of Ghastly with a high-level walkthrough and built a bot with some interesting commands, but there's still more we haven't dived into yet. The [Guide](/guide) will take you through some of the more advanced topics in Ghastly and at the same time go deeper into topics that we've already covered. You can also take a look at the lower-level [API reference](https://doc.esdoc.org/github.com/hkwu/ghastly/).

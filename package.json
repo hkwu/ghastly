@@ -32,7 +32,7 @@
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
     "test": "mocha --require babel-register --recursive",
-    "docs:dev": "docute --watch",
+    "docs:dev": "docsify serve docs",
     "prepublishOnly": "rimraf lib && npm run build && npm test"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
     "babel-register": "^6.18.0",
     "chai": "^4.1.2",
     "chai-subset": "^1.3.0",
-    "docute-cli": "^0.6.0",
+    "docsify-cli": "^4.3.0",
     "esdoc": "^1.0.3",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-standard-plugin": "^1.0.0",
