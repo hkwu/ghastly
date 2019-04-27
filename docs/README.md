@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://ghastly.js.org" target="_blank"><img src="https://ghastly.js.org/assets/logo.png"></a>
+  <a href="https://ghastly.js.org" target="_blank"><img src="/assets/logo.png"></a>
   <h1>Ghastly</h1>
   <a href="https://www.npmjs.com/package/ghastly"><img src="https://img.shields.io/npm/v/ghastly.svg" alt="npm"></a>
   <a href="https://travis-ci.org/hkwu/ghastly"><img src="https://img.shields.io/travis/hkwu/ghastly.svg" alt="build"></a>
