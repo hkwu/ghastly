@@ -1,5 +1,5 @@
 # A Less Evil Eval
-In the [Getting Started](/getting-started#evil-eval) tutorial, we built an `eval` command which allowed users to execute arbitrary JavaScript on our bot. We also implemented a command whitelist using middleware so that only trusted users can access the `eval` command. While this works, there's nothing to actually stop a user from executing malicious code and causing serious problems.
+In the [Getting Started](evil-eval) tutorial, we built an `eval` command which allowed users to execute arbitrary JavaScript on our bot. We also implemented a command whitelist using middleware so that only trusted users can access the `eval` command. While this works, there's nothing to actually stop a user from executing malicious code and causing serious problems.
 
 With this in mind, we're going to want to sandbox our script's execution as much as possible. To do this, we can take advantage of the [vm2](https://github.com/patriksimek/vm2) library.
 

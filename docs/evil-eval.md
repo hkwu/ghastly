@@ -135,4 +135,4 @@ function evilEval() {
 
 Now our command will be restricted to a certain group of (hopefully well-behaved) users.
 
-?> In case you're still not happy with the safety of `eval`, or if you just don't trust anyone, it's possible to make `eval` run inside of a sandboxed environment (so there's no danger of someone tampering with Node globals like `process`). Since this isn't directly related to Ghastly, we've relegated that to the [Examples](/examples#a-less-evil-eval) page for you to check out whenever you feel like it.
+?> In case you're still not happy with the safety of `eval`, or if you just don't trust anyone, it's possible to make `eval` run inside of a sandboxed environment (so there's no danger of someone tampering with Node globals like `process`). Since this isn't directly related to Ghastly, we've relegated that to the [Examples](a-less-evil-eval) section for you to check out whenever you feel like it.

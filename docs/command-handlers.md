@@ -31,10 +31,10 @@ A reference to the Ghastly client. This is just a convenience property, since th
 The dispatch helper function. It allows the handler to generate a response action from a value. We'll come back to this in a bit.
 
 ### commands
-The client's [command registry](#command-registry). Contains methods for managing commands.
+The client's [command registry](command-registry). Contains methods for managing commands.
 
 ### services
-The client's [service container](#services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
+The client's [service container](services). Ghastly services are similar in spirit to services in other frameworks such as Angular or Laravel, providing a central place to retrieve and store command dependencies.
 
 ### formatter
 The `MarkdownFormatter` utility class. Contains useful methods for composing Markdown within text.
